@@ -1,1 +1,182 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* Reset and base styles  */
+* {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Links */
+
+a,
+a:link,
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* Common */
+
+aside,
+nav,
+footer,
+header,
+section,
+main {
+  display: block;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+ul,
+ul li {
+  list-style: none;
+}
+
+img {
+  vertical-align: top;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+address {
+  font-style: normal;
+}
+
+/* Form */
+
+input,
+textarea,
+button,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background-color: transparent;
+}
+
+input::-ms-clear {
+  display: none;
+}
+
+button,
+input[type='submit'] {
+  display: inline-block;
+  box-shadow: none;
+  background-color: transparent;
+  background: none;
+  cursor: pointer;
+}
+
+input:focus,
+input:active,
+button:focus,
+button:active {
+  outline: none;
+}
+
+button::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+
+label {
+  cursor: pointer;
+}
+
+legend {
+  display: block;
+}
+
+input[type='file'] {
+  max-width: 100%;
+}
+
+:root {
+  --color-bg0: #ffffff;
+  --color-bg1: #dddddd;
+  --color-bg3: #1e242b;
+
+  --color-fg0: #181818;
+  --color-fg1: #292929;
+
+  --color-ac0: #222e6f;
+  --color-ac1: #006fb9;
+  --color-ac2: #50a2d8;
+
+  --color-err: #ff8562;
+
+  font-size: calc((100vw / 1920) * 20);
+}
+
+/* [data-theme='dark'] {
+  --color-bg0: #181818;
+  --color-bg1: #292929;
+
+  --color-fg0: #ffffff;
+  --color-fg1: #dddddd;
+
+  --color-ac0: #222e6f;
+  --color-ac1: #006fb9;
+  --color-ac2: #50a2d8;
+
+  --color-err: #ff8562;
+} */
+
+html,
+body,
+.ant-app {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  transition-property: color, background-color, border-color;
+  transition-duration: 0.3s;
+
+  color: var(--color-fg1);
+  background-color: var(--color-bg3);
+}
+
+body * {
+  scrollbar-color: var(--color-ac0) var(--color-bg1);
+  scrollbar-width: thin;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    font-size: calc((100vw / 1920) * 56);
+    --app-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    font-size: calc((100vw / 1920) * 64);
+  }
+}

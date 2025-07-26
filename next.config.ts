@@ -1,7 +1,17 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // eslint-disable-next-line @typescript-eslint/require-await
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination:
+          `${process.env.BACKEND_PROTOCOL}://` +
+          `${process.env.BACKEND_DOMAIN}:${process.env.BACKEND_PORT}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -4,7 +4,6 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -13,6 +12,28 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+
+    "strict": true,
+    "noImplicitAny": true, // Запрещает неявный `any`
+    "strictNullChecks": true, // Проверка на `null`/`undefined`
+    "strictFunctionTypes": true, // Строгая проверка типов функций
+    "strictBindCallApply": true, // Проверка аргументов в `bind`, `call`, `apply`
+    "strictPropertyInitialization": true, // Обязательная инициализация полей класса
+    "noImplicitThis": true, // Запрещает неявный `this: any`
+    "alwaysStrict": true, // Исполнение в strict mode
+
+    "noUnusedLocals": true, // Ошибка при неиспользуемых переменных
+    "noUnusedParameters": true, // Ошибка при неиспользуемых параметрах функций
+    "noImplicitReturns": true, // Проверка, что все пути функции возвращают значение
+    "noFallthroughCasesInSwitch": true, // Запрет "проваливания" в `switch-case`
+    "forceConsistentCasingInFileNames": true, // Чувствительность к регистру в путях
+    "exactOptionalPropertyTypes": true, // Запрещает `undefined` в опциональных полях интерфейсов
+
+    "noUncheckedIndexedAccess": true, // Добавляет `undefined` к индексам массивов/объектов (`arr[0]?`)
+    // "noPropertyAccessFromIndexSignature": true // Запрещает `obj.key` если тип разрешает `obj["key"]`
+
+    "preserveSymlinks": false,
+
     "plugins": [
       {
         "name": "next"
