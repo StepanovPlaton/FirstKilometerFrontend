@@ -2,8 +2,8 @@ import type { z } from 'zod';
 
 import type { HTTPGetRequestOptions, HTTPRequestOptions } from '../http';
 import HTTPService from '../http';
-import type { Entity } from '../schemes';
-import { createMockData, isTypeOfSchema, softArrayOf } from '../schemes';
+import type { Choice, Entity } from '../schemes';
+import { choiceSchema, createMockData, isTypeOfSchema, softArrayOf } from '../schemes';
 import type { PageOf } from '../schemes/page';
 import { schemaPageOf, schemaStrictPageOf } from '../schemes/page';
 import { ExtendableClass } from './extend';
@@ -12,18 +12,20 @@ import type { EntityTools } from './tools';
 export type RequestOptions = Omit<HTTPRequestOptions, 'body'>;
 export type GetRequestOptions = HTTPGetRequestOptions;
 
-export abstract class GetService<E extends Entity> extends ExtendableClass<EntityTools> {
-  urlPrefix: string;
-  schema: z.Schema<E>;
+export abstract class EmptyService extends ExtendableClass<EntityTools> {}
 
-  constructor(urlPrefix: string, schema: z.Schema<E>) {
+export abstract class GetService<E extends Entity> extends EmptyService {
+  schema: z.ZodType<E>;
+  urlPrefix: string;
+
+  constructor(urlPrefix: string, schema: z.ZodType<E>) {
     super();
-    this.urlPrefix = urlPrefix;
     this.schema = schema;
+    this.urlPrefix = urlPrefix;
   }
 
   getDummy = (
-    _: Entity['id'] | null = 0,
+    _: Entity['uuid'] | null = 'c7264e75-7be0-4cdb-adb3-495c3e215088',
     __: GetRequestOptions = {},
     delay: number = 100
   ): Promise<E> => {
@@ -33,7 +35,7 @@ export abstract class GetService<E extends Entity> extends ExtendableClass<Entit
     );
   };
 
-  get = (identifier: Entity['id'], options?: GetRequestOptions): Promise<E> => {
+  get = (identifier: Entity['uuid'], options?: GetRequestOptions): Promise<E> => {
     return HTTPService.get(`${this.urlPrefix}/${identifier}`, this.schema, options);
   };
 }
@@ -43,13 +45,13 @@ export abstract class CRUDService<E extends Entity> extends GetService<E> {
     return HTTPService.get(`${this.urlPrefix}/all/`, softArrayOf(this.schema), options);
   };
 
-  post = (entity: Omit<Entity, 'id'>, options?: RequestOptions): Promise<E> => {
+  post = (entity: Omit<E, 'uuid'>, options?: RequestOptions): Promise<E> => {
     return HTTPService.post(`${this.urlPrefix}/`, this.schema, {
       body: entity,
       ...options,
     });
   };
-  postPartial = (entity: Partial<Entity>, options?: RequestOptions): Promise<E> => {
+  postPartial = (entity: Partial<E>, options?: RequestOptions): Promise<E> => {
     return HTTPService.post(`${this.urlPrefix}/`, this.schema, {
       body: entity,
       ...options,
@@ -65,40 +67,43 @@ export abstract class CRUDService<E extends Entity> extends GetService<E> {
     });
   };
 
-  put = (entity: Entity, options?: RequestOptions): Promise<E> => {
-    return HTTPService.put(`${this.urlPrefix}/${entity.id}/`, this.schema, {
+  put = (entity: E, options?: RequestOptions): Promise<E> => {
+    return HTTPService.put(`${this.urlPrefix}/${entity.uuid}/`, this.schema, {
       body: entity,
       ...options,
     });
   };
-  putAny = (entity: object & Pick<Entity, 'id'>, options?: RequestOptions): Promise<E> => {
-    return HTTPService.put(`${this.urlPrefix}/${entity.id}/`, this.schema, {
-      body: entity,
-      ...options,
-    });
-  };
-
-  patch = (entity: Partial<Entity> & Pick<Entity, 'id'>, options?: RequestOptions): Promise<E> => {
-    return HTTPService.patch(`${this.urlPrefix}/${entity.id}/`, this.schema, {
-      body: entity,
-      ...options,
-    });
-  };
-  patchPartial = (
-    entity: Partial<Entity> & Pick<Entity, 'id'>,
-    options?: RequestOptions
-  ): Promise<E> => {
-    return HTTPService.patch(`${this.urlPrefix}/${entity.id}/`, this.schema, {
+  putAny = (entity: object & Pick<E, 'uuid'>, options?: RequestOptions): Promise<E> => {
+    return HTTPService.put(`${this.urlPrefix}/${entity.uuid}/`, this.schema, {
       body: entity,
       ...options,
     });
   };
 
-  delete = (what: Entity | Entity['id'], options?: GetRequestOptions): Promise<E> => {
+  patch = (entity: Partial<E> & Pick<E, 'uuid'>, options?: RequestOptions): Promise<E> => {
+    return HTTPService.patch(`${this.urlPrefix}/${entity.uuid}/`, this.schema, {
+      body: entity,
+      ...options,
+    });
+  };
+  patchPartial = (entity: Partial<E> & Pick<E, 'uuid'>, options?: RequestOptions): Promise<E> => {
+    return HTTPService.patch(`${this.urlPrefix}/${entity.uuid}/`, this.schema, {
+      body: entity,
+      ...options,
+    });
+  };
+
+  delete = (what: E | E['uuid'], options?: GetRequestOptions): Promise<E> => {
     return ((identifier) =>
       HTTPService.delete(`${this.urlPrefix}/${identifier}`, this.schema, options))(
-      isTypeOfSchema(what, this.schema) ? what.id : (what as Entity['id'])
+      isTypeOfSchema(what, this.schema) ? what.uuid : what
     );
+  };
+}
+
+export abstract class CRUDCService<E extends Entity> extends CRUDService<E> {
+  getChoices = (options?: GetRequestOptions): Promise<Choice[]> => {
+    return HTTPService.get(`${this.urlPrefix}/choices/`, softArrayOf(choiceSchema), options);
   };
 }
 

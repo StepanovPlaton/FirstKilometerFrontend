@@ -1,5 +1,7 @@
 export {
+  CRUDCService,
   CRUDService,
+  EmptyService,
   GetService,
   PaginatedCRUDService,
   type GetRequestOptions,

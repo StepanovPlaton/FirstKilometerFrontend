@@ -3,6 +3,13 @@ import AntdText from 'antd/lib/typography/Text';
 
 export const Text = ({ style, ...props }: TextProps) => {
   return (
-    <AntdText style={{ color: 'var(--color-fg0)', fontFamily: 'font', ...style }} {...props} />
+    <AntdText
+      style={{
+        color: 'var(--color-fg0)',
+        fontFamily: 'font',
+        ...style,
+      }}
+      {...props}
+    />
   );
 };

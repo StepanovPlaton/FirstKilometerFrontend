@@ -1,22 +1,28 @@
 /* eslint-disable */
 //@ts-nocheck
-import z from 'zod';
 
 import { faker } from '@faker-js/faker';
+import { z } from 'zod';
 
 export const createMockData = <T extends z.ZodTypeAny>(schema: T): z.infer<T> => {
-  // Для необязательных полей иногда возвращаем undefined
-  if (schema instanceof z.ZodOptional) {
-    return Math.random() > 0.05 ? createMockData(schema._def.innerType) : undefined;
+  // Обрабатываем трансформы - сначала создаем данные для внутренней схемы, затем применяем трансформ
+  if (schema.def.type === 'pipe') {
+    const innerData = createMockData(schema.def.in);
+    return schema.def.out.parse(innerData);
   }
 
   // Для nullable полей иногда возвращаем null
   if (schema instanceof z.ZodNullable) {
-    return Math.random() > 0.05 ? createMockData(schema._def.innerType) : null;
+    return Math.random() > 0.01 ? createMockData(schema.def.innerType) : null;
+  }
+
+  // Для необязательных полей иногда возвращаем undefined
+  if (schema instanceof z.ZodOptional) {
+    return Math.random() > 0.01 ? createMockData(schema.def.innerType) : undefined;
   }
 
   if (schema instanceof z.ZodString) {
-    const checks = schema._def.checks || [];
+    const checks = schema.def.checks || [];
     if (checks.some((check: any) => check.kind === 'email')) {
       return faker.internet.email() as any;
     }
@@ -26,11 +32,11 @@ export const createMockData = <T extends z.ZodTypeAny>(schema: T): z.infer<T> =>
     if (checks.some((check: any) => check.kind === 'datetime')) {
       return faker.date.recent().toISOString() as any;
     }
-    return faker.lorem.words(1) as any;
+    return faker.lorem.words(Math.random() > 0.5 ? 1 : 2) as any;
   }
 
   if (schema instanceof z.ZodNumber) {
-    const checks = schema._def.checks || [];
+    const checks = schema.def.checks || [];
     const min = checks.find((c: any) => c.kind === 'min')?.value ?? 0;
     const max = checks.find((c: any) => c.kind === 'max')?.value ?? 100;
     return faker.number.float({ min, max }) as any;
@@ -57,21 +63,25 @@ export const createMockData = <T extends z.ZodTypeAny>(schema: T): z.infer<T> =>
   }
 
   if (schema instanceof z.ZodEnum) {
-    const options = schema._def.values;
+    const options = schema.def.values;
     return faker.helpers.arrayElement(options) as any;
   }
 
   if (schema instanceof z.ZodLiteral) {
-    return schema._def.value as any;
+    return schema.def.value as any;
   }
 
   if (schema instanceof z.ZodUnion) {
-    const options = schema._def.options as z.ZodTypeAny[];
+    const options = schema.def.options as z.ZodTypeAny[];
     return createMockData(faker.helpers.arrayElement(options));
   }
 
   if (schema instanceof z.ZodDate) {
     return faker.date.recent() as any;
+  }
+
+  if (schema instanceof z.ZodISODate) {
+    return faker.date.recent().toISOString() as any;
   }
 
   return null as any;

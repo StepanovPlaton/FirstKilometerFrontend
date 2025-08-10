@@ -1,7 +1,7 @@
 import { Flex } from 'antd';
 import Image from 'next/image';
 
-export default function UploadLayout({
+export default function DownloadLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

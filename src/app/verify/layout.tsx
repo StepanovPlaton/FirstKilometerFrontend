@@ -1,7 +1,7 @@
 import { Flex } from 'antd';
 import Image from 'next/image';
 
-export default function UploadLayout({
+export default function VerifyLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -15,7 +15,7 @@ export default function UploadLayout({
         alt="Первый километр / автосалон"
         className="w-100"
       />
-      <div className="w-full flex items-center justify-center">{children}</div>
+      <div className="flex w-full items-center justify-center">{children}</div>
     </Flex>
   );
 }

@@ -1,11 +1,11 @@
 @import 'tailwindcss';
 
 /* Reset and base styles  */
-* {
+/* * {
   padding: 0px;
   margin: 0px;
   border: none;
-}
+} */
 
 *,
 *::before,
@@ -129,7 +129,7 @@ input[type='file'] {
 
   --color-err: #ff8562;
 
-  font-size: calc((100vw / 1920) * 20);
+  /* font-size: calc((100vw / 1920) * 26) !important; */
 }
 
 /* [data-theme='dark'] {
@@ -168,15 +168,14 @@ body * {
   scrollbar-width: thin;
 }
 
-@media (max-width: 1024px) {
+/* @media (max-width: 1024px) {
   :root {
-    font-size: calc((100vw / 1920) * 56);
-    --app-width: 100%;
+    font-size: calc((100vw / 1920) * 56) !important;
   }
 }
 
 @media (max-width: 640px) {
   :root {
-    font-size: calc((100vw / 1920) * 64);
+    font-size: calc((100vw / 1920) * 64) !important;
   }
-}
+} */

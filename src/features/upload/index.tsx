@@ -26,14 +26,14 @@ export const UploadDocument = (props: { onUpload: (file: RcFile) => unknown; tex
       }}
       accept=".jpg,.png,.jpeg"
     >
-      <Button type="dashed" className="w-40 h-40!">
+      <Button type="dashed" className="h-40! w-40">
         {previewImage ? (
           <Image
             src={previewImage}
             height={190}
             width={190}
             alt={props.text}
-            className="w-36! h-34! object-cover rounded"
+            className="h-34! w-36! rounded object-cover"
           />
         ) : (
           <Space direction="vertical">

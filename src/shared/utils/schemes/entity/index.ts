@@ -1,1 +1,1 @@
-export { entitySchema, type Entity } from './schema';
+export { entitySchema, idEntitySchema, type Entity, type IDEntity } from './schema';

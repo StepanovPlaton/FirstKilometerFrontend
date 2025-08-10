@@ -8,7 +8,7 @@ import type { GetRequestOptions, GetService, PaginatedCRUDService } from '../ser
 
 export function useEntity<E extends Entity>(
   service: GetService<E>,
-  identifier: E['id'] | null,
+  identifier: E['uuid'] | null,
   requestOptions?: GetRequestOptions,
   storeOptions?: SWRConfiguration<E, HTTPError> & { active?: boolean }
 ) {

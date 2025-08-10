@@ -1,7 +1,6 @@
-import { CRUDService } from '@/shared/utils/services';
+import { CRUDCService } from '@/shared/utils/services';
+import { type ApiUser, apiUserSchema } from './schema';
 
-import { type User, userSchema } from './schema';
+export class IUserService extends CRUDCService<ApiUser> {}
 
-export class IUserService extends CRUDService<User> {}
-
-export const UserService = new IUserService('users', userSchema);
+export const UserService = new IUserService('users', apiUserSchema);

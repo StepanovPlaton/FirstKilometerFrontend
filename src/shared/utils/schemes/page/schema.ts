@@ -20,12 +20,12 @@ export const pageSchema = pageInfoSchema.extend({
 
 export type Page = z.infer<typeof pageSchema>;
 
-export const schemaPageOf = <T extends z.Schema>(schema: T) =>
+export const schemaPageOf = <T extends z.ZodType>(schema: T) =>
   pageInfoSchema.extend({
     results: softArrayOf(schema),
   });
 
-export const schemaStrictPageOf = <T extends z.Schema>(schema: T) =>
+export const schemaStrictPageOf = <T extends z.ZodType>(schema: T) =>
   pageInfoSchema.extend({
     results: z.array(schema),
   });
