@@ -128,12 +128,7 @@ export default function UploadPage() {
               <Select
                 className="w-80"
                 placeholder="Выберите существующего клиента"
-                disabled={
-                  !!passportMainPage ||
-                  !!passportRegistration ||
-                  !!failedGetExistsUsers ||
-                  existsUsers?.length === 0
-                }
+                disabled={!!passportMainPage || !!passportRegistration || !!failedGetExistsUsers}
                 loading={loadingExistsUsers}
                 options={existsUsers ?? []}
                 onChange={setSelectedUser}
@@ -175,8 +170,7 @@ export default function UploadPage() {
                   !!vehiclePassport ||
                   !!vehicleRegistrationFront ||
                   !!vehicleRegistrationBack ||
-                  !!failedGetExistsVehicles ||
-                  existsVehicles?.length === 0
+                  !!failedGetExistsVehicles
                 }
                 loading={loadingExistsVehicles}
                 options={existsVehicles ?? []}

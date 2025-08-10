@@ -98,7 +98,7 @@ export default function UploadPage() {
                 <Select
                   className="w-80!"
                   placeholder="Выберите тип договора"
-                  disabled={!!getDocumentTypesError || documentTypes?.length === 0}
+                  disabled={!!getDocumentTypesError}
                   loading={loadingDocumentTypes}
                   options={documentTypes ?? []}
                   showSearch
@@ -112,7 +112,7 @@ export default function UploadPage() {
                 <Select
                   className="w-80!"
                   placeholder="Выберите клиента"
-                  disabled={!!failedGetExistsUsers || existsUsers?.length === 0}
+                  disabled={!!failedGetExistsUsers}
                   loading={loadingExistsUsers}
                   options={existsUsers ?? []}
                   showSearch
@@ -125,7 +125,7 @@ export default function UploadPage() {
                 <Select
                   className="w-80!"
                   placeholder="Выберите транспортное средство"
-                  disabled={!!failedGetExistsVehicles || existsVehicles?.length === 0}
+                  disabled={!!failedGetExistsVehicles}
                   loading={loadingExistsVehicles}
                   options={existsVehicles ?? []}
                   showSearch
@@ -138,7 +138,7 @@ export default function UploadPage() {
                 <Select
                   className="w-80!"
                   placeholder="Выберите компанию"
-                  disabled={!!getCompaniesError || companies?.length === 0}
+                  disabled={!!getCompaniesError}
                   loading={loadingCompanies}
                   options={companies ?? []}
                   showSearch
