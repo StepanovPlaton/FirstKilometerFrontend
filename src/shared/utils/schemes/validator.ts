@@ -8,7 +8,7 @@ import z from 'zod';
 export function getValidationRules<T extends ZodType>(
   schema: T,
   path: string,
-  required?: boolean = true
+  required: boolean = true
 ): Rule[] {
   const fieldSchema = getFieldSchema(schema, path);
 
