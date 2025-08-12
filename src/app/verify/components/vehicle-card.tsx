@@ -23,13 +23,13 @@ import clsx from 'clsx';
 import { useState } from 'react';
 
 const baseVehicleTypes = [
-  'ЛЕГКОВОЙ',
-  'ГРУЗОВОЙ',
-  'АВТОБУС',
-  'МОТОЦИКЛ',
-  'ПРИЦЕП',
-  'ПОЛУПРИЦЕП',
-  'СПЕЦИАЛЬНЫЙ',
+  'Легковой',
+  'Грузовой',
+  'Автобус',
+  'Мотоцикл',
+  'Прицеп',
+  'Полуприцеп',
+  'Специальный',
 ];
 
 export const VehicleCard = (props: {
