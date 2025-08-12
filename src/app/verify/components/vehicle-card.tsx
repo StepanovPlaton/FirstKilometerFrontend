@@ -39,7 +39,7 @@ export const VehicleCard = (props: {
   const [vehicleTypes, setVehicleTypes] = useState<string[]>(baseVehicleTypes);
 
   return (
-    <Form<FormVehicle> layout="vertical" className="w-full" form={props.form}>
+    <Form<FormVehicle> layout="vertical" form={props.form}>
       <Card className="w-350 max-w-full">
         <div className="flex w-full">
           <Flex vertical align="center" className="w-1/2" gap={8}>
@@ -160,7 +160,10 @@ export const VehicleCard = (props: {
         <Divider className="m-2!" />
         <div className="flex w-full">
           <Flex vertical align="center" className="w-1/2" gap={8}>
-            <Text>Свидетельство о регистрации транспортного средства</Text>
+            {props.vehicle?.sts_front_url ||
+              (props.vehicle?.sts_back_url && (
+                <Text>Свидетельство о регистрации транспортного средства</Text>
+              ))}
             <div className="aspect-video w-full px-4">
               {props.vehicle ? (
                 <Row>

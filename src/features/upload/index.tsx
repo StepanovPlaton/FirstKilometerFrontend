@@ -26,7 +26,7 @@ export const UploadDocument = (props: { onUpload: (file: RcFile) => unknown; tex
       }}
       accept=".jpg,.png,.jpeg"
     >
-      <Button type="dashed" className="h-40! w-40">
+      <Button type="dashed" className="h-42! w-42">
         {previewImage ? (
           <Image
             src={previewImage}

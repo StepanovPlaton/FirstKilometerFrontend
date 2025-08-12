@@ -5,7 +5,6 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 
 const toDayjsDate = (d?: string | null) => (d ? dayjs(d) : null);
-const toUpperCase = (s?: string | null) => (s ? s.toUpperCase() : null);
 
 export const rawUserSchema = entitySchema.extend({
   first_name: z.string({ error: 'Имя должно быть строкой' }),
@@ -32,15 +31,16 @@ export const rawUserSchema = entitySchema.extend({
 export type User = z.TypeOf<typeof rawUserSchema>;
 
 export const apiUserSchema = entitySchema.extend({
-  first_name: rawUserSchema.shape.first_name.nullable().transform(toUpperCase),
-  last_name: rawUserSchema.shape.last_name.nullable().transform(toUpperCase),
-  middle_name: rawUserSchema.shape.middle_name.nullable().transform(toUpperCase),
+  // TODO: Отключить верхний регистр
+  first_name: rawUserSchema.shape.first_name.nullable(),
+  last_name: rawUserSchema.shape.last_name.nullable(),
+  middle_name: rawUserSchema.shape.middle_name.nullable(),
 
   sex: rawUserSchema.shape.sex.nullable(),
   birth_date: rawUserSchema.shape.birth_date.nullable().transform(toDayjsDate),
-  birth_place: rawUserSchema.shape.birth_place.nullable().transform(toUpperCase),
+  birth_place: rawUserSchema.shape.birth_place.nullable(),
 
-  issue_organization: rawUserSchema.shape.issue_organization.nullable().transform(toUpperCase),
+  issue_organization: rawUserSchema.shape.issue_organization.nullable(),
   issue_organization_code: rawUserSchema.shape.issue_organization_code.nullable(),
   issue_date: rawUserSchema.shape.issue_date.nullable().transform(toDayjsDate),
 
@@ -60,21 +60,19 @@ export const apiUserSchema = entitySchema.extend({
 export type ApiUser = z.TypeOf<typeof apiUserSchema>;
 
 export const formUserSchema = entitySchema.extend({
+  // TODO: Отключить верхний регистр
+
   first_name: rawUserSchema.shape.first_name
     .min(2, { error: 'Имя слишком короткое' })
-    .max(150, { error: 'Имя слишком длинное' })
-    .transform(toUpperCase),
+    .max(150, { error: 'Имя слишком длинное' }),
   last_name: rawUserSchema.shape.last_name
     .min(2, { error: 'Фамилия слишком короткая' })
-    .max(150, { error: 'Фамилия слишком длинная' })
-    .transform(toUpperCase),
+    .max(150, { error: 'Фамилия слишком длинная' }),
   middle_name: rawUserSchema.shape.middle_name
     .min(2, { error: 'Отчество слишком короткое' })
     .max(150, { error: 'Отчество слишком длинное' })
     .or(z.literal(''))
-    .nullable()
-    .transform(toUpperCase),
-
+    .nullable(),
   sex: rawUserSchema.shape.sex,
   birth_date: z
     .any()
@@ -82,13 +80,10 @@ export const formUserSchema = entitySchema.extend({
     .transform((d) => (d as never as Dayjs)?.format('YYYY-MM-DD')),
   birth_place: rawUserSchema.shape.birth_place
     .min(3, { error: 'Место рождения слишком короткое' })
-    .max(255, { error: 'Место рождения слишком длинное' })
-    .transform(toUpperCase),
-
+    .max(255, { error: 'Место рождения слишком длинное' }),
   issue_organization: rawUserSchema.shape.issue_organization
     .min(3, { error: 'Слишком короткое название организации' })
-    .max(255, { error: 'Название организации слишком длинное' })
-    .transform(toUpperCase),
+    .max(255, { error: 'Название организации слишком длинное' }),
   issue_organization_code: rawUserSchema.shape.issue_organization_code.regex(
     /^[0-9]{3}-[0-9]{3}$/,
     { error: 'Код подразделения должен иметь формат ###-###' }
@@ -106,32 +101,27 @@ export const formUserSchema = entitySchema.extend({
     .min(3, {
       error: 'Слишком короткое название региона регистрации',
     })
-    .max(100, { error: 'Слишком длинное название региона регистрации' })
-    .transform(toUpperCase),
+    .max(100, { error: 'Слишком длинное название региона регистрации' }),
   registration_district: rawUserSchema.shape.registration_district
     .min(3, { error: 'Слишком короткое название района' })
     .max(100, { error: 'Слишком длинное название района' })
     .or(z.literal(''))
-    .nullable()
-    .transform(toUpperCase),
+    .nullable(),
   registration_settlement: rawUserSchema.shape.registration_settlement
     .min(3, {
       error: 'Слишком короткое название населённого пункта',
     })
-    .max(100, { error: 'Слишком длинное название населённого пункта' })
-    .transform(toUpperCase),
+    .max(100, { error: 'Слишком длинное название населённого пункта' }),
   registration_area: rawUserSchema.shape.registration_area
     .min(1, { error: 'Слишком короткое название участка' })
     .max(50, { error: 'Слишком длинное название участка' })
     .or(z.literal(''))
-    .nullable()
-    .transform(toUpperCase),
+    .nullable(),
   registration_street: rawUserSchema.shape.registration_street
     .min(3, {
       error: 'Слишком короткое название улицы',
     })
-    .max(100, { error: 'Слишком длинное название улицы' })
-    .transform(toUpperCase),
+    .max(100, { error: 'Слишком длинное название улицы' }),
   registration_address: rawUserSchema.shape.registration_address
     .min(3, {
       error: 'Слишком короткий адрес',

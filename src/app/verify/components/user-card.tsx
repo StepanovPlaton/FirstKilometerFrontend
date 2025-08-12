@@ -9,7 +9,7 @@ import clsx from 'clsx';
 
 export const UserCard = (props: { user: ApiUser | undefined; form: FormInstance<FormUser> }) => {
   return (
-    <Form<FormUser> layout="vertical" className="w-full" form={props.form}>
+    <Form<FormUser> layout="vertical" form={props.form}>
       <Card className="w-350 max-w-full">
         <div className="flex w-full">
           <Flex vertical align="center" className="w-1/2" gap={8}>
