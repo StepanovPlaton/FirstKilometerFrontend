@@ -160,10 +160,9 @@ export const VehicleCard = (props: {
         <Divider className="m-2!" />
         <div className="flex w-full">
           <Flex vertical align="center" className="w-1/2" gap={8}>
-            {props.vehicle?.sts_front_url ||
-              (props.vehicle?.sts_back_url && (
-                <Text>Свидетельство о регистрации транспортного средства</Text>
-              ))}
+            {(props.vehicle?.sts_front_url || props.vehicle?.sts_back_url) && (
+              <Text>Свидетельство о регистрации транспортного средства</Text>
+            )}
             <div className="aspect-video w-full px-4">
               {props.vehicle ? (
                 <Row>
