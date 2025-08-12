@@ -14,15 +14,14 @@ FROM base AS builder
 WORKDIR /application
 COPY --from=dependencies /application/node_modules ./node_modules
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
-
 
 # Stage 3: Start
 FROM base AS runner
 WORKDIR /application
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -33,10 +32,11 @@ RUN mkdir .next
 RUN chown nextjs:nodejs .next
 COPY --from=builder --chown=nextjs:nodejs /application/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /application/.next/static ./.next/static
+COPY --chown=nextjs:nodejs .env .env
 
 USER nextjs
 
 EXPOSE 3000
-ENV PORT 3000
+ENV PORT=3000
 
-CMD HOSTNAME="0.0.0.0" node server.js
+CMD ["sh", "-c", "HOSTNAME=0.0.0.0 node server.js"]

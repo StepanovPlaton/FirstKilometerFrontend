@@ -26,7 +26,7 @@ const eslintConfig = [
     '**/*.mjs',
   ]),
 
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...compat.extends('next', 'next/core-web-vitals', 'next/typescript'),
 
   eslint.configs.recommended,
 

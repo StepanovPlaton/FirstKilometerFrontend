@@ -39,8 +39,8 @@ export const apiVehicleSchema = entitySchema.extend({
   pts_date: rawVehicleSchema.shape.pts_date.nullable().transform(toDayjsDate),
   sts_date: rawVehicleSchema.shape.sts_date.transform(toDayjsDate),
 
-  sts_front_url: z.url(),
-  sts_back_url: z.url(),
+  sts_front_url: z.url().nullable().optional(),
+  sts_back_url: z.url().nullable().optional(),
   pts_url: z.url(),
 });
 export type ApiVehicle = z.TypeOf<typeof apiVehicleSchema>;
