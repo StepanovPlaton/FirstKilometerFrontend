@@ -164,20 +164,24 @@ export const VehicleCard = (props: {
             <div className="aspect-video w-full px-4">
               {props.vehicle ? (
                 <Row>
-                  {props.vehicle.sts_front_url && <Col span={12}>
-                    <Image
-                      src={props.vehicle.sts_front_url}
-                      alt="Свидетельство о регистрации транспортного средства"
-                      className="rounded shadow-lg!"
-                    />
-                  </Col>}
-                  {props.vehicle.sts_back_url && <Col span={12}>
-                    <Image
-                      src={props.vehicle.sts_back_url}
-                      alt="Свидетельство о регистрации транспортного средства (обратная сторона)"
-                      className="rounded shadow-lg!"
-                    />
-                  </Col>}
+                  {props.vehicle.sts_front_url && (
+                    <Col span={12}>
+                      <Image
+                        src={props.vehicle.sts_front_url}
+                        alt="Свидетельство о регистрации транспортного средства"
+                        className="rounded shadow-lg!"
+                      />
+                    </Col>
+                  )}
+                  {props.vehicle.sts_back_url && (
+                    <Col span={12}>
+                      <Image
+                        src={props.vehicle.sts_back_url}
+                        alt="Свидетельство о регистрации транспортного средства (обратная сторона)"
+                        className="rounded shadow-lg!"
+                      />
+                    </Col>
+                  )}
                 </Row>
               ) : (
                 <Skeleton.Node active className="h-full! w-full! p-2" />
