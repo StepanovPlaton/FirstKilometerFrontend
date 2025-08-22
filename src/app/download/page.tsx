@@ -21,13 +21,15 @@ import {
   Space,
   Spin,
 } from 'antd';
-import { redirect, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 const requiredRule = [{ required: true, message: 'Это обязательное поле' }];
 
 export default function UploadPage() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(false);
   const {
     data: documentTypes,
@@ -54,23 +56,26 @@ export default function UploadPage() {
   } = useChoices(UserService);
 
   const searchParams = useSearchParams();
-  const userUUID = searchParams.get('user');
-  const vehicleUUID = searchParams.get('vehicle');
 
   const [messageApi, contextHolder] = message.useMessage();
 
   const [form] = Form.useForm();
 
   useEffect(() => {
-    if (userUUID && existsUsers && existsUsers.find((u) => u.value === userUUID)) {
-      form.setFieldValue('user', userUUID);
-    }
-  }, [existsUsers, userUUID, form]);
-  useEffect(() => {
-    if (vehicleUUID && existsVehicles && existsVehicles.find((v) => v.value === vehicleUUID)) {
-      form.setFieldValue('vehicle', vehicleUUID);
-    }
-  }, [existsVehicles, vehicleUUID, form]);
+    [
+      { key: 'user', list: existsUsers },
+      { key: 'vehicle', list: existsVehicles },
+      { key: 'type', list: documentTypes },
+      { key: 'company', list: companies },
+      { key: 'price', list: null },
+      { key: 'tax', list: null },
+    ].forEach(({ key, list }) => {
+      const value = searchParams.get(key);
+      if (value && (list === null || (!!list && list.find((v) => v.value === value)))) {
+        form.setFieldValue(key, value);
+      }
+    });
+  }, [existsVehicles, existsUsers, companies, documentTypes, searchParams, form]);
 
   const getDocument = (data: object) => {
     setLoading(true);
@@ -178,8 +183,8 @@ export default function UploadPage() {
         <Button type="primary" size="large" onClick={() => form.submit()}>
           Скачать договор
         </Button>
-        <Button size="large" onClick={() => redirect('/upload')}>
-          Добавить нового пользователя
+        <Button size="large" onClick={() => router.push('/')}>
+          Создать новый договор
         </Button>
       </Space>
       {contextHolder}

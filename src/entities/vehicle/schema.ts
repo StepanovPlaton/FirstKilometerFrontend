@@ -46,7 +46,7 @@ export const apiVehicleSchema = entitySchema.extend({
 export type ApiVehicle = z.TypeOf<typeof apiVehicleSchema>;
 
 export const formVehicleSchema = entitySchema.extend({
-  //Добавить маску на номера
+  //TODO: Добавить маску на номера
   pts_id: rawVehicleSchema.shape.pts_id
     .min(3, { error: 'Слишком короткий номер ПТС' })
     .max(20, { error: 'Слишком длинный номер ПТС' }),

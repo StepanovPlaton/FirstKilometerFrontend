@@ -9,7 +9,7 @@ import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
 import { useEntity } from '@/shared/utils/hooks/data';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
-import { redirect, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import z from 'zod';
 import { UserCard } from './components/user-card';
@@ -17,6 +17,8 @@ import { VehicleCard } from './components/vehicle-card';
 dayjs.locale('ru');
 
 export default function VerifyPage() {
+  const router = useRouter();
+
   const searchParams = useSearchParams();
   const userUUID = searchParams.get('user');
   const vehicleUUID = searchParams.get('vehicle');
@@ -104,7 +106,14 @@ export default function VerifyPage() {
               )
               .then(() => {
                 messageApi.success('Данные успешно сохранены');
-                redirect(`/download?user=${userUUID}&vehicle=${vehicleUUID}`);
+                let url = `/download?user=${userUUID}&vehicle=${vehicleUUID}`;
+                ['type', 'company', 'price', 'tax'].forEach((key) => {
+                  const value = searchParams.get(key);
+                  if (value) {
+                    url += `&${key}=${value}`;
+                  }
+                });
+                router.push(url);
               });
           })();
         }}

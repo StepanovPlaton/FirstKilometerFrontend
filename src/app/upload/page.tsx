@@ -10,10 +10,13 @@ import { Title } from '@/shared/ui/title';
 import { useChoices } from '@/shared/utils/hooks/choices';
 import { Button, Card, Flex, message, Select, Space, Spin } from 'antd';
 import type { RcFile } from 'antd/lib/upload';
-import { redirect } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function UploadPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [loadingUser, setLoadingUser] = useState(false);
   const [passportMainPage, setPassportMainPage] = useState<RcFile>();
   const [passportRegistration, setPassportRegistration] = useState<RcFile>();
@@ -100,7 +103,14 @@ export default function UploadPage() {
     const vehicleUUID = selectedVehicle ?? vehicle?.uuid;
 
     if (validated && userUUID && vehicleUUID) {
-      redirect(`/verify?user=${userUUID}&vehicle=${vehicleUUID}`);
+      let url = `/verify?user=${userUUID}&vehicle=${vehicleUUID}`;
+      ['type', 'company', 'price', 'tax'].forEach((key) => {
+        const value = searchParams.get(key);
+        if (value) {
+          url += `&${key}=${value}`;
+        }
+      });
+      router.push(url);
     }
   }, [selectedUser, user, selectedVehicle, vehicle, validated]);
 

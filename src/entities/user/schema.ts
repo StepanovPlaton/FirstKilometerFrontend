@@ -31,7 +31,6 @@ export const rawUserSchema = entitySchema.extend({
 export type User = z.TypeOf<typeof rawUserSchema>;
 
 export const apiUserSchema = entitySchema.extend({
-  // TODO: Отключить верхний регистр
   first_name: rawUserSchema.shape.first_name.nullable(),
   last_name: rawUserSchema.shape.last_name.nullable(),
   middle_name: rawUserSchema.shape.middle_name.nullable(),
@@ -60,8 +59,6 @@ export const apiUserSchema = entitySchema.extend({
 export type ApiUser = z.TypeOf<typeof apiUserSchema>;
 
 export const formUserSchema = entitySchema.extend({
-  // TODO: Отключить верхний регистр
-
   first_name: rawUserSchema.shape.first_name
     .min(2, { error: 'Имя слишком короткое' })
     .max(150, { error: 'Имя слишком длинное' }),
