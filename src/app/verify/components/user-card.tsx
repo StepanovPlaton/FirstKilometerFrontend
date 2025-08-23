@@ -1,10 +1,11 @@
 import type { ApiUser, FormUser } from '@/entities/user';
 import { formUserSchema } from '@/entities/user';
+import { Viewer } from '@/features/viewer';
 import { Text } from '@/shared/ui/text';
 import { Title } from '@/shared/ui/title';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
-import { Card, DatePicker, Divider, Flex, Form, Image, Input, Row, Select, Skeleton } from 'antd';
+import { Card, DatePicker, Divider, Flex, Form, Input, Row, Select, Skeleton } from 'antd';
 import clsx from 'clsx';
 
 export const UserCard = (props: { user: ApiUser | undefined; form: FormInstance<FormUser> }) => {
@@ -16,15 +17,13 @@ export const UserCard = (props: { user: ApiUser | undefined; form: FormInstance<
             <Title level={2}>Документы клиента</Title>
             <Text>Паспорт клиента (главная страница)</Text>
             <div className="aspect-video w-full px-4">
-              {props.user ? (
-                <Image
-                  src={props.user.passport_url ?? '/demo/passport_main.jpg'}
-                  alt="Главная страница паспорта клиента"
-                  className={clsx('rounded shadow-lg!', !props.user.reg_url && 'opacity-30')}
-                />
-              ) : (
-                <Skeleton.Node active className="h-full! w-full! p-2" />
-              )}
+              <Viewer
+                active={!!props.user}
+                url={props.user?.passport_url ?? '/demo/passport_main.jpg'}
+                alt="Главная страница паспорта клиента"
+                imageClassName={clsx('rounded shadow-lg!', !props.user?.reg_url && 'opacity-30')}
+                skeletonClassName="h-full! w-full! p-2"
+              />
             </div>
           </Flex>
           <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
@@ -134,15 +133,13 @@ export const UserCard = (props: { user: ApiUser | undefined; form: FormInstance<
           <Flex vertical align="center" className="w-1/2" gap={8}>
             <Text>Паспорт клиента (прописка)</Text>
             <div className="aspect-video w-full px-4">
-              {props.user ? (
-                <Image
-                  src={props.user.reg_url ?? '/demo/passport_registration.jpg'}
-                  alt="Второй разворот паспорта клиента"
-                  className={clsx('rounded shadow-lg!', !props.user.reg_url && 'opacity-30')}
-                />
-              ) : (
-                <Skeleton.Node active className="h-full! w-full! p-2" />
-              )}
+              <Viewer
+                active={!!props.user}
+                url={props.user?.reg_url ?? '/demo/passport_registration.jpg'}
+                alt="Второй разворот паспорта клиента"
+                imageClassName={clsx('rounded shadow-lg!', !props.user?.reg_url && 'opacity-30')}
+                skeletonClassName="h-full! w-full! p-2"
+              />
             </div>
           </Flex>
           <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />

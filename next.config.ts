@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      new URL(
+        `${process.env.BACKEND_PROTOCOL}://` +
+          `${process.env.BACKEND_DOMAIN}:${process.env.BACKEND_PORT}/**`
+      ),
+    ],
+  },
 };
 
 export default nextConfig;

@@ -1,6 +1,7 @@
 'use client';
 
 import { formVehicleSchema, type ApiVehicle, type FormVehicle } from '@/entities/vehicle';
+import { Viewer } from '@/features/viewer';
 import { Text } from '@/shared/ui/text';
 import { Title } from '@/shared/ui/title';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
@@ -12,7 +13,6 @@ import {
   Divider,
   Flex,
   Form,
-  Image,
   Input,
   InputNumber,
   Row,
@@ -46,15 +46,13 @@ export const VehicleCard = (props: {
             <Title level={2}>Документы транспортного средства</Title>
             <Text>Паспорт транспортного средства</Text>
             <div className="aspect-video w-full px-4">
-              {props.vehicle ? (
-                <Image
-                  src={props.vehicle.pts_url ?? '/demo/pts.jpg'}
-                  alt="Паспорт транспортного средства"
-                  className={clsx('rounded shadow-lg!', !props.vehicle.pts_url && 'opacity-30')}
-                />
-              ) : (
-                <Skeleton.Node active className="h-full! w-full! p-2" />
-              )}
+              <Viewer
+                active={!!props.vehicle}
+                url={props.vehicle?.pts_url ?? '/demo/pts.jpg'}
+                alt="Паспорт транспортного средства"
+                imageClassName={clsx('rounded shadow-lg!', !props.vehicle?.pts_url && 'opacity-30')}
+                skeletonClassName="h-full! min-h-64 w-full! p-2"
+              />
             </div>
           </Flex>
           <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
@@ -164,30 +162,26 @@ export const VehicleCard = (props: {
               <Text>Свидетельство о регистрации транспортного средства</Text>
             )}
             <div className="aspect-video w-full px-4">
-              {props.vehicle ? (
-                <Row>
-                  {props.vehicle.sts_front_url && (
-                    <Col span={12}>
-                      <Image
-                        src={props.vehicle.sts_front_url}
-                        alt="Свидетельство о регистрации транспортного средства"
-                        className="rounded shadow-lg!"
-                      />
-                    </Col>
-                  )}
-                  {props.vehicle.sts_back_url && (
-                    <Col span={12}>
-                      <Image
-                        src={props.vehicle.sts_back_url}
-                        alt="Свидетельство о регистрации транспортного средства (обратная сторона)"
-                        className="rounded shadow-lg!"
-                      />
-                    </Col>
-                  )}
-                </Row>
-              ) : (
-                <Skeleton.Node active className="h-full! w-full! p-2" />
-              )}
+              <Row>
+                <Col span={12}>
+                  <Viewer
+                    active={!!props.vehicle}
+                    url={props.vehicle?.sts_front_url}
+                    alt="Свидетельство о регистрации транспортного средства"
+                    imageClassName="rounded shadow-lg!"
+                    skeletonClassName="h-full! min-h-40 w-full! p-2"
+                  />
+                </Col>
+                <Col span={12}>
+                  <Viewer
+                    active={!!props.vehicle}
+                    url={props.vehicle?.sts_back_url}
+                    alt="Свидетельство о регистрации транспортного средства (обратная сторона)"
+                    imageClassName="rounded shadow-lg!"
+                    skeletonClassName="h-full! min-h-40 w-full! p-2"
+                  />
+                </Col>
+              </Row>
             </div>
           </Flex>
           <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
