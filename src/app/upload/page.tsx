@@ -112,7 +112,7 @@ export default function UploadPage() {
       });
       router.push(url);
     }
-  }, [selectedUser, user, selectedVehicle, vehicle, validated]);
+  }, [selectedUser, user, selectedVehicle, vehicle, searchParams, validated, router]);
 
   return (
     <Space direction="vertical" align="center" size="large">

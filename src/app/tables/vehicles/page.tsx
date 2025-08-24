@@ -1,6 +1,6 @@
 'use client';
 
-import type { ApiVehicle, FormVehicle} from '@/entities/vehicle';
+import type { ApiVehicle, FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
 import { VerifyVehicle } from '@/features/verify/vehicle';
 import { useEntities } from '@/shared/utils/hooks/data';

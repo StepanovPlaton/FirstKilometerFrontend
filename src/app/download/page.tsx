@@ -111,7 +111,7 @@ export default function UploadPage() {
         form.setFieldValue(key as keyof GetDocumentForm, format ? format(value) : value);
       }
     });
-  }, [existsVehicles, existsUsers, companies, documentTypes, searchParams, form]);
+  }, [existsVehicles, existsUsers, companies, individuals, documentTypes, searchParams, form]);
 
   const getDocument = (data: GetDocumentForm) => {
     setLoading(true);
