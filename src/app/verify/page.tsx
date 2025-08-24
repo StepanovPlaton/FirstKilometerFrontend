@@ -2,7 +2,7 @@
 
 import type { FormUser } from '@/entities/user';
 import { formUserSchema, default as UserService } from '@/entities/user';
-import { Button, Flex, Form, message } from 'antd';
+import { Button, Card, Flex, Form, message } from 'antd';
 
 import type { FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
@@ -12,8 +12,8 @@ import 'dayjs/locale/ru'; // Подключаем русскую локаль da
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import z from 'zod';
-import { UserCard } from './components/user-card';
-import { VehicleCard } from './components/vehicle-card';
+import { VerifyUser } from '../../features/verify/user';
+import { VerifyVehicle } from '../../features/verify/vehicle';
 dayjs.locale('ru');
 
 export default function VerifyPage() {
@@ -79,8 +79,12 @@ export default function VerifyPage() {
 
   return (
     <Flex vertical align="center" className="w-full" gap={12}>
-      <UserCard user={user} form={userForm} />
-      <VehicleCard vehicle={vehicle} form={vehicleForm} />
+      <Card className="w-350 max-w-full">
+        <VerifyUser user={user} form={userForm} />
+      </Card>
+      <Card className="w-350 max-w-full">
+        <VerifyVehicle vehicle={vehicle} form={vehicleForm} />
+      </Card>
       <Button
         type="primary"
         size="large"
@@ -107,7 +111,7 @@ export default function VerifyPage() {
               .then(() => {
                 messageApi.success('Данные успешно сохранены');
                 let url = `/download?user=${userUUID}&vehicle=${vehicleUUID}`;
-                ['type', 'company', 'price', 'tax'].forEach((key) => {
+                ['type', 'company', 'individual', 'price', 'tax', 'date'].forEach((key) => {
                   const value = searchParams.get(key);
                   if (value) {
                     url += `&${key}=${value}`;

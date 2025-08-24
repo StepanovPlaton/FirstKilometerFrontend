@@ -15,6 +15,9 @@ const config: ConfigProviderProps = {
       Card: {
         colorTextHeading: 'var(--color-ac1)',
       },
+      Table: {
+        headerColor: 'var(--color-ac1)',
+      },
     },
   },
 };

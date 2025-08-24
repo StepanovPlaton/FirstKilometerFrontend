@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 
-import { App, ConfigProvider } from 'antd';
+import { App, ConfigProvider, Layout } from 'antd';
 
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 
 import './globals.css';
 
+import { Menu } from '@/features/menu';
 import config from '@/shared/utils/theme';
+import { Content } from 'antd/lib/layout/layout';
 import localFont from 'next/font/local';
 
 const font = localFont({
@@ -64,7 +66,12 @@ export default function RootLayout({
       <body className={`${font.className} ${font.variable}`}>
         <AntdRegistry>
           <App>
-            <ConfigProvider {...config}>{children}</ConfigProvider>
+            <ConfigProvider {...config}>
+              <Layout className="h-full w-full">
+                <Menu />
+                <Content className="bg-[var(--color-bg3)]">{children}</Content>
+              </Layout>
+            </ConfigProvider>
           </App>
         </AntdRegistry>
       </body>

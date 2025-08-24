@@ -26,6 +26,7 @@ export const rawUserSchema = entitySchema.extend({
   registration_area: z.string({ error: 'Название участка должно быть строкой' }),
   registration_street: z.string({ error: 'Название улицы должно быть строкой' }),
   registration_address: z.string({ error: 'Название улицы должно быть строкой' }),
+
   licence_number: z.string({ error: 'Номер паспорта должен быть строкой' }),
 });
 export type User = z.TypeOf<typeof rawUserSchema>;

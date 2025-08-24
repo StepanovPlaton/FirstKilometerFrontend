@@ -118,7 +118,9 @@ input[type='file'] {
 :root {
   --color-bg0: #ffffff;
   --color-bg1: #dddddd;
+  --color-bg2: #292929;
   --color-bg3: #1e242b;
+  --color-bg4: #181818;
 
   --color-fg0: #181818;
   --color-fg1: #292929;

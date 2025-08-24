@@ -4,7 +4,7 @@ import useSWR from 'swr';
 import type { HTTPError } from '../http';
 import type { Entity } from '../schemes';
 import type { PageOf } from '../schemes/page';
-import type { GetRequestOptions, GetService, PaginatedCRUDService } from '../services';
+import type { CRUDService, GetRequestOptions, GetService, PaginatedCRUDService } from '../services';
 
 export function useEntity<E extends Entity>(
   service: GetService<E>,
@@ -18,6 +18,26 @@ export function useEntity<E extends Entity>(
       identifier === null
         ? service.getDummy(identifier, requestOptions)
         : service.get(identifier, requestOptions),
+    storeOptions
+  );
+
+  return {
+    data,
+    loading: isLoading,
+    error,
+    mutate,
+  };
+}
+
+export function useEntities<E extends Entity>(
+  service: CRUDService<E>,
+  dummy: boolean = false,
+  requestOptions?: GetRequestOptions,
+  storeOptions?: SWRConfiguration<E[], HTTPError> & { active?: boolean }
+) {
+  const { data, error, isLoading, mutate } = useSWR<E[], HTTPError>(
+    (storeOptions?.active ?? true) ? `${service.urlPrefix}/` : null,
+    () => (dummy ? service.getDummies(requestOptions) : service.getAll(requestOptions)),
     storeOptions
   );
 

@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import type { HTTPGetRequestOptions, HTTPRequestOptions } from '../http';
 import HTTPService from '../http';
@@ -42,7 +42,13 @@ export abstract class GetService<E extends Entity> extends EmptyService {
 
 export abstract class CRUDService<E extends Entity> extends GetService<E> {
   getAll = (options?: GetRequestOptions): Promise<E[]> => {
-    return HTTPService.get(`${this.urlPrefix}/all/`, softArrayOf(this.schema), options);
+    return HTTPService.get(`${this.urlPrefix}/`, softArrayOf(this.schema), options);
+  };
+  getDummies = (_: GetRequestOptions = {}, delay: number = 100): Promise<E[]> => {
+    // return await new Promise<E>((r) => setTimeout(() => r({} as E), delay));
+    return new Promise<E[]>((resolve) =>
+      setTimeout(() => resolve(createMockData(z.array(this.schema))), delay)
+    );
   };
 
   post = (entity: Omit<E, 'uuid'>, options?: RequestOptions): Promise<E> => {
