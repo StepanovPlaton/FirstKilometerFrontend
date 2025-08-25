@@ -7,7 +7,7 @@ export default function UploadLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Flex vertical align="center" justify="space-evenly" className="h-full w-full">
+    <Flex vertical align="center" justify="space-evenly" className="h-full w-full" gap={24}>
       <Image
         src="/logo/logo.webp"
         width={386}

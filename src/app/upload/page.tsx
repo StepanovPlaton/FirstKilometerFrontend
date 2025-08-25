@@ -115,86 +115,84 @@ export default function UploadPage() {
   }, [selectedUser, user, selectedVehicle, vehicle, searchParams, validated, router]);
 
   return (
-    <Space direction="vertical" align="center" size="large">
-      <Space size="large">
-        <Card className="w-100">
-          <Flex justify="center">
-            <Title level={2}>Клиент</Title>
-          </Flex>
-          <Spin spinning={loadingUser}>
-            <Space direction="vertical" align="center" className="w-full">
-              <Text>Добавьте нового клиента</Text>
-              <Space className="w-full">
-                <UploadDocument
-                  onUpload={setPassportMainPage}
-                  text="Загрузите паспорт (главная страница)"
-                />
-                <UploadDocument
-                  onUpload={setPassportRegistration}
-                  text="Загрузите паспорт (прописка)"
-                />
-              </Space>
-              <Text>или</Text>
-              <Select
-                className="w-80"
-                placeholder="Выберите существующего клиента"
-                disabled={!!passportMainPage || !!passportRegistration || !!failedGetExistsUsers}
-                loading={loadingExistsUsers}
-                options={existsUsers ?? []}
-                onChange={setSelectedUser}
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                allowClear
+    <Space direction="vertical" align="center" size="large" className="flex w-full">
+      <Card className="w-100">
+        <Flex justify="center">
+          <Title level={2}>Клиент</Title>
+        </Flex>
+        <Spin spinning={loadingUser}>
+          <Space direction="vertical" align="center">
+            <Text>Добавьте нового клиента</Text>
+            <Space className="w-full">
+              <UploadDocument
+                onUpload={setPassportMainPage}
+                text="Загрузите паспорт (главная страница)"
+              />
+              <UploadDocument
+                onUpload={setPassportRegistration}
+                text="Загрузите паспорт (прописка)"
               />
             </Space>
-          </Spin>
-        </Card>
-        <Card className="w-142">
-          <Flex justify="center">
-            <Title level={2}>Автомобиль</Title>
-          </Flex>
-          <Spin spinning={loadingVehicle}>
-            <Space direction="vertical" align="center" className="w-full">
-              <Text>Добавьте новый автомобиль</Text>
-              <Space className="w-full">
-                <UploadDocument
-                  onUpload={setVehiclePassport}
-                  text="Загрузите паспорт транспортного средства (ПТС)"
-                />
-                <UploadDocument
-                  onUpload={setVehicleRegistrationFront}
-                  text="Загрузите лицевую сторону свидетельства о регистрации (СТС)"
-                />
-                <UploadDocument
-                  onUpload={setVehicleRegistrationBack}
-                  text="Загрузите обратную сторону свидетельства о регистрации (СТС)"
-                />
-              </Space>
-              <Text>или</Text>
-              <Select
-                className="w-80"
-                placeholder="Выберите существующий автомобиль"
-                disabled={
-                  !!vehiclePassport ||
-                  !!vehicleRegistrationFront ||
-                  !!vehicleRegistrationBack ||
-                  !!failedGetExistsVehicles
-                }
-                loading={loadingExistsVehicles}
-                options={existsVehicles ?? []}
-                onChange={setSelectedVehicle}
-                showSearch
-                filterOption={(input, option) =>
-                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                }
-                allowClear
+            <Text>или</Text>
+            <Select
+              className="w-80"
+              placeholder="Выберите существующего клиента"
+              disabled={!!passportMainPage || !!passportRegistration || !!failedGetExistsUsers}
+              loading={loadingExistsUsers}
+              options={existsUsers ?? []}
+              onChange={setSelectedUser}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              allowClear
+            />
+          </Space>
+        </Spin>
+      </Card>
+      <Card className="w-142">
+        <Flex justify="center">
+          <Title level={2}>Автомобиль</Title>
+        </Flex>
+        <Spin spinning={loadingVehicle}>
+          <Space direction="vertical" align="center" className="w-full">
+            <Text>Добавьте новый автомобиль</Text>
+            <Space className="w-full">
+              <UploadDocument
+                onUpload={setVehiclePassport}
+                text="Загрузите паспорт транспортного средства (ПТС)"
+              />
+              <UploadDocument
+                onUpload={setVehicleRegistrationFront}
+                text="Загрузите лицевую сторону свидетельства о регистрации (СТС)"
+              />
+              <UploadDocument
+                onUpload={setVehicleRegistrationBack}
+                text="Загрузите обратную сторону свидетельства о регистрации (СТС)"
               />
             </Space>
-          </Spin>
-        </Card>
-      </Space>
+            <Text>или</Text>
+            <Select
+              className="w-80"
+              placeholder="Выберите существующий автомобиль"
+              disabled={
+                !!vehiclePassport ||
+                !!vehicleRegistrationFront ||
+                !!vehicleRegistrationBack ||
+                !!failedGetExistsVehicles
+              }
+              loading={loadingExistsVehicles}
+              options={existsVehicles ?? []}
+              onChange={setSelectedVehicle}
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              allowClear
+            />
+          </Space>
+        </Spin>
+      </Card>
       <Button type="primary" size="large" onClick={() => void submit()}>
         Проверить данные
       </Button>

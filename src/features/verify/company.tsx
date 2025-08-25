@@ -1,4 +1,4 @@
-import type { Company} from '@/entities/company';
+import type { Company } from '@/entities/company';
 import { companySchema } from '@/entities/company';
 import { Title } from '@/shared/ui/title';
 import { getValidationRules } from '@/shared/utils/schemes/validator';

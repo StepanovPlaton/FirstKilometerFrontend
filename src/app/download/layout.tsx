@@ -7,7 +7,7 @@ export default function DownloadLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <Flex vertical align="center" justify="space-evenly" className="h-full w-full">
+    <Flex vertical align="center" justify="space-evenly" className="h-full w-full" gap={12}>
       <Image
         src="/logo/logo.webp"
         width={386}

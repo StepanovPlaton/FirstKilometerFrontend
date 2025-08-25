@@ -1,6 +1,6 @@
 'use client';
 
-import type { Company} from '@/entities/company';
+import type { Company } from '@/entities/company';
 import CompanyService, { companySchema } from '@/entities/company';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';

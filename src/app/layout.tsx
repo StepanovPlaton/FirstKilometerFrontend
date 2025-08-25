@@ -66,9 +66,11 @@ export default function RootLayout({
         <AntdRegistry>
           <App>
             <ConfigProvider {...config}>
-              <div className="flex h-full w-full">
+              <div className="flex h-full! w-full">
                 <Menu />
-                <div className="w-full bg-[var(--color-bg3)]">{children}</div>
+                <div className="h-full w-[calc(100%-280px)]! overflow-auto bg-[var(--color-bg3)] py-8">
+                  {children}
+                </div>
               </div>
             </ConfigProvider>
           </App>

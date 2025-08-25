@@ -15,5 +15,8 @@
 
 ## Скриншоты:
 
-![](./screenshots/upload_docs.png)
+![](./screenshots/create_doc.png)
+![](./screenshots/upload.png)
 ![](./screenshots/download_docs.png)
+![](./screenshots/user.png)
+![](./screenshots/companies.png)

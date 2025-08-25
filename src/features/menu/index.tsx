@@ -53,7 +53,7 @@ export const Menu = () => {
   const router = useRouter();
 
   return (
-    <Sider width={280} className="h-full! bg-[var(--color-bg2)]!">
+    <Sider width={280} className="min-h-full! bg-[var(--color-bg2)]!">
       <Space direction="vertical" className="p-2">
         <img
           src="/logo/short_logo.webp"
