@@ -43,7 +43,7 @@ export const VerifyVehicle = (props: {
         <Flex vertical align="center" className="w-1/2" gap={8}>
           <Title level={2}>Документы транспортного средства</Title>
           <Text>Паспорт транспортного средства</Text>
-          <div className="aspect-video w-full px-4">
+          <div className="h-full w-full px-4">
             <Viewer
               active={!!props.vehicle}
               url={props.vehicle?.pts_url ?? '/demo/pts.jpg'}

@@ -2,19 +2,63 @@ import { idEntitySchema } from '@/shared/utils/schemes/entity';
 import z from 'zod';
 
 export const companySchema = idEntitySchema.extend({
-  name: z.string(),
-  short_name: z.string(),
-  inn: z.string(),
-  ogrn: z.string(),
-  legal_address: z.string(),
-  postal_address: z.string(),
-  phone: z.string(),
-  email: z.string(),
-  bank_account: z.string(),
-  bank_name: z.string(),
-  bik: z.string(),
-  corr_account: z.string(),
-  director_name: z.string(),
-  director_position: z.string(),
+  name: z
+    .string('Название компании должно быть строкой')
+    .min(3, { error: 'Слишком короткое название компании' })
+    .max(500, { error: 'Слишком длинное название компании' }),
+  short_name: z
+    .string('Сокращённое название должно быть строкой')
+    .min(3, { error: 'Слишком короткое сокращённое название' })
+    .max(200, { error: 'Слишком длинное сокращённое название' }),
+  inn: z.coerce
+    .number('ИНН должен быть числом')
+    .min(Math.pow(10, 9), { error: 'ИНН не может быть короче 10 цифр' })
+    .max(Math.pow(10, 13), { error: 'ИНН не может быть длиннее 12 цифр' }),
+  kpp: z.coerce
+    .number('КПП должен быть числом')
+    .min(Math.pow(10, 8), { error: 'КПП не может быть короче 9 цифр' })
+    .max(Math.pow(10, 13), { error: 'КПП не может быть длиннее 9 цифр' }),
+  ogrn: z.coerce
+    .number('ОРГН должен быть числом')
+    .min(Math.pow(10, 12), { error: 'ОРГН не может быть короче 10 цифр' })
+    .max(Math.pow(10, 14), { error: 'ОРГН не может быть длиннее 12 цифр' }),
+  legal_address: z
+    .string('Юридический адрес должен быть строкой')
+    .min(3, { error: 'Слишком короткий юридический адрес' })
+    .max(100, { error: 'Слишком длинный юридический адрес' }),
+  postal_address: z
+    .string('Почтовый адрес должен быть строкой')
+    .min(3, { error: 'Слишком короткий почтовый адрес' })
+    .max(100, { error: 'Слишком длинный почтовый адрес' }),
+  phone: z
+    .string('Телефон должен быть строкой')
+    .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
+      error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
+    }),
+  email: z.email({ error: 'Некорректный адрес электронной почты' }),
+  bank_account: z.coerce
+    .number('Номер расчётного счёта должен быть числом')
+    .min(Math.pow(10, 19), { error: 'Слишком короткий номер расчётного счёта' })
+    .max(Math.pow(10, 21), { error: 'Слишком длинный номер расчётного счёта' }),
+  bank_name: z
+    .string('Название банка должно быть строкой')
+    .min(3, 'Слишком короткое название банка')
+    .max(300, 'Слишком длинное название банка'),
+  bik: z.coerce
+    .number('БИК должен быть числом')
+    .min(Math.pow(10, 7), 'Слишком короткий БИК')
+    .max(Math.pow(10, 11), 'Слишком длинный БИК'),
+  corr_account: z.coerce
+    .number('Корреспондентский счёт должен быть числом')
+    .min(Math.pow(10, 19), 'Слишком короткий корреспондентский счёт')
+    .max(Math.pow(10, 21), 'Слишком длинный корреспондентский счёт'),
+  director_name: z
+    .string('ФИО директора должно быть строкой')
+    .min(3, 'Слишком короткое ФИО директора')
+    .max(255, 'Слишком длинное ФИО директора'),
+  director_position: z
+    .string('Должность директора должно быть строкой')
+    .min(3, 'Слишком короткое должность директора')
+    .max(100, 'Слишком длинное должность директора'),
 });
 export type Company = z.TypeOf<typeof companySchema>;

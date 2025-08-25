@@ -40,6 +40,12 @@ const columns: ColumnsType<ApiUser> = [
     dataIndex: 'birth_date',
     render: (birthdate: Dayjs) => birthdate.format('DD MMMM YYYYг.'),
   },
+  {
+    key: 'created',
+    title: 'Обновлён / Создан',
+    render: (_, row: ApiUser) =>
+      `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+  },
 ];
 
 export default function ClientTablesPage() {
@@ -86,6 +92,9 @@ export default function ClientTablesPage() {
             onClick: () => setUser(record),
           };
         }}
+        scroll={{
+          x: 'max-content',
+        }}
       />
       <Modal
         open={!!user}
@@ -104,7 +113,10 @@ export default function ClientTablesPage() {
               setUser(undefined);
             });
         }}
-        onCancel={() => setUser(undefined)}
+        onCancel={() => {
+          setUser(undefined);
+          userForm.resetFields();
+        }}
       >
         <VerifyUser user={user} form={userForm} />
       </Modal>

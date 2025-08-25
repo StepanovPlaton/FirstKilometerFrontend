@@ -11,7 +11,7 @@ export const softArrayOf = <T extends z.ZodType>(schema: T) => {
         array.push(schema.parse(e));
       } else {
         // eslint-disable-next-line no-console
-        console.warn(e, schema, schema.safeParse(a).error);
+        console.warn(e, schema, schema.safeParse(e).error);
       }
     });
     return array;

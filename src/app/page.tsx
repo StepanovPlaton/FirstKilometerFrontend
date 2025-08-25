@@ -89,7 +89,7 @@ export default function InitPage() {
     if (getIndividualsError) {
       messageApi.error('Не получилось получить список физических лиц. Попробуйте позже');
     }
-  }, [getCompaniesError, getDocumentTypesError, getIndividualsError]);
+  }, [getCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
 
   return (
     <Flex vertical align="center" justify="space-evenly" className="h-full w-full">

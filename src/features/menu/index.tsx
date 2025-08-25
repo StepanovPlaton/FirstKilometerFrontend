@@ -72,10 +72,7 @@ export const Menu = () => {
               onClick={() => router.push(i.href)}
             >
               <Flex className="w-full" justify="start">
-                <Title
-                  level={5}
-                  className={`align-start m-0! text-[var(--color-${pathname === i.href ? 'bg0' : 'ac0'})]!`}
-                >
+                <Title level={5} className={`align-start m-0! text-inherit!`}>
                   <Space>
                     {i.icon}
                     {i.text}

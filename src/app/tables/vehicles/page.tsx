@@ -17,6 +17,12 @@ const columns: ColumnsType<ApiVehicle> = [
   { key: 'vin', title: 'VIN', dataIndex: 'vin' },
   { key: 'make_model', title: 'Марка и модель ТС', dataIndex: 'make_model' },
   { key: 'color', title: 'Цвет', dataIndex: 'color' },
+  {
+    key: 'created',
+    title: 'Обновлён / Создан',
+    render: (_, row: ApiVehicle) =>
+      `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+  },
 ];
 
 export default function VehiclesTablesPage() {
@@ -65,6 +71,9 @@ export default function VehiclesTablesPage() {
             onClick: () => setVehicle(record),
           };
         }}
+        scroll={{
+          x: 'max-content',
+        }}
       />
       <Modal
         open={!!vehicle}
@@ -83,7 +92,10 @@ export default function VehiclesTablesPage() {
               setVehicle(undefined);
             });
         }}
-        onCancel={() => setVehicle(undefined)}
+        onCancel={() => {
+          setVehicle(undefined);
+          vehicleForm.resetFields();
+        }}
       >
         <VerifyVehicle vehicle={vehicle} form={vehicleForm} />
       </Modal>

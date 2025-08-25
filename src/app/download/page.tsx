@@ -126,6 +126,18 @@ export default function UploadPage() {
       .finally(() => setLoading(false));
   };
 
+  useEffect(() => {
+    if (getCompaniesError) {
+      messageApi.error('Не получилось получить список компаний. Попробуйте позже');
+    }
+    if (getDocumentTypesError) {
+      messageApi.error('Не получилось получить список компаний. Попробуйте позже');
+    }
+    if (getIndividualsError) {
+      messageApi.error('Не получилось получить список физических лиц. Попробуйте позже');
+    }
+  }, [getCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
+
   return (
     <Space direction="vertical" align="center" size="large">
       <Card className="w-120">
