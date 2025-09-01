@@ -1,13 +1,13 @@
-FROM node:20 AS base
+FROM node:22 AS base
 WORKDIR /app
 COPY package.json ./
 
 RUN npm install
 
 COPY . .
-RUN npm build
+RUN npm run build
 
-FROM node:20-alpine3.19 as release
+FROM node:22-alpine AS release
 WORKDIR /app
 
 COPY --from=base /app/node_modules ./node_modules
