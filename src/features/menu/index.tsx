@@ -36,7 +36,7 @@ const menu = [
     icon: <DatabaseOutlined />,
   },
   {
-    href: '/tables/users',
+    href: '/tables/individuals',
     text: 'Физ. лица',
     icon: <IdcardOutlined />,
   },

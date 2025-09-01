@@ -16,27 +16,6 @@ export class HTTPError extends Error {}
 export type HTTPResponse = Record<string, unknown> | Array<unknown>;
 
 export abstract class HTTPService {
-  private static deepUndefinedToNull(o?: object): object | undefined {
-    if (Array.isArray(o)) {
-      return o as object;
-    }
-    if (o) {
-      return Object.fromEntries(
-        Object.entries(o).map(([k, v]) => {
-          if (v === undefined) {
-            return [k, null];
-          }
-          if (typeof v === 'object') {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            return [k, this.deepUndefinedToNull(v)];
-          }
-          return [k, v];
-        })
-      );
-    } else {
-      return undefined;
-    }
-  }
   private static toStringsRecord(
     input?: Record<string, string | number | boolean>
   ): Record<string, string> {
@@ -77,7 +56,7 @@ export abstract class HTTPService {
       body:
         (options?.stringify ?? true) !== true
           ? (options?.body as BodyInit)
-          : JSON.stringify(this.deepUndefinedToNull(options?.body as object | undefined)),
+          : JSON.stringify(options?.body as object | undefined),
       signal: options?.timeout ? AbortSignal.timeout(options?.timeout) : null,
     })
       .then((r) => {

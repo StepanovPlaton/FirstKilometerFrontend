@@ -38,8 +38,9 @@ type GetDocumentForm = {
   company?: string;
   individual?: string;
   price: number;
-  tax: number;
+  tax?: number;
   date: Dayjs;
+  options?: string;
 };
 
 export default function UploadPage() {
@@ -82,6 +83,7 @@ export default function UploadPage() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const [form] = Form.useForm<GetDocumentForm>();
+  const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
 
   useEffect(() => {
     if (!seller) {
@@ -99,6 +101,7 @@ export default function UploadPage() {
       { key: 'individual', list: individuals },
       { key: 'price', list: null },
       { key: 'tax', list: null },
+      { key: 'options', list: null, format: (v: string) => v.split(',') },
       {
         key: 'date',
         list: null,
@@ -244,22 +247,68 @@ export default function UploadPage() {
                 </Form.Item>
               )}
               <Row className="w-100!" gutter={4}>
-                <Col span={8}>
-                  <Form.Item<GetDocumentForm> label="Цена" name={'price'} rules={requiredRule}>
-                    <InputNumber addonAfter="₽" min={0} placeholder="Введите цену" />
+                <Col span={12}>
+                  <Form.Item<GetDocumentForm> label="Цена" name={'price'}>
+                    <InputNumber
+                      className="w-full!"
+                      addonAfter="₽"
+                      min={0}
+                      placeholder="Введите цену"
+                    />
                   </Form.Item>
                 </Col>
-                <Col span={8}>
-                  <Form.Item<GetDocumentForm> label="Комиссия" name={'tax'} rules={requiredRule}>
-                    <InputNumber addonAfter="%" min={0} max={100} placeholder="Введите комиссию" />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item<GetDocumentForm> label="Дата" name={'date'} rules={requiredRule}>
-                    <DatePicker format="DD.MM.YYYY" />
+                <Col span={12}>
+                  <Form.Item<GetDocumentForm> label="Дата" name={'date'}>
+                    <DatePicker
+                      placeholder="Выберите дату"
+                      format="DD.MM.YYYY"
+                      className="w-full!"
+                    />
                   </Form.Item>
                 </Col>
               </Row>
+              {isTaxDoc && (
+                <Row className="w-100!" gutter={4}>
+                  <Col span={8}>
+                    <Form.Item<GetDocumentForm>
+                      label="Комиссия"
+                      name={'tax'}
+                      rules={isTaxDoc ? requiredRule : []}
+                    >
+                      <InputNumber
+                        className="w-full!"
+                        addonAfter="₽"
+                        min={0}
+                        placeholder="Введите комиссию"
+                      />
+                    </Form.Item>
+                  </Col>
+                  <Col span={16}>
+                    <Form.Item<GetDocumentForm>
+                      label="Опции"
+                      name={'options'}
+                      rules={isTaxDoc ? requiredRule : []}
+                    >
+                      <Select
+                        mode="multiple"
+                        allowClear
+                        className="w-full!"
+                        placeholder="Выберите опции"
+                        options={[
+                          'СТС',
+                          'ПТС',
+                          'ЭПТС',
+                          'Один комплект ключей',
+                          'Два комплекта ключей',
+                          'Летняя резина',
+                          'Зимняя резина',
+                          'Сервисная книжка',
+                        ].map((i) => ({ value: i, label: i }))}
+                      />
+                    </Form.Item>
+                  </Col>
+                </Row>
+              )}
             </Spin>
           </Flex>
         </Form>

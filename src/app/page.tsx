@@ -33,8 +33,9 @@ type CreateDocumentForm = {
   company?: string;
   individual?: string;
   price: number;
-  tax: number;
+  tax?: number;
   date: Dayjs;
+  options?: string;
 };
 
 export default function InitPage() {
@@ -42,6 +43,7 @@ export default function InitPage() {
   const [form] = Form.useForm<CreateDocumentForm>();
   const [messageApi, contextHolder] = message.useMessage();
   const [seller, setSeller] = useState<'individual' | 'company'>('company');
+  const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
 
   const {
     data: documentTypes,
@@ -63,11 +65,9 @@ export default function InitPage() {
 
   const submit = (data: CreateDocumentForm) => {
     let url = `/upload?type=${data.type}`;
-    (['price', 'tax'] as (keyof CreateDocumentForm)[]).map((key) => {
-      if (key in data) {
-        url += `&${key}=${data[key] as string}`;
-      }
-    });
+    if ('price' in data) {
+      url += `&price=${data.price}`;
+    }
     if ('date' in data) {
       url += `&date=${data['date'].format('YYYY-MM-DD')}`;
     }
@@ -75,6 +75,9 @@ export default function InitPage() {
       url += `&company=${data.company}`;
     } else if (seller === 'individual') {
       url += `&individual=${data.individual}`;
+    }
+    if (isTaxDoc) {
+      url += `&tax=${data.tax}&options=${data.options}`;
     }
     router.push(url);
   };
@@ -92,7 +95,7 @@ export default function InitPage() {
   }, [getCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
 
   return (
-    <Flex vertical align="center" justify="space-evenly" className="h-full w-full">
+    <Flex vertical align="center" justify="space-evenly" className="h-full w-full" gap={24}>
       <Image
         src="/logo/logo.webp"
         width={386}
@@ -183,7 +186,7 @@ export default function InitPage() {
                   </Form.Item>
                 )}
                 <Row className="w-100!" gutter={4}>
-                  <Col span={8}>
+                  <Col span={12}>
                     <Form.Item<CreateDocumentForm> label="Цена" name={'price'}>
                       <InputNumber
                         className="w-full!"
@@ -193,22 +196,58 @@ export default function InitPage() {
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={8}>
-                    <Form.Item<CreateDocumentForm> label="Комиссия" name={'tax'}>
-                      <InputNumber
-                        addonAfter="%"
-                        min={0}
-                        max={100}
-                        placeholder="Введите комиссию"
+                  <Col span={12}>
+                    <Form.Item<CreateDocumentForm> label="Дата" name={'date'}>
+                      <DatePicker
+                        placeholder="Выберите дату"
+                        format="DD.MM.YYYY"
+                        className="w-full!"
                       />
                     </Form.Item>
                   </Col>
-                  <Col span={8}>
-                    <Form.Item<CreateDocumentForm> label="Дата" name={'date'}>
-                      <DatePicker placeholder="Выберите дату" format="DD.MM.YYYY" />
-                    </Form.Item>
-                  </Col>
                 </Row>
+                {isTaxDoc && (
+                  <Row className="w-100!" gutter={4}>
+                    <Col span={8}>
+                      <Form.Item<CreateDocumentForm>
+                        label="Комиссия"
+                        name={'tax'}
+                        rules={isTaxDoc ? requiredRule : []}
+                      >
+                        <InputNumber
+                          className="w-full!"
+                          addonAfter="₽"
+                          min={0}
+                          placeholder="Введите комиссию"
+                        />
+                      </Form.Item>
+                    </Col>
+                    <Col span={16}>
+                      <Form.Item<CreateDocumentForm>
+                        label="Опции"
+                        name={'options'}
+                        rules={isTaxDoc ? requiredRule : []}
+                      >
+                        <Select
+                          mode="multiple"
+                          allowClear
+                          className="w-full!"
+                          placeholder="Выберите опции"
+                          options={[
+                            'СТС',
+                            'ПТС',
+                            'ЭПТС',
+                            'Один комплект ключей',
+                            'Два комплекта ключей',
+                            'Летняя резина',
+                            'Зимняя резина',
+                            'Сервисная книжка',
+                          ].map((i) => ({ value: i, label: i }))}
+                        />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+                )}
               </Flex>
             </Form>
           </Card>

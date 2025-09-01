@@ -6,13 +6,13 @@ import { Button, Card, Flex, Form, message } from 'antd';
 
 import type { FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
+import { VerifyPerson } from '@/features/verify/person';
 import { useEntity } from '@/shared/utils/hooks/data';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import z from 'zod';
-import { VerifyUser } from '../../features/verify/user';
 import { VerifyVehicle } from '../../features/verify/vehicle';
 dayjs.locale('ru');
 
@@ -80,7 +80,7 @@ export default function VerifyPage() {
   return (
     <Flex vertical align="center" className="w-full" gap={12}>
       <Card className="w-350 max-w-full">
-        <VerifyUser user={user} form={userForm} />
+        <VerifyPerson person={user} form={userForm} type="user" />
       </Card>
       <Card className="w-350 max-w-full">
         <VerifyVehicle vehicle={vehicle} form={vehicleForm} />
@@ -111,12 +111,14 @@ export default function VerifyPage() {
               .then(() => {
                 messageApi.success('Данные успешно сохранены');
                 let url = `/download?user=${userUUID}&vehicle=${vehicleUUID}`;
-                ['type', 'company', 'individual', 'price', 'tax', 'date'].forEach((key) => {
-                  const value = searchParams.get(key);
-                  if (value) {
-                    url += `&${key}=${value}`;
+                ['type', 'company', 'individual', 'price', 'tax', 'options', 'date'].forEach(
+                  (key) => {
+                    const value = searchParams.get(key);
+                    if (value) {
+                      url += `&${key}=${value}`;
+                    }
                   }
-                });
+                );
                 router.push(url);
               });
           })();

@@ -1,7 +1,7 @@
 'use client';
 
-import type { ApiUser, FormUser } from '@/entities/user';
-import UserService, { formUserSchema } from '@/entities/user';
+import type { ApiIndividual, FormIndividual } from '@/entities/individual';
+import IndividualService, { formIndividualSchema } from '@/entities/individual';
 import { UploadDocument } from '@/features/upload';
 import { VerifyPerson } from '@/features/verify/person';
 import { Title } from '@/shared/ui/title';
@@ -18,33 +18,35 @@ import z from 'zod';
 dayjs.locale('ru');
 
 export default function ClientTablesPage() {
-  const { data: users, loading, mutate: mutateTable } = useEntities(UserService);
+  const { data: individuals, loading, mutate: mutateTable } = useEntities(IndividualService);
 
-  const [newUser, setNewUser] = useState(false);
-  const [loadingUser, setLoadingUser] = useState(false);
+  const [newIndividual, setNewIndividual] = useState(false);
+  const [loadingIndividual, setLoadingIndividual] = useState(false);
   const [passportMainPage, setPassportMainPage] = useState<RcFile>();
   const [passportRegistration, setPassportRegistration] = useState<RcFile>();
 
-  const [user, setUser] = useState<ApiUser>();
+  const [individual, setIndividual] = useState<ApiIndividual>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [userForm] = Form.useForm<FormUser>();
+  const [individualForm] = Form.useForm<FormIndividual>();
   useEffect(() => {
-    userForm.setFieldsValue(user as never as FormUser);
-  }, [user, userForm]);
+    individualForm.setFieldsValue(individual as never as FormIndividual);
+  }, [individual, individualForm]);
 
-  const submitUser = (values: FormUser) => {
-    const validatedForm = formUserSchema.safeParse({ ...values, uuid: user?.uuid });
+  const submitIndividual = (values: FormIndividual) => {
+    const validatedForm = formIndividualSchema.safeParse({ ...values, uuid: individual?.uuid });
     if (validatedForm.success) {
-      return UserService.putAny(validatedForm.data)
-        .then((user) =>
-          mutateTable((users) => users?.map((u) => (u.uuid === user.uuid ? user : u)))
+      return IndividualService.putAny(validatedForm.data)
+        .then((individual) =>
+          mutateTable((individuals) =>
+            individuals?.map((u) => (u.uuid === individual.uuid ? individual : u))
+          )
         )
         .catch((e) => {
-          messageApi.error('Не удалось сохранить данные клиента. Повторите попытку позже');
+          messageApi.error('Не удалось сохранить данные физ. лица. Повторите попытку позже');
           throw e;
         });
     } else {
-      messageApi.error('Данные клиента заполнены неправильно');
+      messageApi.error('Данные физ. лица заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
@@ -53,32 +55,34 @@ export default function ClientTablesPage() {
     }
   };
 
-  const addUser = async () => {
+  const addIndividual = async () => {
     if (!passportMainPage) {
-      messageApi.error('Чтобы продолжить, загрузите главную страницу паспорта клиента');
+      messageApi.error('Чтобы продолжить, загрузите главную страницу паспорта физ. лица');
       return;
     }
     if (!passportRegistration) {
-      messageApi.error('Чтобы продолжить, загрузите страницу с пропиской из паспорта клиента');
+      messageApi.error('Чтобы продолжить, загрузите страницу с пропиской из паспорта физ. лица');
       return;
     }
-    setLoadingUser(true);
-    const userData = new FormData();
-    userData.append('passport_main', passportMainPage);
-    userData.append('passport_registration', passportRegistration);
-    await UserService.postAny(userData, { stringify: false })
-      .then((user) => {
-        setNewUser(false);
+    setLoadingIndividual(true);
+    const individualData = new FormData();
+    individualData.append('passport_main', passportMainPage);
+    individualData.append('passport_registration', passportRegistration);
+    await IndividualService.postAny(individualData, { stringify: false })
+      .then((individual) => {
+        setNewIndividual(false);
         setPassportMainPage(undefined);
         setPassportRegistration(undefined);
-        void mutateTable((users) => [...(users ?? []), user]);
-        setUser(user);
+        void mutateTable((individuals) => [...(individuals ?? []), individual]);
+        setIndividual(individual);
       })
-      .catch(() => messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже'))
-      .finally(() => setLoadingUser(false));
+      .catch(() =>
+        messageApi.error('Не удалось загрузить данные физ. лица. Повторите попытку позже')
+      )
+      .finally(() => setLoadingIndividual(false));
   };
 
-  const columns: ColumnsType<ApiUser> = [
+  const columns: ColumnsType<ApiIndividual> = [
     {
       key: 'licence_number',
       title: 'Серия и номер паспорта',
@@ -108,7 +112,7 @@ export default function ClientTablesPage() {
     {
       key: 'created',
       title: 'Обновлён / Создан',
-      render: (_, row: ApiUser) =>
+      render: (_, row: ApiIndividual) =>
         `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
     },
     {
@@ -116,18 +120,18 @@ export default function ClientTablesPage() {
       dataIndex: 'uuid',
       render: (uuid: string) => (
         <Popconfirm
-          title="Удаление клиента"
-          description="Вы уверены, что хотите удалить клиента?"
+          title="Удаление физ. лица"
+          description="Вы уверены, что хотите удалить физ.лицо?"
           okText="Удалить"
           cancelText="Отмена"
           okButtonProps={{ danger: true }}
           onConfirm={(e) => {
             e?.stopPropagation();
-            void UserService.delete(uuid)
+            void IndividualService.delete(uuid)
               .then(() => {
-                void mutateTable((users) => users?.filter((u) => u.uuid !== uuid));
+                void mutateTable((individuals) => individuals?.filter((i) => i.uuid !== uuid));
               })
-              .catch(() => messageApi.error('Не удалось удалить клиента. Попробуйте позже'));
+              .catch(() => messageApi.error('Не удалось удалить физ. лицо. Попробуйте позже'));
           }}
           onCancel={(e) => e?.stopPropagation()}
         >
@@ -146,66 +150,66 @@ export default function ClientTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
-      <Table<ApiUser>
+      <Table<ApiIndividual>
         className="w-full"
         rowKey="uuid"
         loading={loading}
         columns={columns}
-        dataSource={users ?? ([] as ApiUser[])}
+        dataSource={individuals ?? ([] as ApiIndividual[])}
         pagination={false}
         onRow={(record) => {
           return {
-            onClick: () => setUser(record),
+            onClick: () => setIndividual(record),
           };
         }}
         scroll={{
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setNewUser(true)}>
+      <Button type="primary" onClick={() => setNewIndividual(true)}>
         <PlusOutlined />
         Добавить
       </Button>
       <Modal
-        open={!!user}
+        open={!!individual}
         width={1200}
         okText={'Проверить и сохранить'}
         onOk={() => {
-          void userForm
+          void individualForm
             .validateFields()
             .catch((e) => {
-              messageApi.warning('Исправьте ошибки в форме клиента повторите попытку');
+              messageApi.warning('Исправьте ошибки в форме физ. лица повторите попытку');
               throw e;
             })
-            .then(() => submitUser(userForm.getFieldsValue()))
+            .then(() => submitIndividual(individualForm.getFieldsValue()))
             .then(() => {
               messageApi.success('Данные успешно сохранены');
-              setUser(undefined);
+              setIndividual(undefined);
             });
         }}
         onCancel={() => {
-          setUser(undefined);
-          userForm.resetFields();
+          setIndividual(undefined);
+          individualForm.resetFields();
         }}
       >
-        <VerifyPerson person={user} form={userForm} type="user" />
+        <VerifyPerson person={individual} form={individualForm} type="individual" />
       </Modal>
       <Modal
-        open={newUser}
+        open={newIndividual}
         onCancel={() => {
           setPassportMainPage(undefined);
           setPassportRegistration(undefined);
-          setNewUser(false);
+          setNewIndividual(false);
         }}
-        title={<Title level={2}>Добавить клиента</Title>}
-        okText="Добавить клиента"
+        title={<Title level={2}>Добавить физ. лицо</Title>}
+        okText="Добавить физ. лицо"
         okButtonProps={{
           disabled: !passportMainPage || !passportRegistration,
         }}
         width={475}
-        onOk={() => void addUser()}
+        onOk={() => void addIndividual()}
       >
-        <Spin spinning={loadingUser}>
+        <Spin spinning={loadingIndividual}>
           <Space className="w-full">
             <UploadDocument
               file={passportMainPage}

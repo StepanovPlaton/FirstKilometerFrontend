@@ -1,31 +1,32 @@
-import type { ApiUser, FormUser } from '@/entities/user';
-import { formUserSchema } from '@/entities/user';
 import { Viewer } from '@/features/viewer';
 import { Text } from '@/shared/ui/text';
 import { Title } from '@/shared/ui/title';
+import type { ApiPerson, FormPerson } from '@/shared/utils/schemes/person';
+import { formPersonSchema } from '@/shared/utils/schemes/person';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
 import { DatePicker, Divider, Flex, Form, Input, Row, Select, Skeleton } from 'antd';
 import clsx from 'clsx';
 
-export const VerifyUser = ({
+export const VerifyPerson = ({
   ...props
 }: {
-  user: ApiUser | undefined;
-  form: FormInstance<FormUser>;
+  person: ApiPerson | undefined;
+  form: FormInstance<FormPerson>;
+  type: 'user' | 'individual';
 }) => {
   return (
-    <Form<FormUser> layout="vertical" form={props.form}>
+    <Form<FormPerson> layout="vertical" form={props.form}>
       <div className="flex w-full">
         <Flex vertical align="center" className="w-1/2" gap={8}>
-          <Title level={2}>Документы клиента</Title>
-          <Text>Паспорт клиента (главная страница)</Text>
+          <Title level={2}>Документы {props.type === 'user' ? 'клиента' : 'физ. лица'}</Title>
+          <Text>Паспорт {props.type === 'user' ? 'клиента' : 'физ. лица'} (главная страница)</Text>
           <div className="aspect-video w-full px-4">
             <Viewer
-              active={!!props.user}
-              url={props.user?.passport_url ?? '/demo/passport_main.jpg'}
-              alt="Главная страница паспорта клиента"
-              imageClassName={clsx('rounded shadow-lg!', !props.user?.reg_url && 'opacity-30')}
+              active={!!props.person}
+              url={props.person?.passport_url ?? '/demo/passport_main.jpg'}
+              alt={`Главная страница паспорта ${props.type === 'user' ? 'клиента' : 'физ. лица'}`}
+              imageClassName={clsx('rounded shadow-lg!', !props.person?.reg_url && 'opacity-30')}
               skeletonClassName="h-full! w-full! p-2"
             />
           </div>
@@ -33,38 +34,38 @@ export const VerifyUser = ({
         <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
         <div className="w-1/2">
           <Flex justify="space-around">
-            <Title level={2}>Данные клиента</Title>
+            <Title level={2}>Данные {props.type === 'user' ? 'клиента' : 'физ. лица'}</Title>
           </Flex>
-          {props.user ? (
+          {props.person ? (
             <>
               <Row wrap justify={'space-evenly'}>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Фамилия"
                   name={'last_name'}
-                  rules={getValidationRules(formUserSchema, 'last_name')}
+                  rules={getValidationRules(formPersonSchema, 'last_name')}
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Имя"
                   name={'first_name'}
-                  rules={getValidationRules(formUserSchema, 'first_name')}
+                  rules={getValidationRules(formPersonSchema, 'first_name')}
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Отчество"
                   name={'middle_name'}
-                  rules={getValidationRules(formUserSchema, 'middle_name', false)}
+                  rules={getValidationRules(formPersonSchema, 'middle_name', false)}
                 >
                   <Input />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Пол"
                   name={'sex'}
-                  rules={getValidationRules(formUserSchema, 'sex')}
+                  rules={getValidationRules(formPersonSchema, 'sex')}
                 >
                   <Select
                     placeholder="Пол"
@@ -74,54 +75,54 @@ export const VerifyUser = ({
                     ]}
                   />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Дата рождения"
                   name={'birth_date'}
-                  rules={getValidationRules(formUserSchema, 'birth_date')}
+                  rules={getValidationRules(formPersonSchema, 'birth_date')}
                 >
                   <DatePicker format="DD.MM.YYYY" />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Место рождения"
                   name={'birth_place'}
-                  rules={getValidationRules(formUserSchema, 'birth_place')}
+                  rules={getValidationRules(formPersonSchema, 'birth_place')}
                 >
                   <Input className="w-80!" />
                 </Form.Item>
               </Row>
               <Divider className="m-2!" />
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Кем выдан паспорт"
                   name={'issue_organization'}
                   className="w-full"
-                  rules={getValidationRules(formUserSchema, 'issue_organization')}
+                  rules={getValidationRules(formPersonSchema, 'issue_organization')}
                 >
                   <Input className="w-full" />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Дата выдачи"
                   name={'issue_date'}
-                  rules={getValidationRules(formUserSchema, 'issue_date')}
+                  rules={getValidationRules(formPersonSchema, 'issue_date')}
                 >
                   <DatePicker format="DD.MM.YYYY" />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Код подразделения"
                   name={'issue_organization_code'}
-                  rules={getValidationRules(formUserSchema, 'issue_organization_code')}
+                  rules={getValidationRules(formPersonSchema, 'issue_organization_code')}
                 >
                   <Input />
                 </Form.Item>
               </Row>
               <Divider className="m-2!" />
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Серия и номер паспорта"
                   name={'licence_number'}
-                  rules={getValidationRules(formUserSchema, 'licence_number')}
+                  rules={getValidationRules(formPersonSchema, 'licence_number')}
                 >
                   <Input />
                 </Form.Item>
@@ -135,72 +136,72 @@ export const VerifyUser = ({
       <Divider className="m-2!" />
       <div className="flex w-full">
         <Flex vertical align="center" className="w-1/2" gap={8}>
-          <Text>Паспорт клиента (прописка)</Text>
+          <Text>Паспорт {props.type === 'user' ? 'клиента' : 'физ. лица'} (прописка)</Text>
           <div className="aspect-video w-full px-4">
             <Viewer
-              active={!!props.user}
-              url={props.user?.reg_url ?? '/demo/passport_registration.jpg'}
-              alt="Второй разворот паспорта клиента"
-              imageClassName={clsx('rounded shadow-lg!', !props.user?.reg_url && 'opacity-30')}
+              active={!!props.person}
+              url={props.person?.reg_url ?? '/demo/passport_registration.jpg'}
+              alt={`Второй разворот паспорта ${props.type === 'user' ? 'клиента' : 'физ. лица'}`}
+              imageClassName={clsx('rounded shadow-lg!', !props.person?.reg_url && 'opacity-30')}
               skeletonClassName="h-full! w-full! p-2"
             />
           </div>
         </Flex>
         <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
         <div className="w-1/2">
-          {props.user ? (
+          {props.person ? (
             <>
               <Row wrap justify={'space-evenly'}>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Дата регистрации"
                   name={'registration_date'}
-                  rules={getValidationRules(formUserSchema, 'registration_date')}
+                  rules={getValidationRules(formPersonSchema, 'registration_date')}
                 >
                   <DatePicker format="DD MMMM YYYYг." />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Регион"
                   name={'registration_region'}
-                  rules={getValidationRules(formUserSchema, 'registration_region')}
+                  rules={getValidationRules(formPersonSchema, 'registration_region')}
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Населённый пункт"
                   name={'registration_settlement'}
-                  rules={getValidationRules(formUserSchema, 'registration_settlement')}
+                  rules={getValidationRules(formPersonSchema, 'registration_settlement')}
                 >
                   <Input />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Район"
                   name={'registration_district'}
-                  rules={getValidationRules(formUserSchema, 'registration_district', false)}
+                  rules={getValidationRules(formPersonSchema, 'registration_district', false)}
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Участок"
                   name={'registration_area'}
-                  rules={getValidationRules(formUserSchema, 'registration_area', false)}
+                  rules={getValidationRules(formPersonSchema, 'registration_area', false)}
                 >
                   <Input />
                 </Form.Item>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Улица"
                   name={'registration_street'}
-                  rules={getValidationRules(formUserSchema, 'registration_street')}
+                  rules={getValidationRules(formPersonSchema, 'registration_street')}
                 >
                   <Input />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormUser>
+                <Form.Item<FormPerson>
                   label="Адрес"
                   name={'registration_address'}
-                  rules={getValidationRules(formUserSchema, 'registration_address')}
+                  rules={getValidationRules(formPersonSchema, 'registration_address')}
                 >
                   <Input className="w-64!" />
                 </Form.Item>

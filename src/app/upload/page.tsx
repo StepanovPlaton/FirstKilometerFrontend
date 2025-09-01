@@ -89,7 +89,9 @@ export default function UploadPage() {
           return await VehicleService.postAny(vehicleData, { stringify: false })
             .then((vehicle) => setVehicle(vehicle))
             .catch(() =>
-              messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже')
+              messageApi.error(
+                'Не удалось загрузить данные транспортного средства. Повторите попытку позже'
+              )
             )
             .finally(() => setLoadingVehicle(false));
         })()
@@ -104,7 +106,7 @@ export default function UploadPage() {
 
     if (validated && userUUID && vehicleUUID) {
       let url = `/verify?user=${userUUID}&vehicle=${vehicleUUID}`;
-      ['type', 'company', 'individual', 'price', 'tax', 'date'].forEach((key) => {
+      ['type', 'company', 'individual', 'price', 'tax', 'options', 'date'].forEach((key) => {
         const value = searchParams.get(key);
         if (value) {
           url += `&${key}=${value}`;
@@ -125,10 +127,12 @@ export default function UploadPage() {
             <Text>Добавьте нового клиента</Text>
             <Space className="w-full">
               <UploadDocument
+                file={passportMainPage}
                 onUpload={setPassportMainPage}
                 text="Загрузите паспорт (главная страница)"
               />
               <UploadDocument
+                file={passportRegistration}
                 onUpload={setPassportRegistration}
                 text="Загрузите паспорт (прописка)"
               />
@@ -159,14 +163,17 @@ export default function UploadPage() {
             <Text>Добавьте новый автомобиль</Text>
             <Space className="w-full">
               <UploadDocument
+                file={vehiclePassport}
                 onUpload={setVehiclePassport}
                 text="Загрузите паспорт транспортного средства (ПТС)"
               />
               <UploadDocument
+                file={vehicleRegistrationFront}
                 onUpload={setVehicleRegistrationFront}
                 text="Загрузите лицевую сторону свидетельства о регистрации (СТС)"
               />
               <UploadDocument
+                file={vehicleRegistrationBack}
                 onUpload={setVehicleRegistrationBack}
                 text="Загрузите обратную сторону свидетельства о регистрации (СТС)"
               />

@@ -4,27 +4,14 @@ import type { Company } from '@/entities/company';
 import CompanyService, { companySchema } from '@/entities/company';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Flex, Form, message, Modal, Table } from 'antd';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { Button, Flex, Form, message, Modal, Popconfirm, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
 import { useEffect, useState } from 'react';
 import z from 'zod';
 dayjs.locale('ru');
-
-const columns: ColumnsType<Company> = [
-  { key: 'short_name', title: 'Название', dataIndex: 'short_name' },
-  { key: 'director', title: 'Директор', dataIndex: 'director_name' },
-  { key: 'phone', title: 'Телефон', dataIndex: 'phone' },
-  { key: 'email', title: 'Электронная почта', dataIndex: 'email' },
-  {
-    key: 'created',
-    title: 'Обновлён / Создан',
-    render: (_, row: Company) =>
-      `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
-  },
-];
 
 export default function ClientTablesPage() {
   const { data: companies, loading, mutate: mutateTable } = useEntities(CompanyService);
@@ -68,11 +55,55 @@ export default function ClientTablesPage() {
     }
   };
 
+  const columns: ColumnsType<Company> = [
+    { key: 'short_name', title: 'Название', dataIndex: 'short_name' },
+    { key: 'director', title: 'Директор', dataIndex: 'director_name' },
+    { key: 'phone', title: 'Телефон', dataIndex: 'phone' },
+    { key: 'email', title: 'Электронная почта', dataIndex: 'email' },
+    {
+      key: 'created',
+      title: 'Обновлён / Создан',
+      render: (_, row: Company) =>
+        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+    },
+    {
+      key: 'delete',
+      dataIndex: 'id',
+      render: (id: number) => (
+        <Popconfirm
+          title="Удаление компании"
+          description="Вы уверены, что хотите удалить компанию?"
+          okText="Удалить"
+          cancelText="Отмена"
+          okButtonProps={{ danger: true }}
+          onConfirm={(e) => {
+            e?.stopPropagation();
+            void CompanyService.delete(id)
+              .then(() => {
+                void mutateTable((companies) => companies?.filter((c) => c.id !== id));
+              })
+              .catch(() => messageApi.error('Не удалось удалить компанию. Попробуйте позже'));
+          }}
+          onCancel={(e) => e?.stopPropagation()}
+        >
+          <Button
+            danger
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <DeleteOutlined />
+          </Button>
+        </Popconfirm>
+      ),
+    },
+  ];
+
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       <Table<Company>
         className="w-full"
-        rowKey="uuid"
+        rowKey="id"
         loading={loading}
         columns={columns}
         dataSource={companies ?? ([] as Company[])}
