@@ -1,5 +1,6 @@
 import { CRUDCService } from '@/shared/utils/services';
-import { InternalCompany, internalCompanySchema } from './schema';
+import type { InternalCompany} from './schema';
+import { internalCompanySchema } from './schema';
 
 export class IInternalCompanyService extends CRUDCService<InternalCompany> {}
 

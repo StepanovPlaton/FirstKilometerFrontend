@@ -9,7 +9,7 @@ import { useEntities } from '@/shared/utils/hooks/data';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { RcFile } from 'antd/es/upload';
+import type { RcFile } from 'antd/es/upload';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
 import { useEffect, useState } from 'react';
