@@ -106,7 +106,16 @@ export default function UploadPage() {
 
     if (validated && userUUID && vehicleUUID) {
       let url = `/verify?user=${userUUID}&vehicle=${vehicleUUID}`;
-      ['type', 'company', 'individual', 'price', 'tax', 'options', 'date'].forEach((key) => {
+      [
+        'type',
+        'internal_company',
+        'external_company',
+        'individual',
+        'price',
+        'tax',
+        'options',
+        'date',
+      ].forEach((key) => {
         const value = searchParams.get(key);
         if (value) {
           url += `&${key}=${value}`;

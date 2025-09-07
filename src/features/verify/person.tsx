@@ -199,7 +199,7 @@ export const VerifyPerson = ({
               </Row>
               <Row justify="space-evenly" wrap>
                 <Form.Item<FormPerson>
-                  label="Адрес"
+                  label="Дом, квартира, корпус"
                   name={'registration_address'}
                   rules={getValidationRules(formPersonSchema, 'registration_address')}
                 >

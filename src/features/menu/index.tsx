@@ -2,6 +2,7 @@
 
 import { Title } from '@/shared/ui/title';
 import {
+  BankOutlined,
   CarOutlined,
   DatabaseOutlined,
   FileTextOutlined,
@@ -31,7 +32,12 @@ const menu = [
     icon: <CarOutlined />,
   },
   {
-    href: '/tables/companies',
+    href: '/tables/companies/internal',
+    text: 'Филиалы',
+    icon: <BankOutlined />,
+  },
+  {
+    href: '/tables/companies/external',
     text: 'Компании',
     icon: <DatabaseOutlined />,
   },

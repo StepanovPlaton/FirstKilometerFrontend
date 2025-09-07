@@ -1,8 +1,9 @@
 'use client';
 
-import CompanyService from '@/entities/company';
 import DocumentService from '@/entities/documents';
+import ExternalCompanyService from '@/entities/external-company';
 import IndividualService from '@/entities/individual';
+import InternalCompanyService from '@/entities/internal-company';
 import { Title } from '@/shared/ui/title';
 import { useChoices } from '@/shared/utils/hooks/choices';
 import type { HTTPError } from '@/shared/utils/http';
@@ -30,7 +31,8 @@ const requiredRule = [{ required: true, message: 'Это обязательно�
 
 type CreateDocumentForm = {
   type: string;
-  company?: string;
+  internal_company?: string;
+  external_company?: string;
   individual?: string;
   price: number;
   tax?: number;
@@ -42,7 +44,9 @@ export default function InitPage() {
   const router = useRouter();
   const [form] = Form.useForm<CreateDocumentForm>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [seller, setSeller] = useState<'individual' | 'company'>('company');
+  const [seller, setSeller] = useState<'individual' | 'internal_company' | 'external_company'>(
+    'internal_company'
+  );
   const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
 
   const {
@@ -52,10 +56,16 @@ export default function InitPage() {
   } = useSWR<Choice[], HTTPError>(`documents/choices`, () => DocumentService.getTypes());
 
   const {
-    data: companies,
-    error: getCompaniesError,
-    isLoading: loadingCompanies,
-  } = useSWR<Choice[], HTTPError>(`companies/choices`, () => CompanyService.getChoices());
+    data: internalCompanies,
+    error: getInternalCompaniesError,
+    loading: loadingInternalCompanies,
+  } = useChoices(InternalCompanyService);
+
+  const {
+    data: externalCompanies,
+    error: getExternalCompaniesError,
+    loading: loadingExternalCompanies,
+  } = useChoices(ExternalCompanyService);
 
   const {
     data: individuals,
@@ -71,8 +81,10 @@ export default function InitPage() {
     if ('date' in data) {
       url += `&date=${data['date'].format('YYYY-MM-DD')}`;
     }
-    if (seller === 'company') {
-      url += `&company=${data.company}`;
+    if (seller === 'internal_company') {
+      url += `&internal_company=${data.internal_company}`;
+    } else if (seller === 'external_company') {
+      url += `&external_company=${data.external_company}`;
     } else if (seller === 'individual') {
       url += `&individual=${data.individual}`;
     }
@@ -83,7 +95,7 @@ export default function InitPage() {
   };
 
   useEffect(() => {
-    if (getCompaniesError) {
+    if (getInternalCompaniesError) {
       messageApi.error('Не получилось получить список компаний. Попробуйте позже');
     }
     if (getDocumentTypesError) {
@@ -92,7 +104,7 @@ export default function InitPage() {
     if (getIndividualsError) {
       messageApi.error('Не получилось получить список физических лиц. Попробуйте позже');
     }
-  }, [getCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
+  }, [getInternalCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
 
   return (
     <Flex vertical align="center" justify="space-evenly" className="h-full w-full" gap={24}>
@@ -139,8 +151,12 @@ export default function InitPage() {
                         value: 'individual',
                       },
                       {
+                        label: 'Филиал',
+                        value: 'internal_company',
+                      },
+                      {
                         label: 'Компания',
-                        value: 'company',
+                        value: 'external_company',
                       },
                     ]}
                     onChange={(v: typeof seller) => setSeller(v)}
@@ -148,18 +164,36 @@ export default function InitPage() {
                   />
                 </Form.Item>
 
-                {seller === 'company' ? (
+                {seller === 'internal_company' ? (
+                  <Form.Item<CreateDocumentForm>
+                    label="Филиал"
+                    name={'internal_company'}
+                    rules={requiredRule}
+                  >
+                    <Select
+                      className="w-100!"
+                      placeholder="Выберите филиал"
+                      disabled={!!getInternalCompaniesError}
+                      loading={loadingInternalCompanies}
+                      options={internalCompanies ?? []}
+                      showSearch
+                      filterOption={(input, option) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                      }
+                    />
+                  </Form.Item>
+                ) : seller === 'external_company' ? (
                   <Form.Item<CreateDocumentForm>
                     label="Компания"
-                    name={'company'}
+                    name={'external_company'}
                     rules={requiredRule}
                   >
                     <Select
                       className="w-100!"
                       placeholder="Выберите компанию"
-                      disabled={!!getCompaniesError}
-                      loading={loadingCompanies}
-                      options={companies ?? []}
+                      disabled={!!getExternalCompaniesError}
+                      loading={loadingExternalCompanies}
+                      options={externalCompanies ?? []}
                       showSearch
                       filterOption={(input, option) =>
                         (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
@@ -253,7 +287,7 @@ export default function InitPage() {
           </Card>
           <Space>
             <Button type="primary" size="large" onClick={() => form.submit()}>
-              Выбрать клиента
+              Выбрать покупателя
             </Button>
           </Space>
         </Space>

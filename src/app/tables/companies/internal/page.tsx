@@ -1,7 +1,7 @@
 'use client';
 
-import type { Company } from '@/entities/company';
-import CompanyService, { companySchema } from '@/entities/company';
+import type { InternalCompany } from '@/entities/internal-company';
+import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
@@ -13,40 +13,39 @@ import { useEffect, useState } from 'react';
 import z from 'zod';
 dayjs.locale('ru');
 
-export default function ClientTablesPage() {
-  const { data: companies, loading, mutate: mutateTable } = useEntities(CompanyService);
-  const [company, setCompany] = useState<Company>();
+export default function InternalCompaniesTablesPage() {
+  const { data: companies, loading, mutate: mutateTable } = useEntities(InternalCompanyService);
+  const [company, setInternalCompany] = useState<InternalCompany>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [companyForm] = Form.useForm<Company>();
+  const [companyForm] = Form.useForm<InternalCompany>();
   useEffect(() => {
-    companyForm.setFieldsValue(company as never as Company);
+    companyForm.setFieldsValue(company as never as InternalCompany);
   }, [company, companyForm]);
 
-  const submitCompany = (values: Company) => {
-    const validatedForm = companySchema
-      .omit({ id: true })
-      .safeParse({ ...values, id: company?.id });
+  const submitInternalCompany = (values: InternalCompany) => {
+    const validatedForm = internalCompanySchema.omit({ id: true }).safeParse({ ...values });
     if (validatedForm.success && validatedForm.data) {
+      const newCompanyData = { ...validatedForm.data, id: company?.id };
       return (
         company?.id
-          ? CompanyService.putAny(validatedForm.data as Company)
-          : CompanyService.post(validatedForm.data)
+          ? InternalCompanyService.putAny(newCompanyData as InternalCompany)
+          : InternalCompanyService.post(validatedForm.data)
       )
-        .then((receivedCompany) => {
+        .then((receivedInternalCompany) => {
           if (company?.id) {
-            void mutateTable((companies) =>
+            return mutateTable((companies) =>
               companies?.map((c) => (c.id === company.id ? company : c))
             );
           } else {
-            void mutateTable((companies) => [...(companies ?? []), receivedCompany]);
+            return mutateTable((companies) => [...(companies ?? []), receivedInternalCompany]);
           }
         })
         .catch((e) => {
-          messageApi.error('Не удалось сохранить данные компании. Повторите попытку позже');
+          messageApi.error('Не удалось сохранить данные филиала. Повторите попытку позже');
           throw e;
         });
     } else {
-      messageApi.error('Данные компании заполнены неправильно');
+      messageApi.error('Данные филиала заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
@@ -55,7 +54,7 @@ export default function ClientTablesPage() {
     }
   };
 
-  const columns: ColumnsType<Company> = [
+  const columns: ColumnsType<InternalCompany> = [
     { key: 'short_name', title: 'Название', dataIndex: 'short_name' },
     { key: 'director', title: 'Директор', dataIndex: 'director_name' },
     { key: 'phone', title: 'Телефон', dataIndex: 'phone' },
@@ -63,7 +62,7 @@ export default function ClientTablesPage() {
     {
       key: 'created',
       title: 'Обновлён / Создан',
-      render: (_, row: Company) =>
+      render: (_, row: InternalCompany) =>
         `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
     },
     {
@@ -71,18 +70,18 @@ export default function ClientTablesPage() {
       dataIndex: 'id',
       render: (id: number) => (
         <Popconfirm
-          title="Удаление компании"
-          description="Вы уверены, что хотите удалить компанию?"
+          title="Удаление филиала"
+          description="Вы уверены, что хотите удалить филиал?"
           okText="Удалить"
           cancelText="Отмена"
           okButtonProps={{ danger: true }}
           onConfirm={(e) => {
             e?.stopPropagation();
-            void CompanyService.delete(id)
+            void InternalCompanyService.delete(id)
               .then(() => {
                 void mutateTable((companies) => companies?.filter((c) => c.id !== id));
               })
-              .catch(() => messageApi.error('Не удалось удалить компанию. Попробуйте позже'));
+              .catch(() => messageApi.error('Не удалось удалить филиал. Попробуйте позже'));
           }}
           onCancel={(e) => e?.stopPropagation()}
         >
@@ -101,23 +100,23 @@ export default function ClientTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
-      <Table<Company>
+      <Table<InternalCompany>
         className="w-full"
         rowKey="id"
         loading={loading}
         columns={columns}
-        dataSource={companies ?? ([] as Company[])}
+        dataSource={companies ?? ([] as InternalCompany[])}
         pagination={false}
         onRow={(record) => {
           return {
-            onClick: () => setCompany(record),
+            onClick: () => setInternalCompany(record),
           };
         }}
         scroll={{
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setCompany({} as Company)}>
+      <Button type="primary" onClick={() => setInternalCompany({} as InternalCompany)}>
         <PlusOutlined />
         Добавить
       </Button>
@@ -129,21 +128,21 @@ export default function ClientTablesPage() {
           void companyForm
             .validateFields()
             .catch((e) => {
-              messageApi.warning('Исправьте ошибки в форме компании повторите попытку');
+              messageApi.warning('Исправьте ошибки в форме филиала повторите попытку');
               throw e;
             })
-            .then(() => submitCompany(companyForm.getFieldsValue()))
+            .then(() => submitInternalCompany(companyForm.getFieldsValue()))
             .then(() => {
               messageApi.success('Данные успешно сохранены');
-              setCompany(undefined);
+              setInternalCompany(undefined);
             });
         }}
         onCancel={() => {
-          setCompany(undefined);
+          setInternalCompany(undefined);
           companyForm.resetFields();
         }}
       >
-        <VerifyCompany company={company} form={companyForm} />
+        <VerifyCompany company={company} form={companyForm} type="internal" />
       </Modal>
       {contextHolder}
     </Flex>

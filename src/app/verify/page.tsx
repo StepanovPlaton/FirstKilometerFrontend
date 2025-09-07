@@ -111,14 +111,21 @@ export default function VerifyPage() {
               .then(() => {
                 messageApi.success('Данные успешно сохранены');
                 let url = `/download?user=${userUUID}&vehicle=${vehicleUUID}`;
-                ['type', 'company', 'individual', 'price', 'tax', 'options', 'date'].forEach(
-                  (key) => {
-                    const value = searchParams.get(key);
-                    if (value) {
-                      url += `&${key}=${value}`;
-                    }
+                [
+                  'type',
+                  'internal_company',
+                  'external_company',
+                  'individual',
+                  'price',
+                  'tax',
+                  'options',
+                  'date',
+                ].forEach((key) => {
+                  const value = searchParams.get(key);
+                  if (value) {
+                    url += `&${key}=${value}`;
                   }
-                );
+                });
                 router.push(url);
               });
           })();

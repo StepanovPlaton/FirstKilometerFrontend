@@ -1,8 +1,9 @@
 'use client';
 
-import CompanyService from '@/entities/company';
 import DocumentService from '@/entities/documents';
+import ExternalCompanyService from '@/entities/external-company';
 import IndividualService from '@/entities/individual';
+import InternalCompanyService from '@/entities/internal-company';
 import UserService from '@/entities/user';
 import VehicleService from '@/entities/vehicle';
 import { Title } from '@/shared/ui/title';
@@ -35,7 +36,8 @@ type GetDocumentForm = {
   user: string;
   vehicle: string;
   type: string;
-  company?: string;
+  internal_company?: string;
+  external_company?: string;
   individual?: string;
   price: number;
   tax?: number;
@@ -46,7 +48,7 @@ type GetDocumentForm = {
 export default function UploadPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [seller, setSeller] = useState<'individual' | 'company'>();
+  const [seller, setSeller] = useState<'individual' | 'internal_company' | 'external_company'>();
 
   const {
     data: documentTypes,
@@ -55,10 +57,16 @@ export default function UploadPage() {
   } = useSWR<Choice[], HTTPError>(`documents/choices`, () => DocumentService.getTypes());
 
   const {
-    data: companies,
-    error: getCompaniesError,
-    isLoading: loadingCompanies,
-  } = useSWR<Choice[], HTTPError>(`companies/choices`, () => CompanyService.getChoices());
+    data: internalCompanies,
+    error: getInternalCompaniesError,
+    loading: loadingInternalCompanies,
+  } = useChoices(InternalCompanyService);
+
+  const {
+    data: externalCompanies,
+    error: getExternalCompaniesError,
+    loading: loadingExternalCompanies,
+  } = useChoices(ExternalCompanyService);
 
   const {
     data: existsVehicles,
@@ -89,15 +97,18 @@ export default function UploadPage() {
     if (!seller) {
       if (searchParams.get('individual')) {
         setSeller('individual');
+      } else if (searchParams.get('internal_company')) {
+        setSeller('internal_company');
       } else {
-        setSeller('company');
+        setSeller('external_company');
       }
     }
     [
       { key: 'user', list: existsUsers },
       { key: 'vehicle', list: existsVehicles },
       { key: 'type', list: documentTypes },
-      { key: 'company', list: companies },
+      { key: 'internal_company', list: internalCompanies },
+      { key: 'external_company', list: externalCompanies },
       { key: 'individual', list: individuals },
       { key: 'price', list: null },
       { key: 'tax', list: null },
@@ -114,7 +125,16 @@ export default function UploadPage() {
         form.setFieldValue(key as keyof GetDocumentForm, format ? format(value) : value);
       }
     });
-  }, [existsVehicles, existsUsers, companies, individuals, documentTypes, searchParams, form]);
+  }, [
+    existsVehicles,
+    existsUsers,
+    internalCompanies,
+    externalCompanies,
+    individuals,
+    documentTypes,
+    searchParams,
+    form,
+  ]);
 
   const getDocument = (data: GetDocumentForm) => {
     setLoading(true);
@@ -130,7 +150,7 @@ export default function UploadPage() {
   };
 
   useEffect(() => {
-    if (getCompaniesError) {
+    if (getInternalCompaniesError) {
       messageApi.error('Не получилось получить список компаний. Попробуйте позже');
     }
     if (getDocumentTypesError) {
@@ -139,7 +159,7 @@ export default function UploadPage() {
     if (getIndividualsError) {
       messageApi.error('Не получилось получить список физических лиц. Попробуйте позже');
     }
-  }, [getCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
+  }, [getInternalCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
 
   return (
     <Space direction="vertical" align="center" size="large">
@@ -204,8 +224,12 @@ export default function UploadPage() {
                       value: 'individual',
                     },
                     {
+                      label: 'Филиал',
+                      value: 'internal_company',
+                    },
+                    {
                       label: 'Компания',
-                      value: 'company',
+                      value: 'external_company',
                     },
                   ]}
                   onChange={(v: typeof seller) => setSeller(v)}
@@ -213,14 +237,36 @@ export default function UploadPage() {
                 />
               </Form.Item>
 
-              {seller === 'company' ? (
-                <Form.Item<GetDocumentForm> label="Компания" name={'company'} rules={requiredRule}>
+              {seller === 'internal_company' ? (
+                <Form.Item<GetDocumentForm>
+                  label="Филиал"
+                  name={'internal_company'}
+                  rules={requiredRule}
+                >
+                  <Select
+                    className="w-100!"
+                    placeholder="Выберите филиал"
+                    disabled={!!getInternalCompaniesError}
+                    loading={loadingInternalCompanies}
+                    options={internalCompanies ?? []}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                  />
+                </Form.Item>
+              ) : seller === 'external_company' ? (
+                <Form.Item<GetDocumentForm>
+                  label="Компания"
+                  name={'external_company'}
+                  rules={requiredRule}
+                >
                   <Select
                     className="w-100!"
                     placeholder="Выберите компанию"
-                    disabled={!!getCompaniesError}
-                    loading={loadingCompanies}
-                    options={companies ?? []}
+                    disabled={!!getExternalCompaniesError}
+                    loading={loadingExternalCompanies}
+                    options={externalCompanies ?? []}
                     showSearch
                     filterOption={(input, option) =>
                       (option?.label ?? '').toLowerCase().includes(input.toLowerCase())

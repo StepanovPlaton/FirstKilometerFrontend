@@ -1,7 +1,7 @@
 import { idEntitySchema } from '@/shared/utils/schemes/entity';
 import z from 'zod';
 
-export const companySchema = idEntitySchema.extend({
+export const baseCompanySchema = idEntitySchema.extend({
   name: z
     .string('Название компании должно быть строкой')
     .min(3, { error: 'Слишком короткое название компании' })
@@ -61,4 +61,4 @@ export const companySchema = idEntitySchema.extend({
     .min(3, 'Слишком короткое должность директора')
     .max(100, 'Слишком длинное должность директора'),
 });
-export type Company = z.TypeOf<typeof companySchema>;
+export type BaseCompany = z.TypeOf<typeof baseCompanySchema>;
