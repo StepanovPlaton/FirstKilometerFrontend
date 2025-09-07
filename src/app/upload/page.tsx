@@ -55,47 +55,51 @@ export default function UploadPage() {
         messageApi.error('Чтобы продолжить, загрузите страницу с пропиской из паспорта клиента');
         return;
       }
-      requests.push(
-        (async () => {
-          setLoadingUser(true);
-          const userData = new FormData();
-          userData.append('passport_main', passportMainPage);
-          userData.append('passport_registration', passportRegistration);
-          return await UserService.postAny(userData, { stringify: false })
-            .then((user) => setUser(user))
-            .catch(() =>
-              messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже')
-            )
-            .finally(() => setLoadingUser(false));
-        })()
-      );
+      if (!user) {
+        requests.push(
+          (async () => {
+            setLoadingUser(true);
+            const userData = new FormData();
+            userData.append('passport_main', passportMainPage);
+            userData.append('passport_registration', passportRegistration);
+            return await UserService.postAny(userData, { stringify: false })
+              .then((user) => setUser(user))
+              .catch(() =>
+                messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже')
+              )
+              .finally(() => setLoadingUser(false));
+          })()
+        );
+      }
     }
     if (!selectedVehicle) {
       if (!vehiclePassport) {
         messageApi.error('Чтобы продолжить, загрузите паспорт транспортного средства (ПТС)');
         return;
       }
-      requests.push(
-        (async () => {
-          setLoadingVehicle(true);
-          const vehicleData = new FormData();
-          vehicleData.append('pts_main', vehiclePassport);
-          if (vehicleRegistrationFront) {
-            vehicleData.append('sts_front', vehicleRegistrationFront);
-          }
-          if (vehicleRegistrationBack) {
-            vehicleData.append('sts_back', vehicleRegistrationBack);
-          }
-          return await VehicleService.postAny(vehicleData, { stringify: false })
-            .then((vehicle) => setVehicle(vehicle))
-            .catch(() =>
-              messageApi.error(
-                'Не удалось загрузить данные транспортного средства. Повторите попытку позже'
+      if (!vehicle) {
+        requests.push(
+          (async () => {
+            setLoadingVehicle(true);
+            const vehicleData = new FormData();
+            vehicleData.append('pts_main', vehiclePassport);
+            if (vehicleRegistrationFront) {
+              vehicleData.append('sts_front', vehicleRegistrationFront);
+            }
+            if (vehicleRegistrationBack) {
+              vehicleData.append('sts_back', vehicleRegistrationBack);
+            }
+            return await VehicleService.postAny(vehicleData, { stringify: false })
+              .then((vehicle) => setVehicle(vehicle))
+              .catch(() =>
+                messageApi.error(
+                  'Не удалось загрузить данные транспортного средства. Повторите попытку позже'
+                )
               )
-            )
-            .finally(() => setLoadingVehicle(false));
-        })()
-      );
+              .finally(() => setLoadingVehicle(false));
+          })()
+        );
+      }
     }
     void Promise.all(requests).then(() => setValidated(true));
   };
@@ -124,6 +128,13 @@ export default function UploadPage() {
       router.push(url);
     }
   }, [selectedUser, user, selectedVehicle, vehicle, searchParams, validated, router]);
+
+  useEffect(() => {
+    setUser(undefined);
+  }, [passportMainPage, passportRegistration]);
+  useEffect(() => {
+    setVehicle(undefined);
+  }, [vehiclePassport, vehicleRegistrationFront, vehicleRegistrationBack]);
 
   return (
     <Space direction="vertical" align="center" size="large" className="flex w-full">

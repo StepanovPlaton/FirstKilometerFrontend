@@ -103,7 +103,7 @@ export default function ClientTablesPage() {
       key: 'birth_date',
       title: 'Дата рождения',
       dataIndex: 'birth_date',
-      render: (birthdate: Dayjs) => birthdate.format('DD MMMM YYYYг.'),
+      render: (birthdate: Dayjs | null) => birthdate?.format('DD MMMM YYYYг.'),
     },
     {
       key: 'created',
