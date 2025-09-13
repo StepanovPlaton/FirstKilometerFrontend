@@ -19,7 +19,7 @@ import {
   Skeleton,
 } from 'antd';
 import clsx from 'clsx';
-import type { FormEventHandler} from 'react';
+import type { FormEventHandler } from 'react';
 import { useState } from 'react';
 
 const baseVehicleTypes = [
