@@ -78,6 +78,17 @@ export default function ClientTablesPage() {
       .finally(() => setLoadingUser(false));
   };
 
+  const addEmptyUser = () => {
+    setLoadingUser(true);
+    UserService.postAny({})
+      .then((user) => {
+        void mutateTable((users) => [...(users ?? []), user]);
+        setUser(user);
+      })
+      .catch(() => messageApi.error('Не удалось создать клиента. Повторите попытку позже'))
+      .finally(() => setLoadingUser(false));
+  };
+
   const columns: ColumnsType<ApiUser> = [
     {
       key: 'licence_number',
@@ -162,10 +173,17 @@ export default function ClientTablesPage() {
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setNewUser(true)}>
-        <PlusOutlined />
-        Добавить
-      </Button>
+      <Space>
+        <Button type="primary" onClick={() => setNewUser(true)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+        <Button onClick={addEmptyUser}>
+          <PlusOutlined />
+          Добавить без документов
+        </Button>
+      </Space>
+
       <Modal
         open={!!user}
         width={1200}

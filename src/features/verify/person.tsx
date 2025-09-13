@@ -7,6 +7,10 @@ import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
 import { DatePicker, Divider, Flex, Form, Input, Row, Select, Skeleton } from 'antd';
 import clsx from 'clsx';
+import type { FormEventHandler } from 'react';
+
+const toUpperCase: FormEventHandler<HTMLInputElement> = (e) =>
+  ((e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.toUpperCase());
 
 export const VerifyPerson = ({
   ...props
@@ -24,7 +28,7 @@ export const VerifyPerson = ({
           <div className="aspect-video w-full px-4">
             <Viewer
               active={!!props.person}
-              url={props.person?.passport_url ?? '/demo/passport_main.jpg'}
+              url={props.person?.passport_url}
               alt={`Главная страница паспорта ${props.type === 'user' ? 'клиента' : 'физ. лица'}`}
               imageClassName={clsx('rounded shadow-lg!', !props.person?.reg_url && 'opacity-30')}
               skeletonClassName="h-full! w-full! p-2"
@@ -44,21 +48,21 @@ export const VerifyPerson = ({
                   name={'last_name'}
                   rules={getValidationRules(formPersonSchema, 'last_name')}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormPerson>
                   label="Имя"
                   name={'first_name'}
                   rules={getValidationRules(formPersonSchema, 'first_name')}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormPerson>
                   label="Отчество"
                   name={'middle_name'}
                   rules={getValidationRules(formPersonSchema, 'middle_name', false)}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
@@ -87,7 +91,7 @@ export const VerifyPerson = ({
                   name={'birth_place'}
                   rules={getValidationRules(formPersonSchema, 'birth_place')}
                 >
-                  <Input className="w-80!" />
+                  <Input className="w-80!" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Divider className="m-2!" />
@@ -98,7 +102,7 @@ export const VerifyPerson = ({
                   className="w-full"
                   rules={getValidationRules(formPersonSchema, 'issue_organization')}
                 >
-                  <Input className="w-full" />
+                  <Input className="w-full" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
@@ -140,7 +144,7 @@ export const VerifyPerson = ({
           <div className="aspect-video w-full px-4">
             <Viewer
               active={!!props.person}
-              url={props.person?.reg_url ?? '/demo/passport_registration.jpg'}
+              url={props.person?.reg_url}
               alt={`Второй разворот паспорта ${props.type === 'user' ? 'клиента' : 'физ. лица'}`}
               imageClassName={clsx('rounded shadow-lg!', !props.person?.reg_url && 'opacity-30')}
               skeletonClassName="h-full! w-full! p-2"
@@ -164,14 +168,14 @@ export const VerifyPerson = ({
                   name={'registration_region'}
                   rules={getValidationRules(formPersonSchema, 'registration_region')}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormPerson>
                   label="Населённый пункт"
                   name={'registration_settlement'}
                   rules={getValidationRules(formPersonSchema, 'registration_settlement')}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
@@ -180,21 +184,21 @@ export const VerifyPerson = ({
                   name={'registration_district'}
                   rules={getValidationRules(formPersonSchema, 'registration_district', false)}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormPerson>
                   label="Участок"
                   name={'registration_area'}
                   rules={getValidationRules(formPersonSchema, 'registration_area', false)}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormPerson>
                   label="Улица"
                   name={'registration_street'}
                   rules={getValidationRules(formPersonSchema, 'registration_street')}
                 >
-                  <Input />
+                  <Input onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
@@ -203,7 +207,7 @@ export const VerifyPerson = ({
                   name={'registration_address'}
                   rules={getValidationRules(formPersonSchema, 'registration_address')}
                 >
-                  <Input className="w-64!" />
+                  <Input className="w-64!" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
             </>

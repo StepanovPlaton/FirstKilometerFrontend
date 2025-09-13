@@ -29,7 +29,7 @@ export const rawPersonSchema = entitySchema.extend({
 
   licence_number: z.string({ error: 'Номер паспорта должен быть строкой' }),
 });
-export type Person = z.TypeOf<typeof rawPersonSchema>;
+export type Person = z.output<typeof rawPersonSchema>;
 
 export const apiPersonSchema = entitySchema.extend({
   first_name: rawPersonSchema.shape.first_name.nullable(),
@@ -54,10 +54,10 @@ export const apiPersonSchema = entitySchema.extend({
 
   licence_number: rawPersonSchema.shape.licence_number.nullable(),
 
-  passport_url: z.url(),
-  reg_url: z.url(),
+  passport_url: z.url().optional().nullable(),
+  reg_url: z.url().optional().nullable(),
 });
-export type ApiPerson = z.TypeOf<typeof apiPersonSchema>;
+export type ApiPerson = z.output<typeof apiPersonSchema>;
 
 export const formPersonSchema = entitySchema.extend({
   first_name: rawPersonSchema.shape.first_name
@@ -133,4 +133,4 @@ export const formPersonSchema = entitySchema.extend({
       error: 'Серия и номер паспорта должны иметь формат "## ## ######"',
     }),
 });
-export type FormPerson = z.TypeOf<typeof formPersonSchema>;
+export type FormPerson = z.output<typeof formPersonSchema>;

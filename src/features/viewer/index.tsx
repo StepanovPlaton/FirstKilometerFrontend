@@ -27,6 +27,8 @@ export const Viewer = (props: {
     return (
       <Image src={props.url ?? ''} alt={props.alt ?? ''} className={props.imageClassName ?? ''} />
     );
+  } else if (props.active && !props.url) {
+    return <Skeleton.Node className={props.skeletonClassName ?? ''} />;
   }
   return <></>;
 };

@@ -21,7 +21,7 @@ export const rawVehicleSchema = entitySchema.extend({
   pts_date: z.iso.date({ error: 'Некорректная дата выдачи ПТС' }),
   sts_date: z.iso.date({ error: 'Некорректная дата выдачи СТС' }).nullable(),
 });
-export type Vehicle = z.TypeOf<typeof rawVehicleSchema>;
+export type Vehicle = z.output<typeof rawVehicleSchema>;
 
 export const apiVehicleSchema = entitySchema.extend({
   pts_id: rawVehicleSchema.shape.pts_id.nullable(),
@@ -43,7 +43,7 @@ export const apiVehicleSchema = entitySchema.extend({
   sts_back_url: z.url().nullable().optional(),
   pts_url: z.url(),
 });
-export type ApiVehicle = z.TypeOf<typeof apiVehicleSchema>;
+export type ApiVehicle = z.output<typeof apiVehicleSchema>;
 
 export const formVehicleSchema = entitySchema
   .extend({
@@ -108,4 +108,4 @@ export const formVehicleSchema = entitySchema
     },
     { error: 'Данные СТС должны быть заполнены полностью, либо отсутствовать' }
   );
-export type FormVehicle = z.TypeOf<typeof formVehicleSchema>;
+export type FormVehicle = z.output<typeof formVehicleSchema>;

@@ -19,6 +19,7 @@ import {
   Skeleton,
 } from 'antd';
 import clsx from 'clsx';
+import type { FormEventHandler} from 'react';
 import { useState } from 'react';
 
 const baseVehicleTypes = [
@@ -30,6 +31,9 @@ const baseVehicleTypes = [
   'Полуприцеп',
   'Специальный',
 ];
+
+const toUpperCase: FormEventHandler<HTMLInputElement> = (e) =>
+  ((e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.toUpperCase());
 
 export const VerifyVehicle = (props: {
   vehicle: ApiVehicle | undefined;
@@ -46,7 +50,7 @@ export const VerifyVehicle = (props: {
           <div className="h-full w-full px-4">
             <Viewer
               active={!!props.vehicle}
-              url={props.vehicle?.pts_url ?? '/demo/pts.jpg'}
+              url={props.vehicle?.pts_url}
               alt="Паспорт транспортного средства"
               imageClassName={clsx('rounded shadow-lg!', !props.vehicle?.pts_url && 'opacity-30')}
               skeletonClassName="h-full! min-h-64 w-full! p-2"
@@ -73,7 +77,7 @@ export const VerifyVehicle = (props: {
                   name={'vin'}
                   rules={getValidationRules(formVehicleSchema, 'vin')}
                 >
-                  <Input className="w-50!" />
+                  <Input className="w-50!" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row wrap justify={'space-evenly'}>
@@ -82,7 +86,7 @@ export const VerifyVehicle = (props: {
                   name={'make_model'}
                   rules={getValidationRules(formVehicleSchema, 'make_model')}
                 >
-                  <Input className="w-50!" />
+                  <Input className="w-50!" onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormVehicle>
                   label="Наименование (тип ТС)"
@@ -112,7 +116,7 @@ export const VerifyVehicle = (props: {
                   name={'engine'}
                   rules={getValidationRules(formVehicleSchema, 'engine')}
                 >
-                  <Input className="w-50!" />
+                  <Input className="w-50!" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row wrap justify={'space-evenly'}>
@@ -121,7 +125,7 @@ export const VerifyVehicle = (props: {
                   name={'chassis'}
                   rules={getValidationRules(formVehicleSchema, 'chassis')}
                 >
-                  <Input className="w-50!" />
+                  <Input className="w-50!" onInput={toUpperCase} />
                 </Form.Item>
                 <Form.Item<FormVehicle>
                   label="Кузов (кабина, прицеп) №"
@@ -199,7 +203,7 @@ export const VerifyVehicle = (props: {
                   name={'reg_number'}
                   rules={getValidationRules(formVehicleSchema, 'reg_number')}
                 >
-                  <Input className="w-50!" />
+                  <Input className="w-50!" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row wrap justify={'space-evenly'}>

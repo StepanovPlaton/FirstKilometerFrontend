@@ -8,7 +8,7 @@ import { UploadDocument } from '@/features/upload';
 import { Text } from '@/shared/ui/text';
 import { Title } from '@/shared/ui/title';
 import { useChoices } from '@/shared/utils/hooks/choices';
-import { Button, Card, Flex, message, Select, Space, Spin } from 'antd';
+import { Button, Card, Checkbox, Flex, message, Select, Space, Spin } from 'antd';
 import type { RcFile } from 'antd/lib/upload';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -46,60 +46,58 @@ export default function UploadPage() {
 
   const submit = () => {
     const requests: Promise<unknown>[] = [];
-    if (!selectedUser) {
-      if (!passportMainPage) {
+    if (!selectedUser && !user) {
+      if (!passportMainPage && !createEmptyUser) {
         messageApi.error('Чтобы продолжить, загрузите главную страницу паспорта клиента');
         return;
       }
-      if (!passportRegistration) {
+      if (!passportRegistration && !createEmptyUser) {
         messageApi.error('Чтобы продолжить, загрузите страницу с пропиской из паспорта клиента');
         return;
       }
-      if (!user) {
-        requests.push(
-          (async () => {
-            setLoadingUser(true);
-            const userData = new FormData();
+      requests.push(
+        (async () => {
+          setLoadingUser(true);
+          const userData = new FormData();
+          if (!createEmptyUser && passportMainPage && passportRegistration) {
             userData.append('passport_main', passportMainPage);
             userData.append('passport_registration', passportRegistration);
-            return await UserService.postAny(userData, { stringify: false })
-              .then((user) => setUser(user))
-              .catch(() =>
-                messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже')
-              )
-              .finally(() => setLoadingUser(false));
-          })()
-        );
-      }
+          }
+          return await UserService.postAny(userData, { stringify: false })
+            .then((user) => setUser(user))
+            .catch(() =>
+              messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже')
+            )
+            .finally(() => setLoadingUser(false));
+        })()
+      );
     }
-    if (!selectedVehicle) {
+    if (!selectedVehicle && !vehicle) {
       if (!vehiclePassport) {
         messageApi.error('Чтобы продолжить, загрузите паспорт транспортного средства (ПТС)');
         return;
       }
-      if (!vehicle) {
-        requests.push(
-          (async () => {
-            setLoadingVehicle(true);
-            const vehicleData = new FormData();
-            vehicleData.append('pts_main', vehiclePassport);
-            if (vehicleRegistrationFront) {
-              vehicleData.append('sts_front', vehicleRegistrationFront);
-            }
-            if (vehicleRegistrationBack) {
-              vehicleData.append('sts_back', vehicleRegistrationBack);
-            }
-            return await VehicleService.postAny(vehicleData, { stringify: false })
-              .then((vehicle) => setVehicle(vehicle))
-              .catch(() =>
-                messageApi.error(
-                  'Не удалось загрузить данные транспортного средства. Повторите попытку позже'
-                )
+      requests.push(
+        (async () => {
+          setLoadingVehicle(true);
+          const vehicleData = new FormData();
+          vehicleData.append('pts_main', vehiclePassport);
+          if (vehicleRegistrationFront) {
+            vehicleData.append('sts_front', vehicleRegistrationFront);
+          }
+          if (vehicleRegistrationBack) {
+            vehicleData.append('sts_back', vehicleRegistrationBack);
+          }
+          return await VehicleService.postAny(vehicleData, { stringify: false })
+            .then((vehicle) => setVehicle(vehicle))
+            .catch(() =>
+              messageApi.error(
+                'Не удалось загрузить данные транспортного средства. Повторите попытку позже'
               )
-              .finally(() => setLoadingVehicle(false));
-          })()
-        );
-      }
+            )
+            .finally(() => setLoadingVehicle(false));
+        })()
+      );
     }
     void Promise.all(requests).then(() => setValidated(true));
   };
@@ -129,12 +127,14 @@ export default function UploadPage() {
     }
   }, [selectedUser, user, selectedVehicle, vehicle, searchParams, validated, router]);
 
+  const [createEmptyUser, setCreateEmptyUser] = useState(false);
   useEffect(() => {
-    setUser(undefined);
-  }, [passportMainPage, passportRegistration]);
-  useEffect(() => {
-    setVehicle(undefined);
-  }, [vehiclePassport, vehicleRegistrationFront, vehicleRegistrationBack]);
+    if (createEmptyUser) {
+      setSelectedUser(undefined);
+      setPassportMainPage(undefined);
+      setPassportRegistration(undefined);
+    }
+  }, [createEmptyUser]);
 
   return (
     <Space direction="vertical" align="center" size="large" className="flex w-full">
@@ -150,18 +150,26 @@ export default function UploadPage() {
                 file={passportMainPage}
                 onUpload={setPassportMainPage}
                 text="Загрузите паспорт (главная страница)"
+                disabled={!!user || !!selectedUser || !!createEmptyUser}
               />
               <UploadDocument
                 file={passportRegistration}
                 onUpload={setPassportRegistration}
                 text="Загрузите паспорт (прописка)"
+                disabled={!!user || !!selectedUser || !!createEmptyUser}
               />
             </Space>
             <Text>или</Text>
             <Select
               className="w-80"
               placeholder="Выберите существующего клиента"
-              disabled={!!passportMainPage || !!passportRegistration || !!failedGetExistsUsers}
+              disabled={
+                !!passportMainPage ||
+                !!passportRegistration ||
+                !!failedGetExistsUsers ||
+                !!user ||
+                !!createEmptyUser
+              }
               loading={loadingExistsUsers}
               options={existsUsers ?? []}
               onChange={setSelectedUser}
@@ -171,6 +179,13 @@ export default function UploadPage() {
               }
               allowClear
             />
+            <Text>или</Text>
+            <Button
+              onClick={() => setCreateEmptyUser((s) => !s)}
+              disabled={!!user || !!selectedUser}
+            >
+              <Checkbox checked={createEmptyUser}>Создать клиента без документов</Checkbox>
+            </Button>
           </Space>
         </Spin>
       </Card>
@@ -186,16 +201,19 @@ export default function UploadPage() {
                 file={vehiclePassport}
                 onUpload={setVehiclePassport}
                 text="Загрузите паспорт транспортного средства (ПТС)"
+                disabled={!!vehicle || !!selectedVehicle}
               />
               <UploadDocument
                 file={vehicleRegistrationFront}
                 onUpload={setVehicleRegistrationFront}
                 text="Загрузите лицевую сторону свидетельства о регистрации (СТС)"
+                disabled={!!vehicle || !!selectedVehicle}
               />
               <UploadDocument
                 file={vehicleRegistrationBack}
                 onUpload={setVehicleRegistrationBack}
                 text="Загрузите обратную сторону свидетельства о регистрации (СТС)"
+                disabled={!!vehicle || !!selectedVehicle}
               />
             </Space>
             <Text>или</Text>
@@ -206,7 +224,8 @@ export default function UploadPage() {
                 !!vehiclePassport ||
                 !!vehicleRegistrationFront ||
                 !!vehicleRegistrationBack ||
-                !!failedGetExistsVehicles
+                !!failedGetExistsVehicles ||
+                !!vehicle
               }
               loading={loadingExistsVehicles}
               options={existsVehicles ?? []}
