@@ -38,7 +38,7 @@ const menu = [
   },
   {
     href: '/tables/companies/external',
-    text: 'Компании',
+    text: 'Юр. лица',
     icon: <DatabaseOutlined />,
   },
   {

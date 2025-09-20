@@ -74,19 +74,14 @@ export default function InitPage() {
   } = useChoices(IndividualService);
 
   const submit = (data: CreateDocumentForm) => {
-    let url = `/upload?type=${data.type}`;
-    if ('price' in data) {
+    let url =
+      `/upload?type=${data.type}&seller=${seller}` +
+      `&seller_id=${seller === 'internal_company' ? data.internal_company : seller === 'external_company' ? data.external_company : data.individual}`;
+    if ('price' in data && data.price) {
       url += `&price=${data.price}`;
     }
-    if ('date' in data) {
-      url += `&date=${data['date'].format('YYYY-MM-DD')}`;
-    }
-    if (seller === 'internal_company') {
-      url += `&internal_company=${data.internal_company}`;
-    } else if (seller === 'external_company') {
-      url += `&external_company=${data.external_company}`;
-    } else if (seller === 'individual') {
-      url += `&individual=${data.individual}`;
+    if ('date' in data && data.date) {
+      url += `&date=${data.date.format('YYYY-MM-DD')}`;
     }
     if (isTaxDoc) {
       url += `&tax=${data.tax}&options=${data.options}`;
@@ -96,15 +91,21 @@ export default function InitPage() {
 
   useEffect(() => {
     if (getInternalCompaniesError) {
-      messageApi.error('Не получилось получить список компаний. Попробуйте позже');
+      messageApi.error('Не получилось получить список юридических лиц. Попробуйте позже');
     }
     if (getDocumentTypesError) {
-      messageApi.error('Не получилось получить список компаний. Попробуйте позже');
+      messageApi.error('Не получилось получить список типов документов. Попробуйте позже');
     }
     if (getIndividualsError) {
       messageApi.error('Не получилось получить список физических лиц. Попробуйте позже');
     }
   }, [getInternalCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
+
+  useEffect(() => {
+    if (isTaxDoc) {
+      setSeller('internal_company');
+    }
+  }, [isTaxDoc]);
 
   return (
     <Flex vertical align="center" justify="space-evenly" className="h-full w-full" gap={24}>
@@ -141,28 +142,30 @@ export default function InitPage() {
                   />
                 </Form.Item>
 
-                <Form.Item<CreateDocumentForm> label="Продавец" rules={requiredRule}>
-                  <Select
-                    className="w-100!"
-                    placeholder="Выберите продавца"
-                    options={[
-                      {
-                        label: 'Физическое лицо',
-                        value: 'individual',
-                      },
-                      {
-                        label: 'Филиал',
-                        value: 'internal_company',
-                      },
-                      {
-                        label: 'Компания',
-                        value: 'external_company',
-                      },
-                    ]}
-                    onChange={(v: typeof seller) => setSeller(v)}
-                    defaultValue={seller}
-                  />
-                </Form.Item>
+                {!isTaxDoc && (
+                  <Form.Item<CreateDocumentForm> label="Продавец" rules={requiredRule}>
+                    <Select
+                      className="w-100!"
+                      placeholder="Выберите продавца"
+                      options={[
+                        {
+                          label: 'Физическое лицо',
+                          value: 'individual',
+                        },
+                        {
+                          label: 'Филиал',
+                          value: 'internal_company',
+                        },
+                        {
+                          label: 'Юридическое лицо',
+                          value: 'external_company',
+                        },
+                      ]}
+                      onChange={(v: typeof seller) => setSeller(v)}
+                      defaultValue={seller}
+                    />
+                  </Form.Item>
+                )}
 
                 {seller === 'internal_company' ? (
                   <Form.Item<CreateDocumentForm>
@@ -184,13 +187,13 @@ export default function InitPage() {
                   </Form.Item>
                 ) : seller === 'external_company' ? (
                   <Form.Item<CreateDocumentForm>
-                    label="Компания"
+                    label="Юридическое лицо"
                     name={'external_company'}
                     rules={requiredRule}
                   >
                     <Select
                       className="w-100!"
-                      placeholder="Выберите компанию"
+                      placeholder="Выберите юридическое лицо"
                       disabled={!!getExternalCompaniesError}
                       loading={loadingExternalCompanies}
                       options={externalCompanies ?? []}
@@ -208,7 +211,7 @@ export default function InitPage() {
                   >
                     <Select
                       className="w-100!"
-                      placeholder="Выберите компанию"
+                      placeholder="Выберите юридическое лицо"
                       disabled={!!getIndividualsError}
                       loading={loadingIndividuals}
                       options={individuals ?? []}

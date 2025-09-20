@@ -49,11 +49,13 @@ export default function ExternalCompaniesTablesPage() {
           }
         })
         .catch((e) => {
-          messageApi.error('Не удалось сохранить данные компании. Повторите попытку позже');
+          messageApi.error(
+            'Не удалось сохранить данные юридического лица. Повторите попытку позже'
+          );
           throw e;
         });
     } else {
-      messageApi.error('Данные компании заполнены неправильно');
+      messageApi.error('Данные юридического лица заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
@@ -64,7 +66,7 @@ export default function ExternalCompaniesTablesPage() {
 
   const addExternalCompany = async () => {
     if (!companyDoc) {
-      messageApi.error('Чтобы продолжить, загрузите документы компании');
+      messageApi.error('Чтобы продолжить, загрузите документы юридического лица');
       return;
     }
     setLoadingCompany(true);
@@ -78,7 +80,7 @@ export default function ExternalCompaniesTablesPage() {
         return mutateTable((companies) => [...(companies ?? []), company]);
       })
       .catch(() =>
-        messageApi.error('Не удалось загрузить данные компании. Повторите попытку позже')
+        messageApi.error('Не удалось загрузить данные юридического лица. Повторите попытку позже')
       )
       .finally(() => setLoadingCompany(false));
   };
@@ -99,8 +101,8 @@ export default function ExternalCompaniesTablesPage() {
       dataIndex: 'id',
       render: (id: number) => (
         <Popconfirm
-          title="Удаление компании"
-          description="Вы уверены, что хотите удалить компанию?"
+          title="Удаление юридического лица"
+          description="Вы уверены, что хотите удалить юридическое лицо?"
           okText="Удалить"
           cancelText="Отмена"
           okButtonProps={{ danger: true }}
@@ -110,7 +112,9 @@ export default function ExternalCompaniesTablesPage() {
               .then(() => {
                 void mutateTable((companies) => companies?.filter((c) => c.id !== id));
               })
-              .catch(() => messageApi.error('Не удалось удалить компанию. Попробуйте позже'));
+              .catch(() =>
+                messageApi.error('Не удалось удалить юридическое лицо. Попробуйте позже')
+              );
           }}
           onCancel={(e) => e?.stopPropagation()}
         >
@@ -157,7 +161,7 @@ export default function ExternalCompaniesTablesPage() {
           void companyForm
             .validateFields()
             .catch((e) => {
-              messageApi.warning('Исправьте ошибки в форме компании повторите попытку');
+              messageApi.warning('Исправьте ошибки в форме юридического лица повторите попытку');
               throw e;
             })
             .then(() => submitExternalCompany(companyForm.getFieldsValue()))
@@ -179,8 +183,8 @@ export default function ExternalCompaniesTablesPage() {
           setCompanyDoc(undefined);
           setNewCompany(false);
         }}
-        title={<Title level={2}>Добавить компанию</Title>}
-        okText="Добавить компанию"
+        title={<Title level={2}>Добавить юридичесоке лицо</Title>}
+        okText="Добавить юридическое лицо"
         okButtonProps={{
           disabled: !companyDoc,
         }}
@@ -192,7 +196,7 @@ export default function ExternalCompaniesTablesPage() {
             <UploadDocument
               file={companyDoc}
               onUpload={setCompanyDoc}
-              text="Загрузите документы компании"
+              text="Загрузите документы юридического лица"
             />
           </Flex>
         </Spin>

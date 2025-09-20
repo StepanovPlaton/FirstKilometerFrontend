@@ -33,12 +33,12 @@ import useSWR from 'swr';
 const requiredRule = [{ required: true, message: 'Это обязательное поле' }];
 
 type GetDocumentForm = {
-  user: string;
+  buyer: string;
+  buyer_id: string | number;
+  seller: string;
+  seller_id: string | number;
   vehicle: string;
   type: string;
-  internal_company?: string;
-  external_company?: string;
-  individual?: string;
   price: number;
   tax?: number;
   date: Dayjs;
@@ -48,6 +48,7 @@ type GetDocumentForm = {
 export default function UploadPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [buyer, setBuyer] = useState<'user' | 'internal_company' | 'external_company'>();
   const [seller, setSeller] = useState<'individual' | 'internal_company' | 'external_company'>();
 
   const {
@@ -95,21 +96,18 @@ export default function UploadPage() {
 
   useEffect(() => {
     if (!seller) {
-      if (searchParams.get('individual')) {
-        setSeller('individual');
-      } else if (searchParams.get('internal_company')) {
-        setSeller('internal_company');
-      } else {
-        setSeller('external_company');
-      }
+      setSeller(searchParams.get('seller') as never as typeof seller);
+    }
+    if (!buyer) {
+      setBuyer(searchParams.get('buyer') as never as typeof buyer);
     }
     [
-      { key: 'user', list: existsUsers },
-      { key: 'vehicle', list: existsVehicles },
-      { key: 'type', list: documentTypes },
-      { key: 'internal_company', list: internalCompanies },
-      { key: 'external_company', list: externalCompanies },
-      { key: 'individual', list: individuals },
+      { key: 'buyer', list: null },
+      { key: 'buyer_id', list: [existsUsers, externalCompanies, internalCompanies] },
+      { key: 'vehicle', list: [existsVehicles] },
+      { key: 'type', list: [documentTypes] },
+      { key: 'seller', list: null },
+      { key: 'seller_id', list: [individuals, externalCompanies, internalCompanies] },
       { key: 'price', list: null },
       { key: 'tax', list: null },
       { key: 'options', list: null, format: (v: string) => v.split(',') },
@@ -121,7 +119,10 @@ export default function UploadPage() {
       },
     ].forEach(({ key, list, format, defaultValue }) => {
       const value = searchParams.get(key) ?? defaultValue;
-      if (value && (list === null || (!!list && list.find((v) => v.value === value)))) {
+      if (
+        value &&
+        (list === null || (!!list && list.some((l) => l?.find((v) => v.value === value))))
+      ) {
         form.setFieldValue(key as keyof GetDocumentForm, format ? format(value) : value);
       }
     });
@@ -138,7 +139,12 @@ export default function UploadPage() {
 
   const getDocument = (data: GetDocumentForm) => {
     setLoading(true);
-    void DocumentService.getDocument({ ...data, date: data.date.format('YYYY-MM-DD') })
+    void DocumentService.getDocument({
+      ...data,
+      date: data.date.format('YYYY-MM-DD'),
+      buyer,
+      seller,
+    })
       .then((doc) => {
         const link = document.createElement('a');
         link.download = doc.document_name;
@@ -151,15 +157,35 @@ export default function UploadPage() {
 
   useEffect(() => {
     if (getInternalCompaniesError) {
-      messageApi.error('Не получилось получить список компаний. Попробуйте позже');
+      messageApi.error('Не получилось получить список юридических лиц. Попробуйте позже');
     }
     if (getDocumentTypesError) {
-      messageApi.error('Не получилось получить список компаний. Попробуйте позже');
+      messageApi.error('Не получилось получить список типов документов. Попробуйте позже');
     }
     if (getIndividualsError) {
       messageApi.error('Не получилось получить список физических лиц. Попробуйте позже');
     }
   }, [getInternalCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
+
+  useEffect(() => {
+    if (isTaxDoc) {
+      setSeller('internal_company');
+    }
+  }, [isTaxDoc]);
+
+  useEffect(() => {
+    if (form.getFieldValue('seller_id')) {
+      form.resetFields(['seller_id']);
+    }
+  }, [seller]);
+  useEffect(() => {
+    if (form.getFieldValue('buyer_id')) {
+      form.resetFields(['buyer_id']);
+    }
+    if (seller === 'internal_company') {
+      setSeller('external_company');
+    }
+  }, [buyer]);
 
   return (
     <Space direction="vertical" align="center" size="large">
@@ -184,19 +210,77 @@ export default function UploadPage() {
                 />
               </Form.Item>
 
-              <Form.Item<GetDocumentForm> label="Клиент" name={'user'} rules={requiredRule}>
+              <Form.Item<GetDocumentForm> label="Покупатель" rules={requiredRule}>
                 <Select
                   className="w-100!"
-                  placeholder="Выберите клиента"
-                  disabled={!!failedGetExistsUsers}
-                  loading={loadingExistsUsers}
-                  options={existsUsers ?? []}
-                  showSearch
-                  filterOption={(input, option) =>
-                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-                  }
+                  placeholder="Выберите покупателя"
+                  options={[
+                    {
+                      label: 'Клиент',
+                      value: 'user',
+                    },
+                    {
+                      label: 'Филиал',
+                      value: 'internal_company',
+                      disabled: isTaxDoc,
+                    },
+                    {
+                      label: 'Юридическое лицо',
+                      value: 'external_company',
+                    },
+                  ]}
+                  onChange={(v: typeof buyer) => setBuyer(v)}
+                  value={buyer}
                 />
               </Form.Item>
+              {buyer === 'internal_company' ? (
+                <Form.Item<GetDocumentForm> label="Филиал" name={'buyer_id'} rules={requiredRule}>
+                  <Select
+                    className="w-100!"
+                    placeholder="Выберите филиал"
+                    disabled={!!getInternalCompaniesError}
+                    loading={loadingInternalCompanies}
+                    options={internalCompanies ?? []}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                  />
+                </Form.Item>
+              ) : buyer === 'external_company' ? (
+                <Form.Item<GetDocumentForm>
+                  label="Юридическое лицо"
+                  name={'buyer_id'}
+                  rules={requiredRule}
+                >
+                  <Select
+                    className="w-100!"
+                    placeholder="Выберите юридическое лицо"
+                    disabled={!!getExternalCompaniesError}
+                    loading={loadingExternalCompanies}
+                    options={externalCompanies ?? []}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                  />
+                </Form.Item>
+              ) : (
+                <Form.Item<GetDocumentForm> label="Клиент" name={'buyer_id'} rules={requiredRule}>
+                  <Select
+                    className="w-100!"
+                    placeholder="Выберите клиента"
+                    disabled={!!failedGetExistsUsers}
+                    loading={loadingExistsUsers}
+                    options={existsUsers ?? []}
+                    showSearch
+                    filterOption={(input, option) =>
+                      (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                  />
+                </Form.Item>
+              )}
+
               <Form.Item<GetDocumentForm>
                 label="Транспортное средство"
                 name={'vehicle'}
@@ -214,35 +298,34 @@ export default function UploadPage() {
                   }
                 />
               </Form.Item>
-              <Form.Item<GetDocumentForm> label="Продавец" rules={requiredRule}>
-                <Select
-                  className="w-100!"
-                  placeholder="Выберите продавца"
-                  options={[
-                    {
-                      label: 'Физическое лицо',
-                      value: 'individual',
-                    },
-                    {
-                      label: 'Филиал',
-                      value: 'internal_company',
-                    },
-                    {
-                      label: 'Компания',
-                      value: 'external_company',
-                    },
-                  ]}
-                  onChange={(v: typeof seller) => setSeller(v)}
-                  value={seller}
-                />
-              </Form.Item>
+              {!isTaxDoc && (
+                <Form.Item<GetDocumentForm> label="Продавец" rules={requiredRule}>
+                  <Select
+                    className="w-100!"
+                    placeholder="Выберите продавца"
+                    options={[
+                      {
+                        label: 'Физическое лицо',
+                        value: 'individual',
+                      },
+                      {
+                        label: 'Филиал',
+                        value: 'internal_company',
+                        disabled: buyer === 'internal_company',
+                      },
+                      {
+                        label: 'Юридическое лицо',
+                        value: 'external_company',
+                      },
+                    ]}
+                    onChange={(v: typeof seller) => setSeller(v)}
+                    value={seller}
+                  />
+                </Form.Item>
+              )}
 
               {seller === 'internal_company' ? (
-                <Form.Item<GetDocumentForm>
-                  label="Филиал"
-                  name={'internal_company'}
-                  rules={requiredRule}
-                >
+                <Form.Item<GetDocumentForm> label="Филиал" name={'seller_id'} rules={requiredRule}>
                   <Select
                     className="w-100!"
                     placeholder="Выберите филиал"
@@ -257,13 +340,13 @@ export default function UploadPage() {
                 </Form.Item>
               ) : seller === 'external_company' ? (
                 <Form.Item<GetDocumentForm>
-                  label="Компания"
-                  name={'external_company'}
+                  label="Юридическое лицо"
+                  name={'seller_id'}
                   rules={requiredRule}
                 >
                   <Select
                     className="w-100!"
-                    placeholder="Выберите компанию"
+                    placeholder="Выберите юридическое лицо"
                     disabled={!!getExternalCompaniesError}
                     loading={loadingExternalCompanies}
                     options={externalCompanies ?? []}
@@ -276,12 +359,12 @@ export default function UploadPage() {
               ) : (
                 <Form.Item<GetDocumentForm>
                   label="Физическое лицо"
-                  name={'individual'}
+                  name={'seller_id'}
                   rules={requiredRule}
                 >
                   <Select
                     className="w-100!"
-                    placeholder="Выберите компанию"
+                    placeholder="Выберите юридическое лицо"
                     disabled={!!getIndividualsError}
                     loading={loadingIndividuals}
                     options={individuals ?? []}

@@ -13,7 +13,7 @@ export const VerifyCompany = ({
 }) => {
   return (
     <Form<BaseCompany> layout="vertical" form={props.form}>
-      <Title level={2}>{props.type === 'internal' ? 'Филиал' : 'Компания'}</Title>
+      <Title level={2}>{props.type === 'internal' ? 'Филиал' : 'Юридическое лицо'}</Title>
       {props.company ? (
         <>
           <Form.Item<BaseCompany>

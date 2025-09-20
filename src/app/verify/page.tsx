@@ -4,8 +4,13 @@ import type { FormUser } from '@/entities/user';
 import { formUserSchema, default as UserService } from '@/entities/user';
 import { Button, Card, Flex, Form, message } from 'antd';
 
+import type { ExternalCompany } from '@/entities/external-company';
+import ExternalCompanyService, { externalCompanySchema } from '@/entities/external-company';
+import type { InternalCompany } from '@/entities/internal-company';
+import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
 import type { FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
+import { VerifyCompany } from '@/features/verify/company';
 import { VerifyPerson } from '@/features/verify/person';
 import { useEntity } from '@/shared/utils/hooks/data';
 import dayjs from 'dayjs';
@@ -20,26 +25,57 @@ export default function VerifyPage() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
-  const userUUID = searchParams.get('user');
+  const buyer = searchParams.get('buyer');
+  const buyer_id = searchParams.get('buyer_id');
   const vehicleUUID = searchParams.get('vehicle');
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { data: user, mutate: mutateUser } = useEntity(UserService, userUUID);
+  const { data: user, mutate: mutateUser } = useEntity(UserService, buyer_id, undefined, {
+    active: buyer === 'user',
+  });
+  const { data: internalCompany, mutate: mutateInternalCompany } = useEntity(
+    InternalCompanyService,
+    Number(buyer_id),
+    undefined,
+    {
+      active: buyer === 'internal_company',
+    }
+  );
+  const { data: externalCompany, mutate: mutateExternalCompany } = useEntity(
+    ExternalCompanyService,
+    Number(buyer_id),
+    undefined,
+    {
+      active: buyer === 'external_company',
+    }
+  );
   const { data: vehicle, mutate: mutateVehicle } = useEntity(VehicleService, vehicleUUID);
 
   const [userForm] = Form.useForm<FormUser>();
+  const [internalCompanyForm] = Form.useForm<InternalCompany>();
+  const [externalCompanyForm] = Form.useForm<ExternalCompany>();
   const [vehicleForm] = Form.useForm<FormVehicle>();
 
   useEffect(() => {
     userForm.setFieldsValue(user as never as FormUser);
   }, [user, userForm]);
   useEffect(() => {
+    if (internalCompany) {
+      internalCompanyForm.setFieldsValue(internalCompany);
+    }
+  }, [internalCompany, internalCompanyForm]);
+  useEffect(() => {
+    if (externalCompany) {
+      externalCompanyForm.setFieldsValue(externalCompany);
+    }
+  }, [externalCompany, externalCompanyForm]);
+  useEffect(() => {
     vehicleForm.setFieldsValue(vehicle as never as FormVehicle);
   }, [vehicle, vehicleForm]);
 
   const submitUser = (values: FormUser) => {
-    const validatedForm = formUserSchema.safeParse({ ...values, uuid: userUUID });
+    const validatedForm = formUserSchema.safeParse({ ...values, uuid: buyer_id });
     if (validatedForm.success) {
       return UserService.putAny(validatedForm.data)
         .then((user) => mutateUser(user))
@@ -56,6 +92,45 @@ export default function VerifyPage() {
       return Promise.reject(new Error(errorMessage));
     }
   };
+  const submitInternalCompany = (values: InternalCompany) => {
+    const validatedForm = internalCompanySchema.safeParse({ ...values, id: Number(buyer_id) });
+    if (validatedForm.success) {
+      return InternalCompanyService.putAny(validatedForm.data)
+        .then((company) => mutateInternalCompany(company))
+        .catch((e) => {
+          messageApi.error('Не удалось сохранить данные филиала. Повторите попытку позже');
+          throw e;
+        });
+    } else {
+      messageApi.error('Данные филиала заполнены неправильно');
+      const errorMessage = z.treeifyError(validatedForm.error).errors[0];
+      if (errorMessage) {
+        messageApi.error(errorMessage);
+      }
+      return Promise.reject(new Error(errorMessage));
+    }
+  };
+  const submitExternalCompany = (values: ExternalCompany) => {
+    const validatedForm = externalCompanySchema.safeParse({ ...values, id: Number(buyer_id) });
+    if (validatedForm.success) {
+      return ExternalCompanyService.putAny(validatedForm.data)
+        .then((company) => mutateExternalCompany(company))
+        .catch((e) => {
+          messageApi.error(
+            'Не удалось сохранить данные юридического лица. Повторите попытку позже'
+          );
+          throw e;
+        });
+    } else {
+      messageApi.error('Данные юридического лица заполнены неправильно');
+      const errorMessage = z.treeifyError(validatedForm.error).errors[0];
+      if (errorMessage) {
+        messageApi.error(errorMessage);
+      }
+      return Promise.reject(new Error(errorMessage));
+    }
+  };
+
   const submitVehicle = (values: FormVehicle) => {
     const validatedForm = formVehicleSchema.safeParse({ ...values, uuid: vehicleUUID });
     if (validatedForm.success) {
@@ -80,7 +155,13 @@ export default function VerifyPage() {
   return (
     <Flex vertical align="center" className="w-full" gap={12}>
       <Card className="w-350 max-w-full">
-        <VerifyPerson person={user} form={userForm} type="user" />
+        {buyer === 'user' ? (
+          <VerifyPerson person={user} form={userForm} type="user" />
+        ) : buyer === 'internal_company' ? (
+          <VerifyCompany company={internalCompany} type="internal" form={internalCompanyForm} />
+        ) : (
+          <VerifyCompany company={externalCompany} type="external" form={externalCompanyForm} />
+        )}
       </Card>
       <Card className="w-350 max-w-full">
         <VerifyVehicle vehicle={vehicle} form={vehicleForm} />
@@ -91,31 +172,48 @@ export default function VerifyPage() {
         onClick={() => {
           void (async () => {
             await Promise.all([
-              userForm.validateFields().catch((e) => {
-                messageApi.warning('Исправьте ошибки в форме клиента повторите попытку');
-                throw e;
-              }),
+              buyer === 'user'
+                ? userForm.validateFields().catch((e) => {
+                    messageApi.warning('Исправьте ошибки в форме клиента и повторите попытку');
+                    throw e;
+                  })
+                : buyer === 'internal_company'
+                  ? internalCompanyForm.validateFields().catch((e) => {
+                      messageApi.warning('Исправьте ошибки в форме филиала и повторите попытку');
+                      throw e;
+                    })
+                  : externalCompanyForm.validateFields().catch((e) => {
+                      messageApi.warning(
+                        'Исправьте ошибки в форме юридического лица и повторите попытку'
+                      );
+                      throw e;
+                    }),
               vehicleForm.validateFields().catch((e) => {
                 messageApi.info(
-                  'Исправьте ошибки в форме транспортного средства повторите попытку'
+                  'Исправьте ошибки в форме транспортного средства и повторите попытку'
                 );
                 throw e;
               }),
             ])
               .then(() =>
                 Promise.all([
-                  submitUser(userForm.getFieldsValue()),
+                  buyer === 'user'
+                    ? submitUser(userForm.getFieldsValue())
+                    : buyer === 'internal_company'
+                      ? submitInternalCompany(internalCompanyForm.getFieldsValue())
+                      : submitExternalCompany(externalCompanyForm.getFieldsValue()),
                   submitVehicle(vehicleForm.getFieldsValue()),
                 ])
               )
               .then(() => {
                 messageApi.success('Данные успешно сохранены');
-                let url = `/download?user=${userUUID}&vehicle=${vehicleUUID}`;
+                let url = `/download?vehicle=${vehicleUUID}`;
                 [
                   'type',
-                  'internal_company',
-                  'external_company',
-                  'individual',
+                  'seller',
+                  'seller_id',
+                  'buyer',
+                  'buyer_id',
                   'price',
                   'tax',
                   'options',

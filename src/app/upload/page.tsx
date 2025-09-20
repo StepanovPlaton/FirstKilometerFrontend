@@ -1,5 +1,9 @@
 'use client';
 
+import type { ExternalCompany } from '@/entities/external-company';
+import ExternalCompanyService from '@/entities/external-company';
+import type { InternalCompany } from '@/entities/internal-company';
+import InternalCompanyService from '@/entities/internal-company';
 import type { ApiUser, User } from '@/entities/user';
 import UserService from '@/entities/user';
 import type { ApiVehicle } from '@/entities/vehicle';
@@ -17,6 +21,8 @@ export default function UploadPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const [buyer, setBuyer] = useState<'user' | 'internal_company' | 'external_company'>('user');
+
   const [loadingUser, setLoadingUser] = useState(false);
   const [passportMainPage, setPassportMainPage] = useState<RcFile>();
   const [passportRegistration, setPassportRegistration] = useState<RcFile>();
@@ -27,6 +33,28 @@ export default function UploadPage() {
     error: failedGetExistsUsers,
   } = useChoices(UserService);
   const [selectedUser, setSelectedUser] = useState<User['uuid']>();
+  const [createEmptyUser, setCreateEmptyUser] = useState(false);
+  useEffect(() => {
+    if (createEmptyUser) {
+      setSelectedUser(undefined);
+      setPassportMainPage(undefined);
+      setPassportRegistration(undefined);
+    }
+  }, [createEmptyUser]);
+
+  const {
+    data: internalCompanies,
+    error: getInternalCompaniesError,
+    loading: loadingInternalCompanies,
+  } = useChoices(InternalCompanyService);
+  const [internalCompany, setInternalCompany] = useState<InternalCompany['id']>();
+
+  const {
+    data: externalCompanies,
+    error: getExternalCompaniesError,
+    loading: loadingExternalCompanies,
+  } = useChoices(ExternalCompanyService);
+  const [externalCompany, setExternalCompany] = useState<ExternalCompany['id']>();
 
   const [loadingVehicle, setLoadingVehicle] = useState(false);
   const [vehiclePassport, setVehiclePassport] = useState<RcFile>();
@@ -46,7 +74,7 @@ export default function UploadPage() {
 
   const submit = () => {
     const requests: Promise<unknown>[] = [];
-    if (!selectedUser && !user) {
+    if (!selectedUser && !user && buyer === 'user') {
       if (!passportMainPage && !createEmptyUser) {
         messageApi.error('Чтобы продолжить, загрузите главную страницу паспорта клиента');
         return;
@@ -106,18 +134,17 @@ export default function UploadPage() {
     const userUUID = selectedUser ?? user?.uuid;
     const vehicleUUID = selectedVehicle ?? vehicle?.uuid;
 
-    if (validated && userUUID && vehicleUUID) {
-      let url = `/verify?user=${userUUID}&vehicle=${vehicleUUID}`;
-      [
-        'type',
-        'internal_company',
-        'external_company',
-        'individual',
-        'price',
-        'tax',
-        'options',
-        'date',
-      ].forEach((key) => {
+    if (
+      validated &&
+      ((buyer === 'user' && userUUID) ||
+        (buyer === 'internal_company' && internalCompany) ||
+        (buyer === 'external_company' && externalCompany)) &&
+      vehicleUUID
+    ) {
+      let url =
+        `/verify?vehicle=${vehicleUUID}&buyer=${buyer}` +
+        `&buyer_id=${buyer === 'user' ? userUUID : buyer === 'internal_company' ? internalCompany : externalCompany}`;
+      ['type', 'seller', 'seller_id', 'price', 'date', 'tax', 'options'].forEach((key) => {
         const value = searchParams.get(key);
         if (value) {
           url += `&${key}=${value}`;
@@ -127,65 +154,107 @@ export default function UploadPage() {
     }
   }, [selectedUser, user, selectedVehicle, vehicle, searchParams, validated, router]);
 
-  const [createEmptyUser, setCreateEmptyUser] = useState(false);
-  useEffect(() => {
-    if (createEmptyUser) {
-      setSelectedUser(undefined);
-      setPassportMainPage(undefined);
-      setPassportRegistration(undefined);
-    }
-  }, [createEmptyUser]);
-
   return (
     <Space direction="vertical" align="center" size="large" className="flex w-full">
       <Card className="w-100">
         <Flex justify="center">
-          <Title level={2}>Клиент</Title>
+          <Title level={2}>Покупатель</Title>
         </Flex>
         <Spin spinning={loadingUser}>
-          <Space direction="vertical" align="center">
-            <Text>Добавьте нового клиента</Text>
-            <Space className="w-full">
-              <UploadDocument
-                file={passportMainPage}
-                onUpload={setPassportMainPage}
-                text="Загрузите паспорт (главная страница)"
-                disabled={!!user || !!selectedUser || !!createEmptyUser}
-              />
-              <UploadDocument
-                file={passportRegistration}
-                onUpload={setPassportRegistration}
-                text="Загрузите паспорт (прописка)"
-                disabled={!!user || !!selectedUser || !!createEmptyUser}
-              />
-            </Space>
-            <Text>или</Text>
+          <Space direction="vertical" size="large" align="center" style={{ display: 'flex' }}>
             <Select
-              className="w-80"
-              placeholder="Выберите существующего клиента"
-              disabled={
-                !!passportMainPage ||
-                !!passportRegistration ||
-                !!failedGetExistsUsers ||
-                !!user ||
-                !!createEmptyUser
-              }
-              loading={loadingExistsUsers}
-              options={existsUsers ?? []}
-              onChange={setSelectedUser}
-              showSearch
-              filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-              }
-              allowClear
+              className="w-86"
+              placeholder="Выберите покупателя"
+              options={[
+                {
+                  label: 'Клиент',
+                  value: 'user',
+                },
+                {
+                  label: 'Филиал',
+                  value: 'internal_company',
+                  disabled: searchParams.get('seller') === 'internal_company',
+                },
+                {
+                  label: 'Юридическое лицо',
+                  value: 'external_company',
+                },
+              ]}
+              onChange={(v: typeof buyer) => setBuyer(v)}
+              defaultValue={buyer}
             />
-            <Text>или</Text>
-            <Button
-              onClick={() => setCreateEmptyUser((s) => !s)}
-              disabled={!!user || !!selectedUser}
-            >
-              <Checkbox checked={createEmptyUser}>Создать клиента без документов</Checkbox>
-            </Button>
+            {buyer === 'user' ? (
+              <Space direction="vertical" align="center">
+                <Text>Добавьте нового клиента</Text>
+                <Space className="w-full">
+                  <UploadDocument
+                    file={passportMainPage}
+                    onUpload={setPassportMainPage}
+                    text="Загрузите паспорт (главная страница)"
+                    disabled={!!user || !!selectedUser || !!createEmptyUser}
+                  />
+                  <UploadDocument
+                    file={passportRegistration}
+                    onUpload={setPassportRegistration}
+                    text="Загрузите паспорт (прописка)"
+                    disabled={!!user || !!selectedUser || !!createEmptyUser}
+                  />
+                </Space>
+                <Text>или</Text>
+                <Select
+                  className="w-86"
+                  placeholder="Выберите существующего клиента"
+                  disabled={
+                    !!passportMainPage ||
+                    !!passportRegistration ||
+                    !!failedGetExistsUsers ||
+                    !!user ||
+                    !!createEmptyUser
+                  }
+                  loading={loadingExistsUsers}
+                  options={existsUsers ?? []}
+                  onChange={setSelectedUser}
+                  showSearch
+                  filterOption={(input, option) =>
+                    (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                  }
+                  allowClear
+                />
+                <Text>или</Text>
+                <Button
+                  onClick={() => setCreateEmptyUser((s) => !s)}
+                  disabled={!!user || !!selectedUser}
+                >
+                  <Checkbox checked={createEmptyUser}>Создать клиента без документов</Checkbox>
+                </Button>
+              </Space>
+            ) : buyer === 'internal_company' ? (
+              <Select
+                className="w-86!"
+                placeholder="Выберите филиал"
+                disabled={!!getInternalCompaniesError}
+                loading={loadingInternalCompanies}
+                options={internalCompanies ?? []}
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                onChange={(id: InternalCompany['id']) => setInternalCompany(id)}
+              />
+            ) : (
+              <Select
+                className="w-86!"
+                placeholder="Выберите юридическое лицо"
+                disabled={!!getExternalCompaniesError}
+                loading={loadingExternalCompanies}
+                options={externalCompanies ?? []}
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
+                onChange={(id: ExternalCompany['id']) => setExternalCompany(id)}
+              />
+            )}
           </Space>
         </Spin>
       </Card>
