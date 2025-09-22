@@ -93,6 +93,7 @@ export default function UploadPage() {
 
   const [form] = Form.useForm<GetDocumentForm>();
   const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
+  const documentType = Form.useWatch('type', form);
 
   useEffect(() => {
     if (!seller) {
@@ -182,7 +183,7 @@ export default function UploadPage() {
     if (form.getFieldValue('buyer_id')) {
       form.resetFields(['buyer_id']);
     }
-    if (seller === 'internal_company') {
+    if (seller === 'internal_company' && documentType !== 'sale') {
       setSeller('external_company');
     }
   }, [buyer]);
