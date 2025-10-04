@@ -15,15 +15,15 @@ import { VerifyPerson } from '@/features/verify/person';
 import { useEntity } from '@/shared/utils/hooks/data';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect } from 'react';
 import z from 'zod';
 import { VerifyVehicle } from '../../features/verify/vehicle';
 dayjs.locale('ru');
 
 export default function VerifyPage() {
   const router = useRouter();
-
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const buyer = searchParams.get('buyer');
   const buyer_id = searchParams.get('buyer_id');
@@ -152,11 +152,29 @@ export default function VerifyPage() {
     }
   };
 
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+
+      return params.toString();
+    },
+    [searchParams]
+  );
+
   return (
     <Flex vertical align="center" className="w-full" gap={12}>
       <Card className="w-350 max-w-full">
         {buyer === 'user' ? (
-          <VerifyPerson person={user} form={userForm} type="user" />
+          <VerifyPerson
+            person={user}
+            form={userForm}
+            type="user"
+            service={UserService}
+            onPersonChange={(person) =>
+              router.replace(pathname + '?' + createQueryString('buyer_id', person))
+            }
+          />
         ) : buyer === 'internal_company' ? (
           <VerifyCompany company={internalCompany} type="internal" form={internalCompanyForm} />
         ) : (

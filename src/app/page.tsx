@@ -34,9 +34,9 @@ type CreateDocumentForm = {
   internal_company?: string;
   external_company?: string;
   individual?: string;
-  price: number;
+  price?: number;
   tax?: number;
-  date: Dayjs;
+  date?: Dayjs;
   options?: string;
 };
 
@@ -48,6 +48,7 @@ export default function InitPage() {
     'internal_company'
   );
   const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
+  const isReturnDoc = Form.useWatch((v) => v.type === 'return', form);
 
   const {
     data: documentTypes,
@@ -223,16 +224,18 @@ export default function InitPage() {
                   </Form.Item>
                 )}
                 <Row className="w-100!" gutter={4}>
-                  <Col span={12}>
-                    <Form.Item<CreateDocumentForm> label="Цена" name={'price'}>
-                      <InputNumber
-                        className="w-full!"
-                        addonAfter="₽"
-                        min={0}
-                        placeholder="Введите цену"
-                      />
-                    </Form.Item>
-                  </Col>
+                  {!isReturnDoc && (
+                    <Col span={12}>
+                      <Form.Item<CreateDocumentForm> label="Цена" name={'price'}>
+                        <InputNumber
+                          className="w-full!"
+                          addonAfter="₽"
+                          min={0}
+                          placeholder="Введите цену"
+                        />
+                      </Form.Item>
+                    </Col>
+                  )}
                   <Col span={12}>
                     <Form.Item<CreateDocumentForm> label="Дата" name={'date'}>
                       <DatePicker

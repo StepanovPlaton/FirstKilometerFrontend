@@ -1,24 +1,57 @@
 import { Viewer } from '@/features/viewer';
 import { Text } from '@/shared/ui/text';
 import { Title } from '@/shared/ui/title';
+import { useChoices } from '@/shared/utils/hooks/choices';
+import type { Choice } from '@/shared/utils/schemes';
 import type { ApiPerson, FormPerson } from '@/shared/utils/schemes/person';
 import { formPersonSchema } from '@/shared/utils/schemes/person';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
+import type { CRUDCService } from '@/shared/utils/services';
 import type { FormInstance } from 'antd';
-import { DatePicker, Divider, Flex, Form, Input, Row, Select, Skeleton } from 'antd';
+import {
+  AutoComplete,
+  DatePicker,
+  Divider,
+  Flex,
+  Form,
+  Input,
+  Modal,
+  Row,
+  Select,
+  Skeleton,
+  Spin,
+} from 'antd';
 import clsx from 'clsx';
-import type { FormEventHandler } from 'react';
+import { useState, type FormEventHandler } from 'react';
 
 const toUpperCase: FormEventHandler<HTMLInputElement> = (e) =>
   ((e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.toUpperCase());
 
-export const VerifyPerson = ({
+export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   ...props
 }: {
   person: ApiPerson | undefined;
   form: FormInstance<FormPerson>;
   type: 'user' | 'individual';
+  service: T;
+  onPersonChange?: (person: ApiPerson['uuid']) => unknown;
 }) => {
+  const { data: persons, loading } = useChoices(props.service);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [changeToPerson, setChangeToPerson] = useState<Choice>();
+  const [inputLicenceNumber, setInputLicenceNumber] = useState<ApiPerson['licence_number']>();
+
+  const change = () => {
+    if (!changeToPerson || !props.person) {
+      return;
+    }
+    void props.service.delete(props.person?.uuid).then(() => {
+      props.onPersonChange?.(changeToPerson.value);
+      setConfirmDelete(false);
+      setChangeToPerson(undefined);
+    });
+  };
+
   return (
     <Form<FormPerson> layout="vertical" form={props.form}>
       <div className="flex w-full">
@@ -42,94 +75,128 @@ export const VerifyPerson = ({
           </Flex>
           {props.person ? (
             <>
-              <Row wrap justify={'space-evenly'}>
-                <Form.Item<FormPerson>
-                  label="Фамилия"
-                  name={'last_name'}
-                  rules={getValidationRules(formPersonSchema, 'last_name')}
-                >
-                  <Input onInput={toUpperCase} />
-                </Form.Item>
-                <Form.Item<FormPerson>
-                  label="Имя"
-                  name={'first_name'}
-                  rules={getValidationRules(formPersonSchema, 'first_name')}
-                >
-                  <Input onInput={toUpperCase} />
-                </Form.Item>
-                <Form.Item<FormPerson>
-                  label="Отчество"
-                  name={'middle_name'}
-                  rules={getValidationRules(formPersonSchema, 'middle_name', false)}
-                >
-                  <Input onInput={toUpperCase} />
-                </Form.Item>
-              </Row>
               <Row justify="space-evenly" wrap>
-                <Form.Item<FormPerson>
-                  label="Пол"
-                  name={'sex'}
-                  rules={getValidationRules(formPersonSchema, 'sex')}
-                >
-                  <Select
-                    placeholder="Пол"
-                    options={[
-                      { value: 'М', label: 'М' },
-                      { value: 'Ж', label: 'Ж' },
-                    ]}
-                  />
-                </Form.Item>
-                <Form.Item<FormPerson>
-                  label="Дата рождения"
-                  name={'birth_date'}
-                  rules={getValidationRules(formPersonSchema, 'birth_date')}
-                >
-                  <DatePicker format="DD.MM.YYYY" />
-                </Form.Item>
-                <Form.Item<FormPerson>
-                  label="Место рождения"
-                  name={'birth_place'}
-                  rules={getValidationRules(formPersonSchema, 'birth_place')}
-                >
-                  <Input className="w-80!" onInput={toUpperCase} />
-                </Form.Item>
-              </Row>
-              <Divider className="m-2!" />
-              <Row justify="space-evenly" wrap>
-                <Form.Item<FormPerson>
-                  label="Кем выдан паспорт"
-                  name={'issue_organization'}
-                  className="w-full"
-                  rules={getValidationRules(formPersonSchema, 'issue_organization')}
-                >
-                  <Input className="w-full" onInput={toUpperCase} />
-                </Form.Item>
-              </Row>
-              <Row justify="space-evenly" wrap>
-                <Form.Item<FormPerson>
-                  label="Дата выдачи"
-                  name={'issue_date'}
-                  rules={getValidationRules(formPersonSchema, 'issue_date')}
-                >
-                  <DatePicker format="DD.MM.YYYY" />
-                </Form.Item>
-                <Form.Item<FormPerson>
-                  label="Код подразделения"
-                  name={'issue_organization_code'}
-                  rules={getValidationRules(formPersonSchema, 'issue_organization_code')}
-                >
-                  <Input />
-                </Form.Item>
-              </Row>
-              <Divider className="m-2!" />
-              <Row justify="space-evenly" wrap>
-                <Form.Item<FormPerson>
-                  label="Серия и номер паспорта"
-                  name={'licence_number'}
-                  rules={getValidationRules(formPersonSchema, 'licence_number')}
-                >
-                  <Input />
-                </Form.Item>
+                <Spin spinning={loading}>
+                  <Form.Item<FormPerson>
+                    label="Серия и номер паспорта"
+                    name={'licence_number'}
+                    rules={getValidationRules(formPersonSchema, 'licence_number')}
+                  >
+                    <AutoComplete
+                      className="w-80!"
+                      options={
+                        inputLicenceNumber && props.onPersonChange
+                          ? (persons ?? []).filter((o) => o.value !== props.person?.uuid)
+                          : []
+                      }
+                      onSelect={(_, option: Choice) => {
+                        setConfirmDelete(true);
+                        setChangeToPerson(option);
+                      }}
+                      onChange={(e) => setInputLicenceNumber(e)}
+                      filterOption={(input, option) =>
+                        option?.label.split('(')[1]?.split(')')[0] === input
+                      }
+                    />
+                  </Form.Item>
+                  <Modal
+                    open={confirmDelete}
+                    onCancel={() => setConfirmDelete(false)}
+                    title={<Title level={2}>Замена пользователя</Title>}
+                    width={450}
+                    okText="Использовать"
+                    okButtonProps={{ danger: true }}
+                    onOk={change}
+                  >
+                    <Text>
+                      Похоже, что пользователь с такими паспортными данными уже существует
+                    </Text>
+                    <Title level={5}>Использовать уже добавленного пользователя?</Title>
+                    <Text>
+                      Текущий пользователь будет удалён. Загрузится {changeToPerson?.label}
+                    </Text>
+                  </Modal>
+                </Spin>
+                <Divider className="m-2!" />
+                <Row wrap justify={'space-evenly'}>
+                  <Form.Item<FormPerson>
+                    label="Фамилия"
+                    name={'last_name'}
+                    rules={getValidationRules(formPersonSchema, 'last_name')}
+                  >
+                    <Input onInput={toUpperCase} />
+                  </Form.Item>
+                  <Form.Item<FormPerson>
+                    label="Имя"
+                    name={'first_name'}
+                    rules={getValidationRules(formPersonSchema, 'first_name')}
+                  >
+                    <Input onInput={toUpperCase} />
+                  </Form.Item>
+                  <Form.Item<FormPerson>
+                    label="Отчество"
+                    name={'middle_name'}
+                    rules={getValidationRules(formPersonSchema, 'middle_name', false)}
+                  >
+                    <Input onInput={toUpperCase} />
+                  </Form.Item>
+                </Row>
+                <Row justify="space-evenly" wrap>
+                  <Form.Item<FormPerson>
+                    label="Пол"
+                    name={'sex'}
+                    rules={getValidationRules(formPersonSchema, 'sex')}
+                  >
+                    <Select
+                      placeholder="Пол"
+                      options={[
+                        { value: 'М', label: 'М' },
+                        { value: 'Ж', label: 'Ж' },
+                      ]}
+                    />
+                  </Form.Item>
+                  <Form.Item<FormPerson>
+                    label="Дата рождения"
+                    name={'birth_date'}
+                    rules={getValidationRules(formPersonSchema, 'birth_date')}
+                  >
+                    <DatePicker format="DD.MM.YYYY" />
+                  </Form.Item>
+                  <Form.Item<FormPerson>
+                    label="Место рождения"
+                    name={'birth_place'}
+                    rules={getValidationRules(formPersonSchema, 'birth_place')}
+                  >
+                    <Input className="w-80!" onInput={toUpperCase} />
+                  </Form.Item>
+                </Row>
+                <Divider className="m-2!" />
+                <Row justify="space-evenly" wrap>
+                  <Form.Item<FormPerson>
+                    label="Кем выдан паспорт"
+                    name={'issue_organization'}
+                    className="w-full"
+                    rules={getValidationRules(formPersonSchema, 'issue_organization')}
+                  >
+                    <Input className="w-full" onInput={toUpperCase} />
+                  </Form.Item>
+                </Row>
+                <Row justify="space-evenly" wrap>
+                  <Form.Item<FormPerson>
+                    label="Дата выдачи"
+                    name={'issue_date'}
+                    rules={getValidationRules(formPersonSchema, 'issue_date')}
+                  >
+                    <DatePicker format="DD.MM.YYYY" />
+                  </Form.Item>
+                  <Form.Item<FormPerson>
+                    label="Код подразделения"
+                    name={'issue_organization_code'}
+                    rules={getValidationRules(formPersonSchema, 'issue_organization_code')}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Row>
               </Row>
             </>
           ) : (
