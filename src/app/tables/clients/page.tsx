@@ -107,7 +107,7 @@ export default function ClientTablesPage() {
     },
     {
       key: 'middle_name',
-      title: 'Имя',
+      title: 'Отчество',
       dataIndex: 'middle_name',
     },
     {

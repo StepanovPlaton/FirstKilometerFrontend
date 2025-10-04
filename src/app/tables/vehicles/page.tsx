@@ -197,17 +197,17 @@ export default function VehiclesTablesPage() {
             <UploadDocument
               file={vehiclePassport}
               onUpload={setVehiclePassport}
-              text="Загрузите паспорт транспортного средства (ПТС)"
+              text="Загрузите паспорт транспортного средства (ПТС/ЭПТС)"
             />
             <UploadDocument
               file={vehicleRegistrationFront}
               onUpload={setVehicleRegistrationFront}
-              text="Загрузите лицевую сторону свидетельства о регистрации (СТС)"
+              text="Загрузите лицевую сторону свидетельства о регистрации (СТС/VIN)"
             />
             <UploadDocument
               file={vehicleRegistrationBack}
               onUpload={setVehicleRegistrationBack}
-              text="Загрузите обратную сторону свидетельства о регистрации (СТС)"
+              text="Загрузите обратную сторону свидетельства о регистрации (СТС/ФИО)"
             />
           </Space>
         </Spin>

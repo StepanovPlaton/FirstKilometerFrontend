@@ -269,19 +269,19 @@ export default function UploadPage() {
               <UploadDocument
                 file={vehiclePassport}
                 onUpload={setVehiclePassport}
-                text="Загрузите паспорт транспортного средства (ПТС)"
+                text="Загрузите паспорт транспортного средства (ПТС/ЭПТС)"
                 disabled={!!vehicle || !!selectedVehicle}
               />
               <UploadDocument
                 file={vehicleRegistrationFront}
                 onUpload={setVehicleRegistrationFront}
-                text="Загрузите лицевую сторону свидетельства о регистрации (СТС)"
+                text="Загрузите лицевую сторону свидетельства о регистрации (СТС/VIN)"
                 disabled={!!vehicle || !!selectedVehicle}
               />
               <UploadDocument
                 file={vehicleRegistrationBack}
                 onUpload={setVehicleRegistrationBack}
-                text="Загрузите обратную сторону свидетельства о регистрации (СТС)"
+                text="Загрузите обратную сторону свидетельства о регистрации (СТС/ФИО)"
                 disabled={!!vehicle || !!selectedVehicle}
               />
             </Space>
