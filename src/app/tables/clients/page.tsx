@@ -89,6 +89,14 @@ export default function ClientTablesPage() {
       .finally(() => setLoadingUser(false));
   };
 
+  const deleteUser = (uuid: ApiUser['uuid']) => {
+    void UserService.delete(uuid)
+      .then(() => {
+        void mutateTable((users) => users?.filter((u) => u.uuid !== uuid));
+      })
+      .catch(() => messageApi.error('Не удалось удалить клиента. Попробуйте позже'));
+  };
+
   const columns: ColumnsType<ApiUser> = [
     {
       key: 'licence_number',
@@ -134,11 +142,7 @@ export default function ClientTablesPage() {
           okButtonProps={{ danger: true }}
           onConfirm={(e) => {
             e?.stopPropagation();
-            void UserService.delete(uuid)
-              .then(() => {
-                void mutateTable((users) => users?.filter((u) => u.uuid !== uuid));
-              })
-              .catch(() => messageApi.error('Не удалось удалить клиента. Попробуйте позже'));
+            deleteUser(uuid);
           }}
           onCancel={(e) => e?.stopPropagation()}
         >
@@ -206,7 +210,13 @@ export default function ClientTablesPage() {
           userForm.resetFields();
         }}
       >
-        <VerifyPerson person={user} form={userForm} type="user" />
+        <VerifyPerson
+          person={user}
+          form={userForm}
+          type="user"
+          service={UserService}
+          onPersonChange={(person) => setUser(users?.find((u) => u.uuid === person))}
+        />
       </Modal>
       <Modal
         open={newUser}

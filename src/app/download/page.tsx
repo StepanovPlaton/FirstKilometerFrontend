@@ -39,9 +39,9 @@ type GetDocumentForm = {
   seller_id: string | number;
   vehicle: string;
   type: string;
-  price: number;
+  price?: number;
   tax?: number;
-  date: Dayjs;
+  date?: Dayjs;
   options?: string;
 };
 
@@ -93,6 +93,7 @@ export default function UploadPage() {
 
   const [form] = Form.useForm<GetDocumentForm>();
   const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
+  const isReturnDoc = Form.useWatch((v) => v.type === 'return', form);
   const documentType = Form.useWatch('type', form);
 
   useEffect(() => {
@@ -142,7 +143,7 @@ export default function UploadPage() {
     setLoading(true);
     void DocumentService.getDocument({
       ...data,
-      date: data.date.format('YYYY-MM-DD'),
+      date: data.date?.format('YYYY-MM-DD'),
       buyer,
       seller,
     })
@@ -377,16 +378,18 @@ export default function UploadPage() {
                 </Form.Item>
               )}
               <Row className="w-100!" gutter={4}>
-                <Col span={12}>
-                  <Form.Item<GetDocumentForm> label="Цена" name={'price'}>
-                    <InputNumber
-                      className="w-full!"
-                      addonAfter="₽"
-                      min={0}
-                      placeholder="Введите цену"
-                    />
-                  </Form.Item>
-                </Col>
+                {!isReturnDoc && (
+                  <Col span={12}>
+                    <Form.Item<GetDocumentForm> label="Цена" name={'price'}>
+                      <InputNumber
+                        className="w-full!"
+                        addonAfter="₽"
+                        min={0}
+                        placeholder="Введите цену"
+                      />
+                    </Form.Item>
+                  </Col>
+                )}
                 <Col span={12}>
                   <Form.Item<GetDocumentForm> label="Дата" name={'date'}>
                     <DatePicker

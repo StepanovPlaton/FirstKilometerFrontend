@@ -82,6 +82,14 @@ export default function ClientTablesPage() {
       .finally(() => setLoadingIndividual(false));
   };
 
+  const deleteIndividual = (uuid: ApiIndividual['uuid']) => {
+    void IndividualService.delete(uuid)
+      .then(() => {
+        void mutateTable((individuals) => individuals?.filter((i) => i.uuid !== uuid));
+      })
+      .catch(() => messageApi.error('Не удалось удалить физ. лицо. Попробуйте позже'));
+  };
+
   const columns: ColumnsType<ApiIndividual> = [
     {
       key: 'licence_number',
@@ -127,11 +135,7 @@ export default function ClientTablesPage() {
           okButtonProps={{ danger: true }}
           onConfirm={(e) => {
             e?.stopPropagation();
-            void IndividualService.delete(uuid)
-              .then(() => {
-                void mutateTable((individuals) => individuals?.filter((i) => i.uuid !== uuid));
-              })
-              .catch(() => messageApi.error('Не удалось удалить физ. лицо. Попробуйте позже'));
+            deleteIndividual(uuid);
           }}
           onCancel={(e) => e?.stopPropagation()}
         >
@@ -192,7 +196,13 @@ export default function ClientTablesPage() {
           individualForm.resetFields();
         }}
       >
-        <VerifyPerson person={individual} form={individualForm} type="individual" />
+        <VerifyPerson
+          person={individual}
+          form={individualForm}
+          type="individual"
+          service={IndividualService}
+          onPersonChange={(person) => setIndividual(individuals?.find((i) => i.uuid === person))}
+        />
       </Modal>
       <Modal
         open={newIndividual}
