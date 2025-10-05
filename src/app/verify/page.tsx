@@ -236,6 +236,8 @@ export default function VerifyPage() {
                   'tax',
                   'options',
                   'date',
+                  'additional_services',
+                  'additional_services_cost',
                 ].forEach((key) => {
                   const value = searchParams.get(key);
                   if (value) {

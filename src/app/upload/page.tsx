@@ -144,7 +144,17 @@ export default function UploadPage() {
       let url =
         `/verify?vehicle=${vehicleUUID}&buyer=${buyer}` +
         `&buyer_id=${buyer === 'user' ? userUUID : buyer === 'internal_company' ? internalCompany : externalCompany}`;
-      ['type', 'seller', 'seller_id', 'price', 'date', 'tax', 'options'].forEach((key) => {
+      [
+        'type',
+        'seller',
+        'seller_id',
+        'price',
+        'date',
+        'tax',
+        'options',
+        'additional_services',
+        'additional_services_cost',
+      ].forEach((key) => {
         const value = searchParams.get(key);
         if (value) {
           url += `&${key}=${value}`;

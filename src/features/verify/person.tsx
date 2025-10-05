@@ -93,7 +93,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                         setConfirmDelete(true);
                         setChangeToPerson(option);
                       }}
-                      onChange={(e) => setInputLicenceNumber(e)}
+                      onChange={(e: string) => setInputLicenceNumber(e)}
                       filterOption={(input, option) =>
                         option?.label.split('(')[1]?.split(')')[0] === input
                       }

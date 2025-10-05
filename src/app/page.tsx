@@ -38,6 +38,8 @@ type CreateDocumentForm = {
   tax?: number;
   date?: Dayjs;
   options?: string;
+  additional_services?: string;
+  additional_services_cost?: number;
 };
 
 export default function InitPage() {
@@ -49,6 +51,7 @@ export default function InitPage() {
   );
   const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
   const isReturnDoc = Form.useWatch((v) => v.type === 'return', form);
+  const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services, form);
 
   const {
     data: documentTypes,
@@ -86,6 +89,9 @@ export default function InitPage() {
     }
     if (isTaxDoc) {
       url += `&tax=${data.tax}&options=${data.options}`;
+      if ('additional_services' in data && data.additional_services) {
+        url += `&additional_services=${data.additional_services}&additional_services_cost=${data.additional_services_cost}`;
+      }
     }
     router.push(url);
   };
@@ -247,46 +253,78 @@ export default function InitPage() {
                   </Col>
                 </Row>
                 {isTaxDoc && (
-                  <Row className="w-100!" gutter={4}>
-                    <Col span={8}>
-                      <Form.Item<CreateDocumentForm>
-                        label="Комиссия"
-                        name={'tax'}
-                        rules={isTaxDoc ? requiredRule : []}
-                      >
-                        <InputNumber
-                          className="w-full!"
-                          addonAfter="₽"
-                          min={0}
-                          placeholder="Введите комиссию"
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={16}>
-                      <Form.Item<CreateDocumentForm>
-                        label="Опции"
-                        name={'options'}
-                        rules={isTaxDoc ? requiredRule : []}
-                      >
-                        <Select
-                          mode="multiple"
-                          allowClear
-                          className="w-full!"
-                          placeholder="Выберите опции"
-                          options={[
-                            'СТС',
-                            'ПТС',
-                            'ЭПТС',
-                            'Один комплект ключей',
-                            'Два комплекта ключей',
-                            'Летняя резина',
-                            'Зимняя резина',
-                            'Сервисная книжка',
-                          ].map((i) => ({ value: i, label: i }))}
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
+                  <>
+                    <Row className="w-100!" gutter={4}>
+                      <Col span={8}>
+                        <Form.Item<CreateDocumentForm>
+                          label="Комиссия"
+                          name={'tax'}
+                          rules={isTaxDoc ? requiredRule : []}
+                        >
+                          <InputNumber
+                            className="w-full!"
+                            addonAfter="₽"
+                            min={0}
+                            placeholder="Введите комиссию"
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={16}>
+                        <Form.Item<CreateDocumentForm>
+                          label="Опции"
+                          name={'options'}
+                          rules={isTaxDoc ? requiredRule : []}
+                        >
+                          <Select
+                            mode="multiple"
+                            allowClear
+                            className="w-full!"
+                            placeholder="Выберите опции"
+                            options={[
+                              'СТС',
+                              'ПТС',
+                              'ЭПТС',
+                              'Один комплект ключей',
+                              'Два комплекта ключей',
+                              'Летняя резина',
+                              'Зимняя резина',
+                              'Сервисная книжка',
+                            ].map((i) => ({ value: i, label: i }))}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Row className="w-100!" gutter={4}>
+                      <Col span={16}>
+                        <Form.Item<CreateDocumentForm>
+                          label="Дополнительные услуги"
+                          name={'additional_services'}
+                        >
+                          <Select
+                            mode="tags"
+                            allowClear
+                            className="w-full!"
+                            placeholder="Выберите дополнительные услуги"
+                            options={[].map((i) => ({ value: i, label: i }))}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item<CreateDocumentForm>
+                          label="Стоимость"
+                          name={'additional_services_cost'}
+                          rules={hasAdditionalServices ? requiredRule : []}
+                        >
+                          <InputNumber
+                            className="w-full!"
+                            addonAfter="₽"
+                            min={0}
+                            placeholder="Введите стоимость"
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </>
                 )}
               </Flex>
             </Form>
