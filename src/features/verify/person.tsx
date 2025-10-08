@@ -228,7 +228,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   name={'registration_date'}
                   rules={getValidationRules(formPersonSchema, 'registration_date')}
                 >
-                  <DatePicker format="DD MMMM YYYYг." />
+                  <DatePicker format={['DD MMMM YYYYг.', 'DD.MM.YYYY']}/>
                 </Form.Item>
                 <Form.Item<FormPerson>
                   label="Регион"

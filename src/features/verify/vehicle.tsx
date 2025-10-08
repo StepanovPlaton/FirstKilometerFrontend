@@ -212,7 +212,7 @@ export const VerifyVehicle = (props: {
                   name={'sts_date'}
                   rules={getValidationRules(formVehicleSchema, 'sts_date')}
                 >
-                  <DatePicker format="DD MMMM YYYY г." />
+                  <DatePicker format={['DD MMMM YYYYг.', 'DD.MM.YYYY']} />
                 </Form.Item>
               </Row>
             </>
