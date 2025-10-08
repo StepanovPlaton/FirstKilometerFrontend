@@ -8,4 +8,3 @@ export {
   type RequestOptions,
   type Service,
 } from './service';
-export { EntityTools } from './tools';

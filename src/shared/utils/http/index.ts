@@ -1,7 +1,9 @@
 import { HTTPService } from './http';
-
-export { type HTTPError, type HTTPResponse } from './http';
-
+export {
+  HTTPError,
+  type HTTPGetRequestOptions,
+  type HTTPRequestMethod,
+  type HTTPRequestOptions,
+  type HTTPResponse,
+} from './types';
 export default HTTPService;
-
-export { type HTTPGetRequestOptions, type HTTPRequestOptions } from './http';

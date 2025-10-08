@@ -1,31 +1,33 @@
 import type { z } from 'zod';
-
-export type HTTPGetRequestOptions = {
-  query?: Record<string, string | number | boolean>;
-  headers?: HeadersInit;
-};
-
-export type HTTPRequestOptions = HTTPGetRequestOptions & {
-  body?: BodyInit | object;
-  stringify?: boolean;
-  timeout?: number;
-};
-
-export class HTTPError extends Error {}
-
-export type HTTPResponse = Record<string, unknown> | Array<unknown>;
+import { pairOfTokensSchema } from '../schemes/tokens/schema';
+import { useAuthTokens } from '../schemes/tokens/store';
+import { JWTTools } from '../services/tools';
+import type { HTTPGetRequestOptions, HTTPRequestOptions, HTTPResponse } from './types';
+import { HTTPError } from './types';
+import { HTTPUtils } from './utils';
 
 export abstract class HTTPService {
-  private static toStringsRecord(
-    input?: Record<string, string | number | boolean>
-  ): Record<string, string> {
-    const result: Record<string, string> = {};
-    for (const key in input) {
-      if (Object.prototype.hasOwnProperty.call(input, key)) {
-        result[key] = String(input[key]);
-      }
+  private static refreshToken() {
+    if (!process.env.NEXT_PUBLIC_API_TOKEN_REFRESH) {
+      throw new HTTPError('Unknown token refresh endpoint');
     }
-    return result;
+    const authTokens = useAuthTokens.getState();
+    if (!authTokens.refresh?.token) {
+      throw new HTTPError('Refresh token not found');
+    }
+    return HTTPService.post(process.env.NEXT_PUBLIC_API_TOKEN_REFRESH, pairOfTokensSchema, {
+      body: {
+        refresh: authTokens.refresh.token,
+      },
+      tryTokenUpdate: false,
+    }).then((pairOfTokens) => {
+      try {
+        const pairOfTokensData = new JWTTools().decodeAndValidatePairJWTToken(pairOfTokens);
+        authTokens.updateTokens(pairOfTokensData);
+      } catch {
+        throw new HTTPError('Failed refresh token');
+      }
+    });
   }
 
   public static async request<
@@ -37,47 +39,19 @@ export abstract class HTTPService {
     schema?: Z extends z.ZodType ? Z : z.ZodType<Z> | null,
     options?: HTTPRequestOptions
   ): Promise<O> {
-    if (!process.env.NEXT_PUBLIC_BASE_URL || !process.env.NEXT_PUBLIC_API_PATTERN) {
-      throw new HTTPError('Unknown base api url');
-    }
-    let requestUrl =
-      process.env.NEXT_PUBLIC_BASE_URL + '/' + process.env.NEXT_PUBLIC_API_PATTERN + '/' + url;
-    if (!requestUrl.endsWith('/')) {
-      requestUrl += '/';
-    }
-    requestUrl += new URLSearchParams(this.toStringsRecord(options?.query)).toString();
-    return fetch(requestUrl, {
-      method: method,
-      headers: {
-        accept: 'application/json',
-        ...((options?.stringify ?? true) !== true ? {} : { 'Content-Type': 'application/json' }),
-        ...options?.headers,
-      },
-      body:
-        (options?.stringify ?? true) !== true
-          ? (options?.body as BodyInit)
-          : JSON.stringify(options?.body as object | undefined),
-      signal: options?.timeout ? AbortSignal.timeout(options?.timeout) : null,
-    })
+    const requestUrl = HTTPUtils.prepareUrl(url, options?.query);
+    const authTokens = useAuthTokens.getState();
+
+    return HTTPUtils.createFetch(requestUrl, method, options, authTokens.access?.token)
       .then((r) => {
-        if (r && r.ok) {
-          return r;
-        } else {
-          throw new HTTPError('Response ok = false');
-        }
-      })
-      .then((r) => r.json())
-      .then((d) => {
-        if (schema) {
-          const parsed = schema.safeParse(d);
-          if (parsed.success) {
-            return parsed.data as O;
-          } else {
-            throw new HTTPError(parsed.error.message);
-          }
-        } else {
-          return d as O;
-        }
+        return HTTPUtils.handleAnswer(r, schema, options, () =>
+          this.refreshToken().then(() =>
+            HTTPService.request<Z, O>(method, url, schema, {
+              ...options,
+              tryTokenUpdate: false,
+            })
+          )
+        );
       })
       .catch((e) => {
         // eslint-disable-next-line no-console

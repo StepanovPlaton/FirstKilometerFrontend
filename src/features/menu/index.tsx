@@ -1,12 +1,14 @@
 'use client';
 
 import { Title } from '@/shared/ui/title';
+import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import {
   BankOutlined,
   CarOutlined,
   DatabaseOutlined,
   FileTextOutlined,
   IdcardOutlined,
+  PlaySquareOutlined,
   PlusOutlined,
   UserOutlined,
 } from '@ant-design/icons';
@@ -57,6 +59,7 @@ const menu = [
 export const Menu = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const clearAuthTokens = useAuthTokens((s) => s.clear);
 
   return (
     <Sider width={280} className="min-h-full! bg-[var(--color-bg2)]!">
@@ -89,6 +92,16 @@ export const Menu = () => {
           )
         )}
       </Space>
+      <Button
+        danger
+        className="absolute! right-4! bottom-4!"
+        onClick={() => {
+          clearAuthTokens();
+          router.push('/login');
+        }}
+      >
+        Выйти <PlaySquareOutlined />
+      </Button>
     </Sider>
   );
 };

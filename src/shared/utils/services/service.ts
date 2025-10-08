@@ -10,20 +10,26 @@ import type { WithoutIdentifier } from '../schemes/entity/schema';
 import type { PageOf } from '../schemes/page';
 import { schemaPageOf, schemaStrictPageOf } from '../schemes/page';
 import { ExtendableClass } from './extend';
-import type { EntityTools } from './tools';
+import type { EntityTools } from './tools/base';
 
 export type RequestOptions = Omit<HTTPRequestOptions, 'body'>;
 export type GetRequestOptions = HTTPGetRequestOptions;
 
 export abstract class EmptyService extends ExtendableClass<EntityTools> {}
 
-export abstract class GetService<E extends Entity> extends EmptyService {
+export abstract class SimpleService<E> extends EmptyService {
   schema: z.ZodType<E>;
+  constructor(schema: z.ZodType<E>) {
+    super();
+    this.schema = schema;
+  }
+}
+
+export abstract class GetService<E extends Entity> extends SimpleService<E> {
   urlPrefix: string;
 
   constructor(urlPrefix: string, schema: z.ZodType<E>) {
-    super();
-    this.schema = schema;
+    super(schema);
     this.urlPrefix = urlPrefix;
   }
 

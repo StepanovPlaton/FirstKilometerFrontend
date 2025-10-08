@@ -12,13 +12,13 @@ import type { FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
 import { VerifyCompany } from '@/features/verify/company';
 import { VerifyPerson } from '@/features/verify/person';
+import { VerifyVehicle } from '@/features/verify/vehicle';
 import { useEntity } from '@/shared/utils/hooks/data';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect } from 'react';
 import z from 'zod';
-import { VerifyVehicle } from '../../features/verify/vehicle';
 dayjs.locale('ru');
 
 export default function VerifyPage() {

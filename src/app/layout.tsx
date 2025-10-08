@@ -6,7 +6,6 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 
 import './globals.css';
 
-import { Menu } from '@/features/menu';
 import config from '@/shared/utils/theme';
 import localFont from 'next/font/local';
 
@@ -65,14 +64,7 @@ export default function RootLayout({
       <body className={`${font.className} ${font.variable}`}>
         <AntdRegistry>
           <App>
-            <ConfigProvider {...config}>
-              <div className="flex h-full! w-full">
-                <Menu />
-                <div className="h-full w-[calc(100%-280px)]! overflow-auto bg-[var(--color-bg3)] py-8">
-                  {children}
-                </div>
-              </div>
-            </ConfigProvider>
+            <ConfigProvider {...config}>{children}</ConfigProvider>
           </App>
         </AntdRegistry>
       </body>
