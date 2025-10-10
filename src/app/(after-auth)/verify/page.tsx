@@ -164,7 +164,7 @@ export default function VerifyPage() {
 
   return (
     <Flex vertical align="center" className="w-full" gap={12}>
-      <Card className="w-350 max-w-full">
+      <Card className="w-300 max-w-full">
         {buyer === 'user' ? (
           <VerifyPerson
             person={user}

@@ -190,7 +190,7 @@ export default function ClientTablesPage() {
 
       <Modal
         open={!!user}
-        width={1200}
+        width={1400}
         okText={'Проверить и сохранить'}
         onOk={() => {
           void userForm

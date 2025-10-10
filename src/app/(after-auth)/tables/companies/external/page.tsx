@@ -2,14 +2,11 @@
 
 import type { ExternalCompany } from '@/entities/external-company';
 import ExternalCompanyService, { externalCompanySchema } from '@/entities/external-company';
-import { UploadDocument } from '@/features/upload';
 import { VerifyCompany } from '@/features/verify/company';
-import { Title } from '@/shared/ui/title';
 import { useEntities } from '@/shared/utils/hooks/data';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Flex, Form, message, Modal, Popconfirm, Spin, Table } from 'antd';
+import { Button, Flex, Form, message, Modal, Popconfirm, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { RcFile } from 'antd/es/upload';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
 import { useEffect, useState } from 'react';
@@ -18,10 +15,6 @@ dayjs.locale('ru');
 
 export default function ExternalCompaniesTablesPage() {
   const { data: companies, loading, mutate: mutateTable } = useEntities(ExternalCompanyService);
-
-  const [newCompany, setNewCompany] = useState(false);
-  const [loadingCompany, setLoadingCompany] = useState(false);
-  const [companyDoc, setCompanyDoc] = useState<RcFile>();
 
   const [company, setExternalCompany] = useState<ExternalCompany>();
   const [messageApi, contextHolder] = message.useMessage();
@@ -62,27 +55,6 @@ export default function ExternalCompaniesTablesPage() {
       }
       return Promise.reject(new Error(errorMessage));
     }
-  };
-
-  const addExternalCompany = async () => {
-    if (!companyDoc) {
-      messageApi.error('Чтобы продолжить, загрузите документы юридического лица');
-      return;
-    }
-    setLoadingCompany(true);
-    const companyData = new FormData();
-    companyData.append('company_card', companyDoc);
-    await ExternalCompanyService.postAny(companyData, { stringify: false })
-      .then((company) => {
-        setNewCompany(false);
-        setCompanyDoc(undefined);
-        setExternalCompany(company);
-        return mutateTable((companies) => [...(companies ?? []), company]);
-      })
-      .catch(() =>
-        messageApi.error('Не удалось загрузить данные юридического лица. Повторите попытку позже')
-      )
-      .finally(() => setLoadingCompany(false));
   };
 
   const columns: ColumnsType<ExternalCompany> = [
@@ -149,7 +121,7 @@ export default function ExternalCompaniesTablesPage() {
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setNewCompany(true)}>
+      <Button type="primary" onClick={() => setExternalCompany({} as ExternalCompany)}>
         <PlusOutlined />
         Добавить
       </Button>
@@ -176,30 +148,6 @@ export default function ExternalCompaniesTablesPage() {
         }}
       >
         <VerifyCompany company={company} form={companyForm} type="external" />
-      </Modal>
-      <Modal
-        open={newCompany}
-        onCancel={() => {
-          setCompanyDoc(undefined);
-          setNewCompany(false);
-        }}
-        title={<Title level={2}>Добавить юридичесоке лицо</Title>}
-        okText="Добавить юридическое лицо"
-        okButtonProps={{
-          disabled: !companyDoc,
-        }}
-        width={400}
-        onOk={() => void addExternalCompany()}
-      >
-        <Spin spinning={loadingCompany}>
-          <Flex className="w-full" justify="space-around">
-            <UploadDocument
-              file={companyDoc}
-              onUpload={setCompanyDoc}
-              text="Загрузите документы юридического лица"
-            />
-          </Flex>
-        </Spin>
       </Modal>
       {contextHolder}
     </Flex>

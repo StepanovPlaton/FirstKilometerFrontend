@@ -10,6 +10,7 @@ import type { CRUDCService } from '@/shared/utils/services';
 import type { FormInstance } from 'antd';
 import {
   AutoComplete,
+  Col,
   DatePicker,
   Divider,
   Flex,
@@ -19,13 +20,11 @@ import {
   Row,
   Select,
   Skeleton,
-  Spin,
 } from 'antd';
+import type { NamePath } from 'antd/es/form/interface';
+import TextArea from 'antd/es/input/TextArea';
 import clsx from 'clsx';
-import { useState, type FormEventHandler } from 'react';
-
-const toUpperCase: FormEventHandler<HTMLInputElement> = (e) =>
-  ((e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.toUpperCase());
+import { useState } from 'react';
 
 export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   ...props
@@ -36,7 +35,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   service: T;
   onPersonChange?: (person: ApiPerson['uuid']) => unknown;
 }) => {
-  const { data: persons, loading } = useChoices(props.service);
+  const toUpperCase = (field: NamePath<FormPerson>) =>
+    props.form.setFieldValue(field, (props.form.getFieldValue(field) as string).toUpperCase());
+
+  const { data: persons } = useChoices(props.service);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [changeToPerson, setChangeToPerson] = useState<Choice>();
   const [inputLicenceNumber, setInputLicenceNumber] = useState<ApiPerson['licence_number']>();
@@ -55,7 +57,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   return (
     <Form<FormPerson> layout="vertical" form={props.form}>
       <div className="flex w-full">
-        <Flex vertical align="center" className="w-1/2" gap={8}>
+        <Flex vertical align="center" className="w-2/3" gap={8}>
           <Title level={2}>Документы {props.type === 'user' ? 'клиента' : 'физ. лица'}</Title>
           <Text>Паспорт {props.type === 'user' ? 'клиента' : 'физ. лица'} (главная страница)</Text>
           <div className="aspect-video w-full px-4">
@@ -69,83 +71,89 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
           </div>
         </Flex>
         <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
-        <div className="w-1/2">
+        <div className="w-1/3">
           <Flex justify="space-around">
             <Title level={2}>Данные {props.type === 'user' ? 'клиента' : 'физ. лица'}</Title>
           </Flex>
           {props.person ? (
             <>
-              <Row justify="space-evenly" wrap>
-                <Spin spinning={loading}>
-                  <Form.Item<FormPerson>
-                    label="Серия и номер паспорта"
-                    name={'licence_number'}
-                    rules={getValidationRules(formPersonSchema, 'licence_number')}
-                  >
-                    <AutoComplete
-                      className="w-80!"
-                      options={
-                        inputLicenceNumber && props.onPersonChange
-                          ? (persons ?? []).filter((o) => o.value !== props.person?.uuid)
-                          : []
-                      }
-                      onSelect={(_, option: Choice) => {
-                        setConfirmDelete(true);
-                        setChangeToPerson(option);
-                      }}
-                      onChange={(e: string) => setInputLicenceNumber(e)}
-                      filterOption={(input, option) =>
-                        option?.label.split('(')[1]?.split(')')[0] === input
-                      }
-                    />
-                  </Form.Item>
-                  <Modal
-                    open={confirmDelete}
-                    onCancel={() => setConfirmDelete(false)}
-                    title={<Title level={2}>Замена пользователя</Title>}
-                    width={450}
-                    okText="Использовать"
-                    okButtonProps={{ danger: true }}
-                    onOk={change}
-                  >
-                    <Text>
-                      Похоже, что пользователь с такими паспортными данными уже существует
-                    </Text>
-                    <Title level={5}>Использовать уже добавленного пользователя?</Title>
-                    <Text>
-                      Текущий пользователь будет удалён. Загрузится {changeToPerson?.label}
-                    </Text>
-                  </Modal>
-                </Spin>
-                <Divider className="m-2!" />
-                <Row wrap justify={'space-evenly'}>
-                  <Form.Item<FormPerson>
-                    label="Фамилия"
-                    name={'last_name'}
-                    rules={getValidationRules(formPersonSchema, 'last_name')}
-                  >
-                    <Input onInput={toUpperCase} />
-                  </Form.Item>
-                  <Form.Item<FormPerson>
-                    label="Имя"
-                    name={'first_name'}
-                    rules={getValidationRules(formPersonSchema, 'first_name')}
-                  >
-                    <Input onInput={toUpperCase} />
-                  </Form.Item>
-                  <Form.Item<FormPerson>
-                    label="Отчество"
-                    name={'middle_name'}
-                    rules={getValidationRules(formPersonSchema, 'middle_name', false)}
-                  >
-                    <Input onInput={toUpperCase} />
-                  </Form.Item>
-                </Row>
-                <Row justify="space-evenly" wrap>
+              <Row justify="start" wrap className="w-full!">
+                {/* <Spin spinning={loading} className="w-full!"> */}
+                <Form.Item<FormPerson>
+                  label="Серия и номер паспорта"
+                  name={'licence_number'}
+                  rules={getValidationRules(formPersonSchema, 'licence_number')}
+                  className="w-full"
+                >
+                  <AutoComplete
+                    className="w-full!"
+                    options={
+                      inputLicenceNumber && props.onPersonChange
+                        ? (persons ?? []).filter((o) => o.value !== props.person?.uuid)
+                        : []
+                    }
+                    onSelect={(_, option: Choice) => {
+                      setConfirmDelete(true);
+                      setChangeToPerson(option);
+                    }}
+                    onChange={(e: string) => setInputLicenceNumber(e)}
+                    filterOption={(input, option) =>
+                      option?.label.split('(')[1]?.split(')')[0] === input
+                    }
+                  />
+                </Form.Item>
+                <Modal
+                  open={confirmDelete}
+                  onCancel={() => setConfirmDelete(false)}
+                  title={<Title level={2}>Замена пользователя</Title>}
+                  width={450}
+                  okText="Использовать"
+                  okButtonProps={{ danger: true }}
+                  onOk={change}
+                >
+                  <Text>Похоже, что пользователь с такими паспортными данными уже существует</Text>
+                  <Title level={5}>Использовать уже добавленного пользователя?</Title>
+                  <Text>Текущий пользователь будет удалён. Загрузится {changeToPerson?.label}</Text>
+                </Modal>
+                {/* </Spin> */}
+              </Row>
+              <Row wrap justify="start" className="w-full">
+                <Form.Item<FormPerson>
+                  label="Фамилия"
+                  name={'last_name'}
+                  rules={getValidationRules(formPersonSchema, 'last_name')}
+                  className="w-full"
+                >
+                  <Input onBlur={() => toUpperCase('last_name')} className="w-full" />
+                </Form.Item>
+              </Row>
+              <Row wrap justify="start" className="w-full">
+                <Form.Item<FormPerson>
+                  label="Имя"
+                  name={'first_name'}
+                  rules={getValidationRules(formPersonSchema, 'first_name')}
+                  className="w-full"
+                >
+                  <Input onBlur={() => toUpperCase('first_name')} className="w-full" />
+                </Form.Item>
+              </Row>
+              <Row wrap justify="start" className="w-full">
+                <Form.Item<FormPerson>
+                  label="Отчество"
+                  name={'middle_name'}
+                  rules={getValidationRules(formPersonSchema, 'middle_name', false)}
+                  className="w-full"
+                >
+                  <Input onBlur={() => toUpperCase('middle_name')} className="w-full" />
+                </Form.Item>
+              </Row>
+              <Row justify="start" wrap className="w-full">
+                <Col span={12} className="pr-4">
                   <Form.Item<FormPerson>
                     label="Пол"
                     name={'sex'}
                     rules={getValidationRules(formPersonSchema, 'sex')}
+                    className="w-full"
                   >
                     <Select
                       placeholder="Пол"
@@ -155,40 +163,55 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                       ]}
                     />
                   </Form.Item>
+                </Col>
+
+                <Col span={12}>
                   <Form.Item<FormPerson>
                     label="Дата рождения"
                     name={'birth_date'}
                     rules={getValidationRules(formPersonSchema, 'birth_date')}
-                  >
-                    <DatePicker format="DD.MM.YYYY" />
-                  </Form.Item>
-                  <Form.Item<FormPerson>
-                    label="Место рождения"
-                    name={'birth_place'}
-                    rules={getValidationRules(formPersonSchema, 'birth_place')}
-                  >
-                    <Input className="w-80!" onInput={toUpperCase} />
-                  </Form.Item>
-                </Row>
-                <Divider className="m-2!" />
-                <Row justify="space-evenly" wrap>
-                  <Form.Item<FormPerson>
-                    label="Кем выдан паспорт"
-                    name={'issue_organization'}
                     className="w-full"
-                    rules={getValidationRules(formPersonSchema, 'issue_organization')}
                   >
-                    <Input className="w-full" onInput={toUpperCase} />
+                    <DatePicker format="DD.MM.YYYY" className="w-full" />
                   </Form.Item>
-                </Row>
-                <Row justify="space-evenly" wrap>
+                </Col>
+              </Row>
+              <Row justify="start" wrap className="w-full gap-4">
+                <Form.Item<FormPerson>
+                  label="Место рождения"
+                  name={'birth_place'}
+                  rules={getValidationRules(formPersonSchema, 'birth_place')}
+                  className="w-full"
+                >
+                  <Input className="w-full" onBlur={() => toUpperCase('birth_place')} />
+                </Form.Item>
+              </Row>
+              <Row justify="start" wrap className="w-full">
+                <Form.Item<FormPerson>
+                  label="Кем выдан паспорт"
+                  name={'issue_organization'}
+                  className="w-full"
+                  rules={getValidationRules(formPersonSchema, 'issue_organization')}
+                >
+                  <TextArea
+                    rows={1}
+                    className="field-sizing-content! w-full"
+                    onBlur={() => toUpperCase('issue_organization')}
+                  />
+                </Form.Item>
+              </Row>
+              <Row justify="start" wrap className="w-full">
+                <Col span={12} className="pr-4">
                   <Form.Item<FormPerson>
                     label="Дата выдачи"
                     name={'issue_date'}
                     rules={getValidationRules(formPersonSchema, 'issue_date')}
+                    className="w-full"
                   >
-                    <DatePicker format="DD.MM.YYYY" />
+                    <DatePicker format="DD.MM.YYYY" className="w-full" />
                   </Form.Item>
+                </Col>
+                <Col span={12}>
                   <Form.Item<FormPerson>
                     label="Код подразделения"
                     name={'issue_organization_code'}
@@ -196,7 +219,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   >
                     <Input />
                   </Form.Item>
-                </Row>
+                </Col>
               </Row>
             </>
           ) : (
@@ -206,7 +229,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
       </div>
       <Divider className="m-2!" />
       <div className="flex w-full">
-        <Flex vertical align="center" className="w-1/2" gap={8}>
+        <Flex vertical align="center" className="w-2/3" gap={8}>
           <Text>Паспорт {props.type === 'user' ? 'клиента' : 'физ. лица'} (прописка)</Text>
           <div className="aspect-video w-full px-4">
             <Viewer
@@ -219,30 +242,37 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
           </div>
         </Flex>
         <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
-        <div className="w-1/2">
+        <div className="w-1/3">
           {props.person ? (
             <>
-              <Row wrap justify={'space-evenly'}>
+              <Row wrap justify="start" className="w-full">
                 <Form.Item<FormPerson>
                   label="Дата регистрации"
                   name={'registration_date'}
                   rules={getValidationRules(formPersonSchema, 'registration_date')}
+                  className="w-full"
                 >
-                  <DatePicker format={['DD MMMM YYYYг.', 'DD.MM.YYYY']} />
+                  <DatePicker format={['DD MMMM YYYYг.', 'DD.MM.YYYY']} className="w-full" />
                 </Form.Item>
+              </Row>
+              <Row wrap justify="start" className="w-full">
                 <Form.Item<FormPerson>
                   label="Регион"
                   name={'registration_region'}
                   rules={getValidationRules(formPersonSchema, 'registration_region')}
+                  className="w-full"
                 >
-                  <Input onInput={toUpperCase} />
+                  <Input onBlur={() => toUpperCase('registration_region')} className="w-full" />
                 </Form.Item>
+              </Row>
+              <Row wrap justify="start" className="w-full">
                 <Form.Item<FormPerson>
                   label="Населённый пункт"
                   name={'registration_settlement'}
                   rules={getValidationRules(formPersonSchema, 'registration_settlement')}
+                  className="w-full"
                 >
-                  <Input onInput={toUpperCase} />
+                  <Input onBlur={() => toUpperCase('registration_settlement')} className="w-full" />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
@@ -250,22 +280,29 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   label="Район"
                   name={'registration_district'}
                   rules={getValidationRules(formPersonSchema, 'registration_district', false)}
+                  className="w-full"
                 >
-                  <Input onInput={toUpperCase} />
+                  <Input onBlur={() => toUpperCase('registration_district')} className="w-full" />
                 </Form.Item>
+              </Row>
+              <Row justify="space-evenly" wrap>
                 <Form.Item<FormPerson>
                   label="Участок"
                   name={'registration_area'}
                   rules={getValidationRules(formPersonSchema, 'registration_area', false)}
+                  className="w-full"
                 >
-                  <Input onInput={toUpperCase} />
+                  <Input onBlur={() => toUpperCase('registration_area')} className="w-full" />
                 </Form.Item>
+              </Row>
+              <Row justify="space-evenly" wrap>
                 <Form.Item<FormPerson>
                   label="Улица"
                   name={'registration_street'}
                   rules={getValidationRules(formPersonSchema, 'registration_street')}
+                  className="w-full"
                 >
-                  <Input onInput={toUpperCase} />
+                  <Input onBlur={() => toUpperCase('registration_street')} className="w-full" />
                 </Form.Item>
               </Row>
               <Row justify="space-evenly" wrap>
@@ -273,8 +310,9 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   label="Дом, квартира, корпус"
                   name={'registration_address'}
                   rules={getValidationRules(formPersonSchema, 'registration_address')}
+                  className="w-full"
                 >
-                  <Input className="w-64!" onInput={toUpperCase} />
+                  <Input onBlur={() => toUpperCase('registration_address')} className="w-full" />
                 </Form.Item>
               </Row>
             </>
