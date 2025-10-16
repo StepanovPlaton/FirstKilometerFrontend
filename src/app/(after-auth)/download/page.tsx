@@ -392,6 +392,14 @@ export default function UploadPage() {
                         addonAfter="₽"
                         min={0}
                         placeholder="Введите цену"
+                        formatter={(v) =>
+                          `${v}`
+                            .split('')
+                            .reverse()
+                            .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                            .reverse()
+                            .join('')
+                        }
                       />
                     </Form.Item>
                   </Col>
@@ -420,6 +428,14 @@ export default function UploadPage() {
                           addonAfter="₽"
                           min={0}
                           placeholder="Введите комиссию"
+                          formatter={(v) =>
+                            `${v}`
+                              .split('')
+                              .reverse()
+                              .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                              .reverse()
+                              .join('')
+                          }
                         />
                       </Form.Item>
                     </Col>
@@ -474,6 +490,14 @@ export default function UploadPage() {
                           addonAfter="₽"
                           min={0}
                           placeholder="Введите стоимость"
+                          formatter={(v) =>
+                            `${v}`
+                              .split('')
+                              .reverse()
+                              .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                              .reverse()
+                              .join('')
+                          }
                         />
                       </Form.Item>
                     </Col>

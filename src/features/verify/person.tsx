@@ -262,7 +262,11 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   rules={getValidationRules(formPersonSchema, 'registration_region')}
                   className="w-full"
                 >
-                  <Input onBlur={() => toUpperCase('registration_region')} className="w-full" />
+                  <TextArea
+                    rows={1}
+                    className="field-sizing-content! w-full"
+                    onBlur={() => toUpperCase('issue_organization')}
+                  />
                 </Form.Item>
               </Row>
               <Row wrap justify="start" className="w-full">
