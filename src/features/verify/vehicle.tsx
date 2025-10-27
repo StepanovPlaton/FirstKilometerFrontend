@@ -152,6 +152,16 @@ export const VerifyVehicle = (props: {
               </Row>
               <Row justify="start" className="w-full">
                 <Form.Item<FormVehicle>
+                  label="Категория ТС"
+                  name={'category'}
+                  rules={getValidationRules(formVehicleSchema, 'category')}
+                  className="w-full"
+                >
+                  <Input className="w-full" />
+                </Form.Item>
+              </Row>
+              <Row justify="start" className="w-full">
+                <Form.Item<FormVehicle>
                   label="Цвет кузова (кабины, прицепа)"
                   name={'color'}
                   rules={getValidationRules(formVehicleSchema, 'color')}

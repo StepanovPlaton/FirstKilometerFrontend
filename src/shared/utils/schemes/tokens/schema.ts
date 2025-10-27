@@ -20,6 +20,7 @@ export type TokenObtainData = z.output<typeof tokenObtainDataSchema>;
 
 export const accessTokenDataSchema = z.object({
   token_type: z.literal('access'),
+  role: z.string().min(1),
   user_id: z.coerce.number().positive(),
 });
 export type AccessTokenData = z.output<typeof accessTokenDataSchema>;

@@ -6,6 +6,7 @@ import { UploadDocument } from '@/features/upload';
 import { VerifyVehicle } from '@/features/verify/vehicle';
 import { Title } from '@/shared/ui/title';
 import { useEntities } from '@/shared/utils/hooks/data';
+import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Space, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -17,6 +18,8 @@ import z from 'zod';
 dayjs.locale('ru');
 
 export default function VehiclesTablesPage() {
+  const permissions = useAuthTokens((s) => s.permissions);
+
   const { data: vehicles, loading, mutate: mutateTable } = useEntities(VehicleService);
 
   const [newVehicle, setNewVehicle] = useState(false);
@@ -97,37 +100,41 @@ export default function VehiclesTablesPage() {
       render: (_, row: ApiVehicle) =>
         `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
     },
-    {
-      key: 'delete',
-      dataIndex: 'uuid',
-      render: (uuid: string) => (
-        <Popconfirm
-          title="Удаление ТС"
-          description="Вы уверены, что хотите удалить ТС?"
-          okText="Удалить"
-          cancelText="Отмена"
-          okButtonProps={{ danger: true }}
-          onConfirm={(e) => {
-            e?.stopPropagation();
-            void VehicleService.delete(uuid)
-              .then(() => {
-                void mutateTable((vehicles) => vehicles?.filter((v) => v.uuid !== uuid));
-              })
-              .catch(() => messageApi.error('Не удалось удалить ТС. Попробуйте позже'));
-          }}
-          onCancel={(e) => e?.stopPropagation()}
-        >
-          <Button
-            danger
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <DeleteOutlined />
-          </Button>
-        </Popconfirm>
-      ),
-    },
+    ...(permissions.includes('delete_vehicle')
+      ? [
+          {
+            key: 'delete',
+            dataIndex: 'uuid',
+            render: (uuid: string) => (
+              <Popconfirm
+                title="Удаление ТС"
+                description="Вы уверены, что хотите удалить ТС?"
+                okText="Удалить"
+                cancelText="Отмена"
+                okButtonProps={{ danger: true }}
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  void VehicleService.delete(uuid)
+                    .then(() => {
+                      void mutateTable((vehicles) => vehicles?.filter((v) => v.uuid !== uuid));
+                    })
+                    .catch(() => messageApi.error('Не удалось удалить ТС. Попробуйте позже'));
+                }}
+                onCancel={(e) => e?.stopPropagation()}
+              >
+                <Button
+                  danger
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -148,14 +155,19 @@ export default function VehiclesTablesPage() {
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setNewVehicle(true)}>
-        <PlusOutlined />
-        Добавить
-      </Button>
+      {permissions.includes('add_vehicle') && (
+        <Button type="primary" onClick={() => setNewVehicle(true)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+      )}
       <Modal
         open={!!vehicle}
         width={1200}
         okText={'Проверить и сохранить'}
+        okButtonProps={{
+          disabled: !permissions.includes('change_vehicle'),
+        }}
         onOk={() => {
           void vehicleForm
             .validateFields()

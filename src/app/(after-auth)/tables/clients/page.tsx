@@ -6,6 +6,7 @@ import { UploadDocument } from '@/features/upload';
 import { VerifyPerson } from '@/features/verify/person';
 import { Title } from '@/shared/ui/title';
 import { useEntities } from '@/shared/utils/hooks/data';
+import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Space, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -18,6 +19,8 @@ import z from 'zod';
 dayjs.locale('ru');
 
 export default function ClientTablesPage() {
+  const permissions = useAuthTokens((s) => s.permissions);
+
   const { data: users, loading, mutate: mutateTable } = useEntities(UserService);
 
   const [newUser, setNewUser] = useState(false);
@@ -130,33 +133,37 @@ export default function ClientTablesPage() {
       render: (_, row: ApiUser) =>
         `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
     },
-    {
-      key: 'delete',
-      dataIndex: 'uuid',
-      render: (uuid: string) => (
-        <Popconfirm
-          title="Удаление клиента"
-          description="Вы уверены, что хотите удалить клиента?"
-          okText="Удалить"
-          cancelText="Отмена"
-          okButtonProps={{ danger: true }}
-          onConfirm={(e) => {
-            e?.stopPropagation();
-            deleteUser(uuid);
-          }}
-          onCancel={(e) => e?.stopPropagation()}
-        >
-          <Button
-            danger
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <DeleteOutlined />
-          </Button>
-        </Popconfirm>
-      ),
-    },
+    ...(permissions.includes('delete_user')
+      ? [
+          {
+            key: 'delete',
+            dataIndex: 'uuid',
+            render: (uuid: string) => (
+              <Popconfirm
+                title="Удаление клиента"
+                description="Вы уверены, что хотите удалить клиента?"
+                okText="Удалить"
+                cancelText="Отмена"
+                okButtonProps={{ danger: true }}
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  deleteUser(uuid);
+                }}
+                onCancel={(e) => e?.stopPropagation()}
+              >
+                <Button
+                  danger
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -177,21 +184,26 @@ export default function ClientTablesPage() {
           x: 'max-content',
         }}
       />
-      <Space>
-        <Button type="primary" onClick={() => setNewUser(true)}>
-          <PlusOutlined />
-          Добавить
-        </Button>
-        <Button onClick={addEmptyUser}>
-          <PlusOutlined />
-          Добавить без документов
-        </Button>
-      </Space>
+      {permissions.includes('add_user') && (
+        <Space>
+          <Button type="primary" onClick={() => setNewUser(true)}>
+            <PlusOutlined />
+            Добавить
+          </Button>
+          <Button onClick={addEmptyUser}>
+            <PlusOutlined />
+            Добавить без документов
+          </Button>
+        </Space>
+      )}
 
       <Modal
         open={!!user}
         width={1400}
         okText={'Проверить и сохранить'}
+        okButtonProps={{
+          disabled: !permissions.includes('change_user'),
+        }}
         onOk={() => {
           void userForm
             .validateFields()

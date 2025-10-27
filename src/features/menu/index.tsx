@@ -16,58 +16,110 @@ import { Button, Divider, Flex, Space } from 'antd';
 import Sider from 'antd/es/layout/Sider';
 import { usePathname, useRouter } from 'next/navigation';
 
-const menu = [
-  {
-    href: '/',
-    text: 'Создать новый договор',
-    icon: <PlusOutlined />,
-  },
-  undefined,
-  {
-    href: '/tables/clients',
-    text: 'Клиенты автосалона',
-    icon: <UserOutlined />,
-  },
-  {
-    href: '/tables/vehicles',
-    text: 'Транспортные средства',
-    icon: <CarOutlined />,
-  },
-  {
-    href: '/tables/companies/internal',
-    text: 'Филиалы',
-    icon: <BankOutlined />,
-  },
-  {
-    href: '/tables/companies/external',
-    text: 'Юр. лица',
-    icon: <DatabaseOutlined />,
-  },
-  {
-    href: '/tables/individuals',
-    text: 'Физ. лица',
-    icon: <IdcardOutlined />,
-  },
-  undefined,
-  {
-    href: '/download',
-    text: 'Сгенерировать договор',
-    icon: <FileTextOutlined />,
-  },
-];
+import Image from 'next/image';
 
 export const Menu = () => {
   const pathname = usePathname();
   const router = useRouter();
   const clearAuthTokens = useAuthTokens((s) => s.clear);
+  const permissions = useAuthTokens((s) => s.permissions);
+
+  const menu = [
+    ...([
+      'view_doc',
+      'add_doc',
+      'view_user',
+      'add_user',
+      'change_user',
+      'view_vehicle',
+      'add_vehicle',
+      'change_vehicle',
+      'view_individual',
+      'add_individual',
+      'change_individual',
+      'view_internalcompany',
+      'add_internalcompany',
+      'change_internalcompany',
+      'view_externalcompany',
+      'add_externalcompany',
+      'change_externalcompany',
+    ].every((k) => permissions.includes(k))
+      ? [
+          {
+            href: '/create',
+            text: 'Создать новый договор',
+            icon: <PlusOutlined />,
+          },
+        ]
+      : []),
+    undefined,
+    ...(permissions.includes('view_user')
+      ? [
+          {
+            href: '/tables/clients',
+            text: 'Клиенты автосалона',
+            icon: <UserOutlined />,
+          },
+        ]
+      : []),
+    ...(permissions.includes('view_vehicle')
+      ? [
+          {
+            href: '/tables/vehicles',
+            text: 'Транспортные средства',
+            icon: <CarOutlined />,
+          },
+        ]
+      : []),
+    ...(permissions.includes('view_internalcompany')
+      ? [
+          {
+            href: '/tables/companies/internal',
+            text: 'Филиалы',
+            icon: <BankOutlined />,
+          },
+        ]
+      : []),
+    ...(permissions.includes('view_externalcompany')
+      ? [
+          {
+            href: '/tables/companies/external',
+            text: 'Юр. лица',
+            icon: <DatabaseOutlined />,
+          },
+        ]
+      : []),
+    ...(permissions.includes('view_individual')
+      ? [
+          {
+            href: '/tables/individuals',
+            text: 'Физ. лица',
+            icon: <IdcardOutlined />,
+          },
+        ]
+      : []),
+    undefined,
+    ...(permissions.includes('add_doc')
+      ? [
+          {
+            href: '/download',
+            text: 'Сгенерировать договор',
+            icon: <FileTextOutlined />,
+          },
+        ]
+      : []),
+  ];
 
   return (
     <Sider width={280} className="min-h-full! bg-[var(--color-bg2)]!">
       <Space direction="vertical" className="p-2">
-        <img
+        <Image
           src="/logo/short_logo.webp"
+          alt="Первый километр"
           className="cursor-pointer p-4"
           onClick={() => router.push('/')}
+          width={260}
+          height={60}
         />
         {menu.map((i, ind) =>
           !i ? (

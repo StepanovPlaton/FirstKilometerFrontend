@@ -20,6 +20,7 @@ export const rawVehicleSchema = entitySchema.extend({
   engine: z.string({ error: 'Номер двигателя ТС должен быть строкой' }),
   pts_date: z.iso.date({ error: 'Некорректная дата выдачи ПТС' }),
   sts_date: z.iso.date({ error: 'Некорректная дата выдачи СТС' }).nullable(),
+  category: z.string({ error: 'Категория ТС должна быть строкой' }),
 });
 export type Vehicle = z.output<typeof rawVehicleSchema>;
 
@@ -35,6 +36,7 @@ export const apiVehicleSchema = entitySchema.extend({
   chassis: rawVehicleSchema.shape.chassis.nullable(),
   body: rawVehicleSchema.shape.body.nullable(),
   engine: rawVehicleSchema.shape.engine.nullable(),
+  category: rawVehicleSchema.shape.category.nullable(),
 
   pts_date: rawVehicleSchema.shape.pts_date.nullable().transform(toDayjsDate),
   sts_date: rawVehicleSchema.shape.sts_date.transform(toDayjsDate),
@@ -86,6 +88,9 @@ export const formVehicleSchema = entitySchema
     engine: rawVehicleSchema.shape.engine
       .min(3, { error: 'Слишком короткий номер двигателя ТС' })
       .max(20, { error: 'Слишком длинный номер двигателя ТС' }),
+    category: rawVehicleSchema.shape.category
+      .min(1, { error: 'Слишком короткая категория ТС' })
+      .max(5, { error: 'Слишком длинная категория ТС' }),
 
     pts_date: z
       .any()

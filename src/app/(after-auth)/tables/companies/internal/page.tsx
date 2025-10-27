@@ -4,6 +4,7 @@ import type { InternalCompany } from '@/entities/internal-company';
 import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
+import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -14,6 +15,8 @@ import z from 'zod';
 dayjs.locale('ru');
 
 export default function InternalCompaniesTablesPage() {
+  const permissions = useAuthTokens((s) => s.permissions);
+
   const { data: companies, loading, mutate: mutateTable } = useEntities(InternalCompanyService);
   const [company, setInternalCompany] = useState<InternalCompany>();
   const [messageApi, contextHolder] = message.useMessage();
@@ -65,37 +68,41 @@ export default function InternalCompaniesTablesPage() {
       render: (_, row: InternalCompany) =>
         `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
     },
-    {
-      key: 'delete',
-      dataIndex: 'id',
-      render: (id: number) => (
-        <Popconfirm
-          title="Удаление филиала"
-          description="Вы уверены, что хотите удалить филиал?"
-          okText="Удалить"
-          cancelText="Отмена"
-          okButtonProps={{ danger: true }}
-          onConfirm={(e) => {
-            e?.stopPropagation();
-            void InternalCompanyService.delete(id)
-              .then(() => {
-                void mutateTable((companies) => companies?.filter((c) => c.id !== id));
-              })
-              .catch(() => messageApi.error('Не удалось удалить филиал. Попробуйте позже'));
-          }}
-          onCancel={(e) => e?.stopPropagation()}
-        >
-          <Button
-            danger
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <DeleteOutlined />
-          </Button>
-        </Popconfirm>
-      ),
-    },
+    ...(permissions.includes('delete_internalcompany')
+      ? [
+          {
+            key: 'delete',
+            dataIndex: 'id',
+            render: (id: number) => (
+              <Popconfirm
+                title="Удаление филиала"
+                description="Вы уверены, что хотите удалить филиал?"
+                okText="Удалить"
+                cancelText="Отмена"
+                okButtonProps={{ danger: true }}
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  void InternalCompanyService.delete(id)
+                    .then(() => {
+                      void mutateTable((companies) => companies?.filter((c) => c.id !== id));
+                    })
+                    .catch(() => messageApi.error('Не удалось удалить филиал. Попробуйте позже'));
+                }}
+                onCancel={(e) => e?.stopPropagation()}
+              >
+                <Button
+                  danger
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -116,14 +123,19 @@ export default function InternalCompaniesTablesPage() {
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setInternalCompany({} as InternalCompany)}>
-        <PlusOutlined />
-        Добавить
-      </Button>
+      {permissions.includes('add_internalcompany') && (
+        <Button type="primary" onClick={() => setInternalCompany({} as InternalCompany)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+      )}
       <Modal
         open={!!company}
         width={550}
         okText={'Проверить и сохранить'}
+        okButtonProps={{
+          disabled: !permissions.includes('change_internalcompany'),
+        }}
         onOk={() => {
           void companyForm
             .validateFields()

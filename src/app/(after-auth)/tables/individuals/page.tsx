@@ -6,6 +6,7 @@ import { UploadDocument } from '@/features/upload';
 import { VerifyPerson } from '@/features/verify/person';
 import { Title } from '@/shared/ui/title';
 import { useEntities } from '@/shared/utils/hooks/data';
+import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Space, Spin, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -18,6 +19,8 @@ import z from 'zod';
 dayjs.locale('ru');
 
 export default function ClientTablesPage() {
+  const permissions = useAuthTokens((s) => s.permissions);
+
   const { data: individuals, loading, mutate: mutateTable } = useEntities(IndividualService);
 
   const [newIndividual, setNewIndividual] = useState(false);
@@ -123,33 +126,37 @@ export default function ClientTablesPage() {
       render: (_, row: ApiIndividual) =>
         `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
     },
-    {
-      key: 'delete',
-      dataIndex: 'uuid',
-      render: (uuid: string) => (
-        <Popconfirm
-          title="Удаление физ. лица"
-          description="Вы уверены, что хотите удалить физ.лицо?"
-          okText="Удалить"
-          cancelText="Отмена"
-          okButtonProps={{ danger: true }}
-          onConfirm={(e) => {
-            e?.stopPropagation();
-            deleteIndividual(uuid);
-          }}
-          onCancel={(e) => e?.stopPropagation()}
-        >
-          <Button
-            danger
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <DeleteOutlined />
-          </Button>
-        </Popconfirm>
-      ),
-    },
+    ...(permissions.includes('delete_individual')
+      ? [
+          {
+            key: 'delete',
+            dataIndex: 'uuid',
+            render: (uuid: string) => (
+              <Popconfirm
+                title="Удаление физ. лица"
+                description="Вы уверены, что хотите удалить физ.лицо?"
+                okText="Удалить"
+                cancelText="Отмена"
+                okButtonProps={{ danger: true }}
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  deleteIndividual(uuid);
+                }}
+                onCancel={(e) => e?.stopPropagation()}
+              >
+                <Button
+                  danger
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -170,14 +177,19 @@ export default function ClientTablesPage() {
           x: 'max-content',
         }}
       />
-      <Button type="primary" onClick={() => setNewIndividual(true)}>
-        <PlusOutlined />
-        Добавить
-      </Button>
+      {permissions.includes('add_individual') && (
+        <Button type="primary" onClick={() => setNewIndividual(true)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+      )}
       <Modal
         open={!!individual}
         width={1200}
         okText={'Проверить и сохранить'}
+        okButtonProps={{
+          disabled: !permissions.includes('change_individual'),
+        }}
         onOk={() => {
           void individualForm
             .validateFields()

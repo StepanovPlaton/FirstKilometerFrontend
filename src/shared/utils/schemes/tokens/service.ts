@@ -1,8 +1,9 @@
-import type z from 'zod';
+import z from 'zod';
 import HTTPService from '../../http';
-import type { RequestOptions } from '../../services/service';
+import type { GetRequestOptions, RequestOptions } from '../../services/service';
 import { SimpleService } from '../../services/service';
 import { JWTTools } from '../../services/tools';
+import { softArrayOf } from '../softArray';
 import type { PairOfTokens, TokenObtainData } from './schema';
 import { pairOfTokensSchema } from './schema';
 
@@ -19,6 +20,10 @@ export class ITokenService extends SimpleService<PairOfTokens> {
       body: obtainData,
       ...options,
     });
+  };
+
+  getPermissions = (role: string, options?: GetRequestOptions): Promise<string[]> => {
+    return HTTPService.get(`permissions/${role}`, softArrayOf(z.string().min(1)), options);
   };
 }
 

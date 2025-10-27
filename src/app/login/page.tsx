@@ -13,6 +13,7 @@ export default function InitPage() {
   const [form] = Form.useForm<TokenObtainData>();
   const [messageApi, contextHolder] = message.useMessage();
   const updateAuthTokens = useAuthTokens((s) => s.updateTokens);
+  // const updatePermissions = useAuthTokens((s) => s.updatePermissions);
 
   const submit = (obtainData: TokenObtainData) => {
     setLoading(true);
@@ -22,6 +23,8 @@ export default function InitPage() {
         try {
           const pairOfTokensData = TokenService.tools.decodeAndValidatePairJWTToken(pairOfTokens);
           updateAuthTokens(pairOfTokensData);
+          // const permissions = await TokenService.getPermissions(pairOfTokensData.access.role)
+          // updatePermissions(permissions)
           router.push('/');
         } catch (e) {
           messageApi.error('Не удалось войти. Попробуйте позже');
