@@ -90,10 +90,11 @@ export default function VehiclesTablesPage() {
   };
 
   const columns: ColumnsType<ApiVehicle> = [
-    { key: 'pts_id', title: 'ПТС', dataIndex: 'pts_id' },
-    { key: 'vin', title: 'VIN', dataIndex: 'vin' },
+    // Артикул
     { key: 'make_model', title: 'Марка и модель ТС', dataIndex: 'make_model' },
+    { key: 'vin', title: 'VIN', dataIndex: 'vin' },
     { key: 'color', title: 'Цвет', dataIndex: 'color' },
+    { key: 'pts_id', title: 'ПТС', dataIndex: 'pts_id' },
     {
       key: 'created',
       title: 'Обновлён / Создан',
