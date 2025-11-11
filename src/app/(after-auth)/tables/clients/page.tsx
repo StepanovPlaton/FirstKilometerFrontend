@@ -102,9 +102,9 @@ export default function ClientTablesPage() {
 
   const columns: ColumnsType<ApiUser> = [
     {
-      key: 'licence_number',
-      title: 'Серия и номер паспорта',
-      dataIndex: 'licence_number',
+      key: 'last_name',
+      title: 'Фамилия',
+      dataIndex: 'last_name',
     },
     {
       key: 'first_name',
@@ -112,14 +112,14 @@ export default function ClientTablesPage() {
       dataIndex: 'first_name',
     },
     {
-      key: 'last_name',
-      title: 'Фамилия',
-      dataIndex: 'last_name',
-    },
-    {
       key: 'middle_name',
       title: 'Отчество',
       dataIndex: 'middle_name',
+    },
+    {
+      key: 'licence_number',
+      title: 'Серия и номер паспорта',
+      dataIndex: 'licence_number',
     },
     {
       key: 'birth_date',
