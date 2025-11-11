@@ -2,7 +2,7 @@ import { Title } from '@/shared/ui/title';
 import { baseCompanySchema, type BaseCompany } from '@/shared/utils/schemes/company';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
-import { Form, Input, InputNumber, Skeleton } from 'antd';
+import { Form, Input, Skeleton } from 'antd';
 
 export const VerifyCompany = ({
   ...props
@@ -36,28 +36,21 @@ export const VerifyCompany = ({
             name={'inn'}
             rules={getValidationRules(baseCompanySchema, 'inn')}
           >
-            <InputNumber className="w-full!" />
-          </Form.Item>
-          <Form.Item<BaseCompany>
-            label="БИК"
-            name={'bik'}
-            rules={getValidationRules(baseCompanySchema, 'bik')}
-          >
-            <InputNumber className="w-full!" />
+            <Input className="w-full!" />
           </Form.Item>
           <Form.Item<BaseCompany>
             label="КПП"
             name={'kpp'}
             rules={getValidationRules(baseCompanySchema, 'kpp')}
           >
-            <InputNumber className="w-full!" />
+            <Input className="w-full!" />
           </Form.Item>
           <Form.Item<BaseCompany>
-            label="ОРГН"
+            label="ОГРН"
             name={'ogrn'}
             rules={getValidationRules(baseCompanySchema, 'ogrn')}
           >
-            <InputNumber className="w-full!" />
+            <Input className="w-full!" />
           </Form.Item>
           <Form.Item<BaseCompany>
             label="Юридический адрес"
@@ -92,7 +85,14 @@ export const VerifyCompany = ({
             name={'bank_account'}
             rules={getValidationRules(baseCompanySchema, 'bank_account')}
           >
-            <InputNumber className="w-full!" />
+            <Input className="w-full!" />
+          </Form.Item>
+          <Form.Item<BaseCompany>
+            label="БИК"
+            name={'bik'}
+            rules={getValidationRules(baseCompanySchema, 'bik')}
+          >
+            <Input className="w-full!" />
           </Form.Item>
           <Form.Item<BaseCompany>
             label="Название банка"
@@ -106,7 +106,7 @@ export const VerifyCompany = ({
             name={'corr_account'}
             rules={getValidationRules(baseCompanySchema, 'corr_account')}
           >
-            <InputNumber className="w-full!" />
+            <Input className="w-full!" />
           </Form.Item>
           <Form.Item<BaseCompany>
             label="Директор"
