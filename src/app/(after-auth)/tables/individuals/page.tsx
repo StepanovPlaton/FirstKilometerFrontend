@@ -95,37 +95,37 @@ export default function ClientTablesPage() {
 
   const columns: ColumnsType<ApiIndividual> = [
     {
-      key: 'licence_number',
-      title: 'Серия и номер паспорта',
-      dataIndex: 'licence_number',
-    },
-    {
-      key: 'first_name',
-      title: 'Имя',
-      dataIndex: 'first_name',
-    },
-    {
-      key: 'last_name',
-      title: 'Фамилия',
-      dataIndex: 'last_name',
-    },
-    {
-      key: 'middle_name',
-      title: 'Отчество',
-      dataIndex: 'middle_name',
-    },
-    {
-      key: 'birth_date',
-      title: 'Дата рождения',
-      dataIndex: 'birth_date',
-      render: (birthdate: Dayjs | null) => birthdate?.format('DD MMMM YYYYг.'),
-    },
-    {
-      key: 'created',
-      title: 'Обновлён / Создан',
-      render: (_, row: ApiIndividual) =>
-        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
-    },
+        key: 'last_name',
+        title: 'Фамилия',
+        dataIndex: 'last_name',
+      },
+      {
+        key: 'first_name',
+        title: 'Имя',
+        dataIndex: 'first_name',
+      },
+      {
+        key: 'middle_name',
+        title: 'Отчество',
+        dataIndex: 'middle_name',
+      },
+      {
+        key: 'licence_number',
+        title: 'Серия и номер паспорта',
+        dataIndex: 'licence_number',
+      },
+      {
+        key: 'birth_date',
+        title: 'Дата рождения',
+        dataIndex: 'birth_date',
+        render: (birthdate: Dayjs | null) => birthdate?.format('DD MMMM YYYYг.'),
+      },
+      {
+        key: 'created',
+        title: 'Обновлён / Создан',
+        render: (_, row: ApiIndividual) =>
+          `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+      },
     ...(permissions.includes('delete_individual')
       ? [
           {
