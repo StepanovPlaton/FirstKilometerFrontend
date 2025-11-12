@@ -2,6 +2,7 @@
 
 import type { ApiVehicle, FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
+import { addCreatedAndUpdated, addTextSortAndFilters } from '@/features/tables/sort-filters';
 import { UploadDocument } from '@/features/upload';
 import { VerifyVehicle } from '@/features/verify/vehicle';
 import { Title } from '@/shared/ui/title';
@@ -91,16 +92,31 @@ export default function VehiclesTablesPage() {
 
   const columns: ColumnsType<ApiVehicle> = [
     // Артикул
-    { key: 'make_model', title: 'Марка и модель ТС', dataIndex: 'make_model' },
-    { key: 'vin', title: 'VIN', dataIndex: 'vin' },
-    { key: 'color', title: 'Цвет', dataIndex: 'color' },
-    { key: 'pts_id', title: 'ПТС', dataIndex: 'pts_id' },
     {
-      key: 'created',
-      title: 'Обновлён / Создан',
-      render: (_, row: ApiVehicle) =>
-        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+      key: 'make_model',
+      title: 'Марка и модель ТС',
+      dataIndex: 'make_model',
+      ...addTextSortAndFilters<ApiVehicle, 'make_model'>('make_model', vehicles),
     },
+    {
+      key: 'vin',
+      title: 'VIN',
+      dataIndex: 'vin',
+      ...addTextSortAndFilters<ApiVehicle, 'vin'>('vin', vehicles),
+    },
+    {
+      key: 'color',
+      title: 'Цвет',
+      dataIndex: 'color',
+      ...addTextSortAndFilters<ApiVehicle, 'color'>('color', vehicles),
+    },
+    {
+      key: 'pts_id',
+      title: 'ПТС',
+      dataIndex: 'pts_id',
+      ...addTextSortAndFilters<ApiVehicle, 'pts_id'>('pts_id', vehicles),
+    },
+    ...addCreatedAndUpdated<ApiVehicle>(),
     ...(permissions.includes('delete_vehicle')
       ? [
           {
@@ -138,6 +154,17 @@ export default function VehiclesTablesPage() {
       : []),
   ];
 
+  const addEmptyVehicle = () => {
+    setLoadingVehicle(true);
+    VehicleService.postAny({})
+      .then((vehicle) => {
+        void mutateTable((vehicles) => [...(vehicles ?? []), vehicle]);
+        setVehicle(vehicle);
+      })
+      .catch(() => messageApi.error('Не удалось создать ТС. Повторите попытку позже'))
+      .finally(() => setLoadingVehicle(false));
+  };
+
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       <Table<ApiVehicle>
@@ -157,10 +184,16 @@ export default function VehiclesTablesPage() {
         }}
       />
       {permissions.includes('add_vehicle') && (
-        <Button type="primary" onClick={() => setNewVehicle(true)}>
-          <PlusOutlined />
-          Добавить
-        </Button>
+        <Space>
+          <Button type="primary" onClick={() => setNewVehicle(true)}>
+            <PlusOutlined />
+            Добавить
+          </Button>
+          <Button onClick={addEmptyVehicle}>
+            <PlusOutlined />
+            Добавить без документов
+          </Button>
+        </Space>
       )}
       <Modal
         open={!!vehicle}

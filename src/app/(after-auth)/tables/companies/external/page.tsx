@@ -2,6 +2,7 @@
 
 import type { ExternalCompany } from '@/entities/external-company';
 import ExternalCompanyService, { externalCompanySchema } from '@/entities/external-company';
+import { addCreatedAndUpdated, addTextSortAndFilters } from '@/features/tables/sort-filters';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
@@ -61,16 +62,31 @@ export default function ExternalCompaniesTablesPage() {
   };
 
   const columns: ColumnsType<ExternalCompany> = [
-    { key: 'short_name', title: 'Название', dataIndex: 'short_name' },
-    { key: 'director', title: 'Директор', dataIndex: 'director_name' },
-    { key: 'phone', title: 'Телефон', dataIndex: 'phone' },
-    { key: 'email', title: 'Электронная почта', dataIndex: 'email' },
     {
-      key: 'created',
-      title: 'Обновлён / Создан',
-      render: (_, row: ExternalCompany) =>
-        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+      key: 'short_name',
+      title: 'Название',
+      dataIndex: 'short_name',
+      ...addTextSortAndFilters<ExternalCompany, 'short_name'>('short_name', companies),
     },
+    {
+      key: 'director',
+      title: 'Директор',
+      dataIndex: 'director_name',
+      ...addTextSortAndFilters<ExternalCompany, 'director_name'>('director_name', companies),
+    },
+    {
+      key: 'phone',
+      title: 'Телефон',
+      dataIndex: 'phone',
+      ...addTextSortAndFilters<ExternalCompany, 'phone'>('phone', companies),
+    },
+    {
+      key: 'email',
+      title: 'Электронная почта',
+      dataIndex: 'email',
+      ...addTextSortAndFilters<ExternalCompany, 'email'>('email', companies),
+    },
+    ...addCreatedAndUpdated<ExternalCompany>(),
     ...(permissions.includes('delete_externalcompany')
       ? [
           {

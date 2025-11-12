@@ -2,6 +2,11 @@
 
 import type { ApiUser, FormUser } from '@/entities/user';
 import UserService, { formUserSchema } from '@/entities/user';
+import {
+  addCreatedAndUpdated,
+  addDateSortAndFilters,
+  addTextSortAndFilters,
+} from '@/features/tables/sort-filters';
 import { UploadDocument } from '@/features/upload';
 import { VerifyPerson } from '@/features/verify/person';
 import { Title } from '@/shared/ui/title';
@@ -105,34 +110,34 @@ export default function ClientTablesPage() {
       key: 'last_name',
       title: 'Фамилия',
       dataIndex: 'last_name',
+      ...addTextSortAndFilters<ApiUser, 'last_name'>('last_name', users),
     },
     {
       key: 'first_name',
       title: 'Имя',
       dataIndex: 'first_name',
+      ...addTextSortAndFilters<ApiUser, 'first_name'>('first_name', users),
     },
     {
       key: 'middle_name',
       title: 'Отчество',
       dataIndex: 'middle_name',
+      ...addTextSortAndFilters<ApiUser, 'middle_name'>('middle_name', users),
     },
     {
       key: 'licence_number',
       title: 'Серия и номер паспорта',
       dataIndex: 'licence_number',
+      ...addTextSortAndFilters<ApiUser, 'licence_number'>('licence_number', users),
     },
     {
       key: 'birth_date',
       title: 'Дата рождения',
       dataIndex: 'birth_date',
       render: (birthdate: Dayjs | null) => birthdate?.format('DD MMMM YYYYг.'),
+      ...addDateSortAndFilters<ApiUser, 'birth_date'>('birth_date'),
     },
-    {
-      key: 'created',
-      title: 'Обновлён / Создан',
-      render: (_, row: ApiUser) =>
-        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
-    },
+    ...addCreatedAndUpdated<ApiUser>(),
     ...(permissions.includes('delete_user')
       ? [
           {

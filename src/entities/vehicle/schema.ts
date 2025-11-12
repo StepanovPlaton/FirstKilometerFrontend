@@ -43,7 +43,7 @@ export const apiVehicleSchema = entitySchema.extend({
 
   sts_front_url: z.url().nullable().optional(),
   sts_back_url: z.url().nullable().optional(),
-  pts_url: z.url(),
+  pts_url: z.url().nullable().optional(),
 });
 export type ApiVehicle = z.output<typeof apiVehicleSchema>;
 

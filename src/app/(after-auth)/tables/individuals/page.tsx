@@ -2,6 +2,11 @@
 
 import type { ApiIndividual, FormIndividual } from '@/entities/individual';
 import IndividualService, { formIndividualSchema } from '@/entities/individual';
+import {
+  addCreatedAndUpdated,
+  addDateSortAndFilters,
+  addTextSortAndFilters,
+} from '@/features/tables/sort-filters';
 import { UploadDocument } from '@/features/upload';
 import { VerifyPerson } from '@/features/verify/person';
 import { Title } from '@/shared/ui/title';
@@ -17,7 +22,6 @@ import 'dayjs/locale/ru'; // Подключаем русскую локаль da
 import { useEffect, useState } from 'react';
 import z from 'zod';
 dayjs.locale('ru');
-
 export default function ClientTablesPage() {
   const permissions = useAuthTokens((s) => s.permissions);
 
@@ -95,37 +99,37 @@ export default function ClientTablesPage() {
 
   const columns: ColumnsType<ApiIndividual> = [
     {
-      key: 'licence_number',
-      title: 'Серия и номер паспорта',
-      dataIndex: 'licence_number',
+      key: 'last_name',
+      title: 'Фамилия',
+      dataIndex: 'last_name',
+      ...addTextSortAndFilters<ApiIndividual, 'last_name'>('last_name', individuals),
     },
     {
       key: 'first_name',
       title: 'Имя',
       dataIndex: 'first_name',
-    },
-    {
-      key: 'last_name',
-      title: 'Фамилия',
-      dataIndex: 'last_name',
+      ...addTextSortAndFilters<ApiIndividual, 'first_name'>('first_name', individuals),
     },
     {
       key: 'middle_name',
       title: 'Отчество',
       dataIndex: 'middle_name',
+      ...addTextSortAndFilters<ApiIndividual, 'middle_name'>('middle_name', individuals),
+    },
+    {
+      key: 'licence_number',
+      title: 'Серия и номер паспорта',
+      dataIndex: 'licence_number',
+      ...addTextSortAndFilters<ApiIndividual, 'licence_number'>('licence_number', individuals),
     },
     {
       key: 'birth_date',
       title: 'Дата рождения',
       dataIndex: 'birth_date',
       render: (birthdate: Dayjs | null) => birthdate?.format('DD MMMM YYYYг.'),
+      ...addDateSortAndFilters<ApiIndividual, 'birth_date'>('birth_date'),
     },
-    {
-      key: 'created',
-      title: 'Обновлён / Создан',
-      render: (_, row: ApiIndividual) =>
-        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
-    },
+    ...addCreatedAndUpdated<ApiIndividual>(),
     ...(permissions.includes('delete_individual')
       ? [
           {

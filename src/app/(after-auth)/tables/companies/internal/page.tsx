@@ -2,6 +2,7 @@
 
 import type { InternalCompany } from '@/entities/internal-company';
 import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
+import { addCreatedAndUpdated, addTextSortAndFilters } from '@/features/tables/sort-filters';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
@@ -58,16 +59,31 @@ export default function InternalCompaniesTablesPage() {
   };
 
   const columns: ColumnsType<InternalCompany> = [
-    { key: 'short_name', title: 'Название', dataIndex: 'short_name' },
-    { key: 'director', title: 'Директор', dataIndex: 'director_name' },
-    { key: 'phone', title: 'Телефон', dataIndex: 'phone' },
-    { key: 'email', title: 'Электронная почта', dataIndex: 'email' },
     {
-      key: 'created',
-      title: 'Обновлён / Создан',
-      render: (_, row: InternalCompany) =>
-        `${row.updated_at?.format('DD MMMM') ?? '???'} / ${row.created_at?.format('DD MMMM YYYY г.') ?? '???'}`,
+      key: 'short_name',
+      title: 'Название',
+      dataIndex: 'short_name',
+      ...addTextSortAndFilters<InternalCompany, 'short_name'>('short_name', companies),
     },
+    {
+      key: 'director',
+      title: 'Директор',
+      dataIndex: 'director_name',
+      ...addTextSortAndFilters<InternalCompany, 'director_name'>('director_name', companies),
+    },
+    {
+      key: 'phone',
+      title: 'Телефон',
+      dataIndex: 'phone',
+      ...addTextSortAndFilters<InternalCompany, 'phone'>('phone', companies),
+    },
+    {
+      key: 'email',
+      title: 'Электронная почта',
+      dataIndex: 'email',
+      ...addTextSortAndFilters<InternalCompany, 'email'>('email', companies),
+    },
+    ...addCreatedAndUpdated<InternalCompany>(),
     ...(permissions.includes('delete_internalcompany')
       ? [
           {
