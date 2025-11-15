@@ -1,11 +1,11 @@
 'use client';
 
-import type { FormUser } from '@/entities/user';
-import { formUserSchema, default as UserService } from '@/entities/user';
 import { Button, Card, Flex, Form, message } from 'antd';
 
 import type { ExternalCompany } from '@/entities/external-company';
 import ExternalCompanyService, { externalCompanySchema } from '@/entities/external-company';
+import type { FormIndividual } from '@/entities/individual';
+import IndividualService, { formIndividualSchema } from '@/entities/individual';
 import type { InternalCompany } from '@/entities/internal-company';
 import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
 import type { FormVehicle } from '@/entities/vehicle';
@@ -31,8 +31,8 @@ export default function VerifyPage() {
 
   const [messageApi, contextHolder] = message.useMessage();
 
-  const { data: user, mutate: mutateUser } = useEntity(UserService, buyer_id, undefined, {
-    active: buyer === 'user',
+  const { data: user, mutate: mutateUser } = useEntity(IndividualService, buyer_id, undefined, {
+    active: buyer === 'individual',
   });
   const { data: internalCompany, mutate: mutateInternalCompany } = useEntity(
     InternalCompanyService,
@@ -52,13 +52,13 @@ export default function VerifyPage() {
   );
   const { data: vehicle, mutate: mutateVehicle } = useEntity(VehicleService, vehicleUUID);
 
-  const [userForm] = Form.useForm<FormUser>();
+  const [userForm] = Form.useForm<FormIndividual>();
   const [internalCompanyForm] = Form.useForm<InternalCompany>();
   const [externalCompanyForm] = Form.useForm<ExternalCompany>();
   const [vehicleForm] = Form.useForm<FormVehicle>();
 
   useEffect(() => {
-    userForm.setFieldsValue(user as never as FormUser);
+    userForm.setFieldsValue(user as never as FormIndividual);
   }, [user, userForm]);
   useEffect(() => {
     if (internalCompany) {
@@ -74,10 +74,10 @@ export default function VerifyPage() {
     vehicleForm.setFieldsValue(vehicle as never as FormVehicle);
   }, [vehicle, vehicleForm]);
 
-  const submitUser = (values: FormUser) => {
-    const validatedForm = formUserSchema.safeParse({ ...values, uuid: buyer_id });
+  const submitUser = (values: FormIndividual) => {
+    const validatedForm = formIndividualSchema.safeParse({ ...values, uuid: buyer_id });
     if (validatedForm.success) {
-      return UserService.putAny(validatedForm.data)
+      return IndividualService.putAny(validatedForm.data)
         .then((user) => mutateUser(user))
         .catch((e) => {
           messageApi.error('Не удалось сохранить данные клиента. Повторите попытку позже');
@@ -165,12 +165,11 @@ export default function VerifyPage() {
   return (
     <Flex vertical align="center" className="w-full" gap={12}>
       <Card className="w-300 max-w-full">
-        {buyer === 'user' ? (
+        {buyer === 'individual' ? (
           <VerifyPerson
             person={user}
             form={userForm}
-            type="user"
-            service={UserService}
+            service={IndividualService}
             onPersonChange={(person) =>
               router.replace(pathname + '?' + createQueryString('buyer_id', person))
             }
@@ -190,7 +189,7 @@ export default function VerifyPage() {
         onClick={() => {
           void (async () => {
             await Promise.all([
-              buyer === 'user'
+              buyer === 'individual'
                 ? userForm.validateFields().catch((e) => {
                     messageApi.warning('Исправьте ошибки в форме клиента и повторите попытку');
                     throw e;
@@ -215,7 +214,7 @@ export default function VerifyPage() {
             ])
               .then(() =>
                 Promise.all([
-                  buyer === 'user'
+                  buyer === 'individual'
                     ? submitUser(userForm.getFieldsValue())
                     : buyer === 'internal_company'
                       ? submitInternalCompany(internalCompanyForm.getFieldsValue())

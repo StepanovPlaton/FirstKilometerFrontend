@@ -31,7 +31,6 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
 }: {
   person: ApiPerson | undefined;
   form: FormInstance<FormPerson>;
-  type: 'user' | 'individual';
   service: T;
   onPersonChange?: (person: ApiPerson['uuid']) => unknown;
 }) => {
@@ -58,13 +57,13 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
     <Form<FormPerson> layout="vertical" form={props.form}>
       <div className="flex w-full">
         <Flex vertical align="center" className="w-2/3" gap={8}>
-          <Title level={2}>Документы {props.type === 'user' ? 'клиента' : 'физ. лица'}</Title>
-          <Text>Паспорт {props.type === 'user' ? 'клиента' : 'физ. лица'} (главная страница)</Text>
+          <Title level={2}>Документы физ. лица</Title>
+          <Text>Паспорт физ. лица (главная страница)</Text>
           <div className="aspect-video w-full px-4">
             <Viewer
               active={!!props.person}
               url={props.person?.passport_url}
-              alt={`Главная страница паспорта ${props.type === 'user' ? 'клиента' : 'физ. лица'}`}
+              alt="Главная страница паспорта физ. лица"
               imageClassName={clsx('rounded shadow-lg!', !props.person?.reg_url && 'opacity-30')}
               skeletonClassName="h-full! w-full! p-2"
             />
@@ -73,7 +72,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
         <div className="mx-4 min-h-20 w-[2px] bg-gray-300" />
         <div className="w-1/3">
           <Flex justify="space-around">
-            <Title level={2}>Данные {props.type === 'user' ? 'клиента' : 'физ. лица'}</Title>
+            <Title level={2}>Данные физ. лица</Title>
           </Flex>
           {props.person ? (
             <>
@@ -230,12 +229,12 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
       <Divider className="m-2!" />
       <div className="flex w-full">
         <Flex vertical align="center" className="w-2/3" gap={8}>
-          <Text>Паспорт {props.type === 'user' ? 'клиента' : 'физ. лица'} (прописка)</Text>
+          <Text>Паспорт физ. лица (прописка)</Text>
           <div className="aspect-video w-full px-4">
             <Viewer
               active={!!props.person}
               url={props.person?.reg_url}
-              alt={`Второй разворот паспорта ${props.type === 'user' ? 'клиента' : 'физ. лица'}`}
+              alt="Второй разворот паспорта физ. лица"
               imageClassName={clsx('rounded shadow-lg!', !props.person?.reg_url && 'opacity-30')}
               skeletonClassName="h-full! w-full! p-2"
             />

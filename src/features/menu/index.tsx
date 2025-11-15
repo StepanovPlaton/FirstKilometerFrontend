@@ -10,7 +10,6 @@ import {
   IdcardOutlined,
   PlaySquareOutlined,
   PlusOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import { Button, Divider, Flex, Space } from 'antd';
 import Sider from 'antd/es/layout/Sider';
@@ -53,15 +52,16 @@ export const Menu = () => {
         ]
       : []),
     undefined,
-    ...(permissions.includes('view_user')
+    ...(permissions.includes('view_individual')
       ? [
           {
-            href: '/tables/clients',
-            text: 'Клиенты автосалона',
-            icon: <UserOutlined />,
+            href: '/tables/individuals',
+            text: 'Физ. лица',
+            icon: <IdcardOutlined />,
           },
         ]
       : []),
+    undefined,
     ...(permissions.includes('view_vehicle')
       ? [
           {
@@ -89,16 +89,7 @@ export const Menu = () => {
           },
         ]
       : []),
-    ...(permissions.includes('view_individual')
-      ? [
-          {
-            href: '/tables/individuals',
-            text: 'Физ. лица',
-            icon: <IdcardOutlined />,
-          },
-        ]
-      : []),
-    undefined,
+
     ...(permissions.includes('add_doc')
       ? [
           {

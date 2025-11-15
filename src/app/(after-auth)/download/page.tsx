@@ -4,7 +4,6 @@ import DocumentService from '@/entities/documents';
 import ExternalCompanyService from '@/entities/external-company';
 import IndividualService from '@/entities/individual';
 import InternalCompanyService from '@/entities/internal-company';
-import UserService from '@/entities/user';
 import VehicleService from '@/entities/vehicle';
 import { Title } from '@/shared/ui/title';
 import { useChoices } from '@/shared/utils/hooks/choices';
@@ -50,7 +49,7 @@ type GetDocumentForm = {
 export default function UploadPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [buyer, setBuyer] = useState<'user' | 'internal_company' | 'external_company'>();
+  const [buyer, setBuyer] = useState<'individual' | 'internal_company' | 'external_company'>();
   const [seller, setSeller] = useState<'individual' | 'internal_company' | 'external_company'>();
 
   const {
@@ -78,12 +77,6 @@ export default function UploadPage() {
   } = useChoices(VehicleService);
 
   const {
-    data: existsUsers,
-    loading: loadingExistsUsers,
-    error: failedGetExistsUsers,
-  } = useChoices(UserService);
-
-  const {
     data: individuals,
     error: getIndividualsError,
     loading: loadingIndividuals,
@@ -108,7 +101,7 @@ export default function UploadPage() {
     }
     [
       { key: 'buyer', list: null },
-      { key: 'buyer_id', list: [existsUsers, externalCompanies, internalCompanies] },
+      { key: 'buyer_id', list: [individuals, externalCompanies, internalCompanies] },
       { key: 'vehicle', list: [existsVehicles] },
       { key: 'type', list: [documentTypes] },
       { key: 'seller', list: null },
@@ -135,7 +128,6 @@ export default function UploadPage() {
     });
   }, [
     existsVehicles,
-    existsUsers,
     internalCompanies,
     externalCompanies,
     individuals,
@@ -149,11 +141,10 @@ export default function UploadPage() {
     void DocumentService.getDocument({
       ...data,
       date: data.date?.format('YYYY-MM-DD'),
-      buyer,
-      seller,
+      buyer: buyer === 'individual' ? 'person' : buyer,
+      seller: seller === 'individual' ? 'person' : seller,
     })
       .then((doc) => {
-        console.log(doc.document_url);
         const link = document.createElement('a');
         link.download = doc.document_name;
         link.href = doc.document_url;
@@ -225,7 +216,7 @@ export default function UploadPage() {
                   options={[
                     {
                       label: 'Клиент',
-                      value: 'user',
+                      value: 'individual',
                     },
                     {
                       label: 'Филиал',
@@ -278,9 +269,9 @@ export default function UploadPage() {
                   <Select
                     className="w-100!"
                     placeholder="Выберите клиента"
-                    disabled={!!failedGetExistsUsers}
-                    loading={loadingExistsUsers}
-                    options={existsUsers ?? []}
+                    disabled={!!getIndividualsError}
+                    loading={loadingIndividuals}
+                    options={individuals ?? []}
                     showSearch
                     filterOption={(input, option) =>
                       (option?.label ?? '').toLowerCase().includes(input.toLowerCase())

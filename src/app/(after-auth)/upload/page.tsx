@@ -2,10 +2,10 @@
 
 import type { ExternalCompany } from '@/entities/external-company';
 import ExternalCompanyService from '@/entities/external-company';
+import type { ApiIndividual, Individual } from '@/entities/individual';
+import IndividualService from '@/entities/individual';
 import type { InternalCompany } from '@/entities/internal-company';
 import InternalCompanyService from '@/entities/internal-company';
-import type { ApiUser, User } from '@/entities/user';
-import UserService from '@/entities/user';
 import type { ApiVehicle } from '@/entities/vehicle';
 import VehicleService from '@/entities/vehicle';
 import { UploadDocument } from '@/features/upload';
@@ -21,18 +21,20 @@ export default function UploadPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [buyer, setBuyer] = useState<'user' | 'internal_company' | 'external_company'>('user');
+  const [buyer, setBuyer] = useState<'individual' | 'internal_company' | 'external_company'>(
+    'individual'
+  );
 
   const [loadingUser, setLoadingUser] = useState(false);
   const [passportMainPage, setPassportMainPage] = useState<RcFile>();
   const [passportRegistration, setPassportRegistration] = useState<RcFile>();
-  const [user, setUser] = useState<ApiUser>();
+  const [user, setUser] = useState<ApiIndividual>();
   const {
     data: existsUsers,
     loading: loadingExistsUsers,
     error: failedGetExistsUsers,
-  } = useChoices(UserService);
-  const [selectedUser, setSelectedUser] = useState<User['uuid']>();
+  } = useChoices(IndividualService);
+  const [selectedUser, setSelectedUser] = useState<Individual['uuid']>();
   const [createEmptyUser, setCreateEmptyUser] = useState(false);
   useEffect(() => {
     if (createEmptyUser) {
@@ -74,7 +76,7 @@ export default function UploadPage() {
 
   const submit = () => {
     const requests: Promise<unknown>[] = [];
-    if (!selectedUser && !user && buyer === 'user') {
+    if (!selectedUser && !user && buyer === 'individual') {
       if (!passportMainPage && !createEmptyUser) {
         messageApi.error('Чтобы продолжить, загрузите главную страницу паспорта клиента');
         return;
@@ -91,7 +93,7 @@ export default function UploadPage() {
             userData.append('passport_main', passportMainPage);
             userData.append('passport_registration', passportRegistration);
           }
-          return await UserService.postAny(userData, { stringify: false })
+          return await IndividualService.postAny(userData, { stringify: false })
             .then((user) => setUser(user))
             .catch(() =>
               messageApi.error('Не удалось загрузить данные клиента. Повторите попытку позже')
@@ -136,14 +138,14 @@ export default function UploadPage() {
 
     if (
       validated &&
-      ((buyer === 'user' && userUUID) ||
+      ((buyer === 'individual' && userUUID) ||
         (buyer === 'internal_company' && internalCompany) ||
         (buyer === 'external_company' && externalCompany)) &&
       vehicleUUID
     ) {
       let url =
         `/verify?vehicle=${vehicleUUID}&buyer=${buyer}` +
-        `&buyer_id=${buyer === 'user' ? userUUID : buyer === 'internal_company' ? internalCompany : externalCompany}`;
+        `&buyer_id=${buyer === 'individual' ? userUUID : buyer === 'internal_company' ? internalCompany : externalCompany}`;
       [
         'type',
         'seller',
@@ -178,7 +180,7 @@ export default function UploadPage() {
               options={[
                 {
                   label: 'Клиент',
-                  value: 'user',
+                  value: 'individual',
                 },
                 {
                   label: 'Филиал',
@@ -193,7 +195,7 @@ export default function UploadPage() {
               onChange={(v: typeof buyer) => setBuyer(v)}
               defaultValue={buyer}
             />
-            {buyer === 'user' ? (
+            {buyer === 'individual' ? (
               <Space direction="vertical" align="center">
                 <Text>Добавьте нового клиента</Text>
                 <Space className="w-full">
