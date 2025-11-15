@@ -215,7 +215,6 @@ export default function ClientTablesPage() {
         <VerifyPerson
           person={individual}
           form={individualForm}
-          type="individual"
           service={IndividualService}
           onPersonChange={(person) => setIndividual(individuals?.find((i) => i.uuid === person))}
         />
