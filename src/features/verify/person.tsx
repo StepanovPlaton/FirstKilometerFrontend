@@ -47,7 +47,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
       return;
     }
     void props.service.delete(props.person?.uuid).then(() => {
-      props.onPersonChange?.(changeToPerson.value);
+      props.onPersonChange?.(String(changeToPerson.value));
       setConfirmDelete(false);
       setChangeToPerson(undefined);
     });
