@@ -89,7 +89,6 @@ export default function UploadPage() {
   const [form] = Form.useForm<GetDocumentForm>();
   const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
   const isReturnDoc = Form.useWatch((v) => v.type === 'return', form);
-  const documentType = Form.useWatch('type', form);
   const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services, form);
 
   useEffect(() => {
@@ -169,6 +168,7 @@ export default function UploadPage() {
   useEffect(() => {
     if (isTaxDoc) {
       setSeller('internal_company');
+      setBuyer(undefined);
     }
   }, [isTaxDoc]);
 
@@ -180,9 +180,6 @@ export default function UploadPage() {
   useEffect(() => {
     if (form.getFieldValue('buyer_id')) {
       form.resetFields(['buyer_id']);
-    }
-    if (seller === 'internal_company' && documentType !== 'sale') {
-      setSeller('external_company');
     }
   }, [buyer]);
 
@@ -215,7 +212,7 @@ export default function UploadPage() {
                   placeholder="Выберите покупателя"
                   options={[
                     {
-                      label: 'Клиент',
+                      label: 'Физическое лицо',
                       value: 'individual',
                     },
                     {
@@ -265,10 +262,14 @@ export default function UploadPage() {
                   />
                 </Form.Item>
               ) : (
-                <Form.Item<GetDocumentForm> label="Клиент" name={'buyer_id'} rules={requiredRule}>
+                <Form.Item<GetDocumentForm>
+                  label="Физическое лицо"
+                  name={'buyer_id'}
+                  rules={requiredRule}
+                >
                   <Select
                     className="w-100!"
-                    placeholder="Выберите клиента"
+                    placeholder="Выберите физическое лицо"
                     disabled={!!getIndividualsError}
                     loading={loadingIndividuals}
                     options={individuals ?? []}

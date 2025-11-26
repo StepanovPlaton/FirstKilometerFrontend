@@ -24,6 +24,29 @@ export const addTextSortAndFilters = <T extends { [k in K]: string | null }, K e
     onFilter: (value: string, row: T) => row[key] === value,
     filterMode: 'tree',
     filterSearch: true,
+    onFilterDropdownOpenChange: (visible: boolean) => {
+      if (visible) {
+        setTimeout(() => {
+          const filterInput = document.querySelector(
+            '.ant-table-filter-dropdown input'
+          ) as HTMLInputElement;
+          if (filterInput) {
+            filterInput.addEventListener('input', (e) => {
+              const searchValue = (e.target as HTMLInputElement).value.toLowerCase();
+              const filterItems = document.querySelectorAll('.ant-tree-treenode');
+              filterItems.forEach((item) => {
+                const text = item.textContent?.toLowerCase() || '';
+                if (text.includes(searchValue)) {
+                  (item as HTMLElement).style.display = '';
+                } else {
+                  (item as HTMLElement).style.display = 'none';
+                }
+              });
+            });
+          }
+        }, 100);
+      }
+    },
   } as ColumnsType<T>[number];
 };
 export const addDateSortAndFilters = <T extends Record<K, Dayjs | null>, K extends keyof T>(

@@ -1,9 +1,11 @@
 'use client';
 
 import { formVehicleSchema, type ApiVehicle, type FormVehicle } from '@/entities/vehicle';
+import ArticleCategoryService from '@/entities/vehicle/article';
 import { Viewer } from '@/features/viewer';
 import { Text } from '@/shared/ui/text';
 import { Title } from '@/shared/ui/title';
+import { useChoices } from '@/shared/utils/hooks/choices';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
 import {
@@ -41,6 +43,9 @@ export const VerifyVehicle = (props: {
 }) => {
   const [vehicleTypes, setVehicleTypes] = useState<string[]>(baseVehicleTypes);
 
+  const { data: articleCategories, loading: articleCategoriesLoading } =
+    useChoices(ArticleCategoryService);
+
   return (
     <Form<FormVehicle> layout="vertical" form={props.form}>
       <div className="flex w-full">
@@ -65,6 +70,31 @@ export const VerifyVehicle = (props: {
           {props.vehicle ? (
             <>
               <Row justify="start" className="w-full">
+                <Col span={8}>
+                  <Form.Item<FormVehicle>
+                    label="Категория"
+                    name={'article_category_id'}
+                    rules={getValidationRules(formVehicleSchema, 'article_category_id')}
+                  >
+                    <Select
+                      className="w-full"
+                      options={articleCategories ?? []}
+                      loading={articleCategoriesLoading}
+                      allowClear
+                    />
+                  </Form.Item>
+                </Col>
+                <Col span={16}>
+                  <Form.Item<FormVehicle>
+                    label="Артикул"
+                    name={'article_number'}
+                    rules={getValidationRules(formVehicleSchema, 'article_number')}
+                  >
+                    <Input className="w-full" />
+                  </Form.Item>
+                </Col>
+              </Row>
+              <Row justify="start" className="w-full">
                 <Form.Item<FormVehicle>
                   label="Номер ПТС"
                   name={'pts_id'}
@@ -76,7 +106,7 @@ export const VerifyVehicle = (props: {
               </Row>
               <Row justify="start" className="w-full">
                 <Form.Item<FormVehicle>
-                  label="Индификационный номер (VIN)"
+                  label="Идентификационный номер (VIN)"
                   name={'vin'}
                   rules={getValidationRules(formVehicleSchema, 'vin')}
                   className="w-full"

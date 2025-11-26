@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { entitySchema } from '@/shared/utils/schemes';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { articleCategorySchema } from './article';
 
 const toDayjsDate = (d?: string | null) => (d ? dayjs(d) : null);
 
@@ -21,6 +22,9 @@ export const rawVehicleSchema = entitySchema.extend({
   pts_date: z.iso.date({ error: 'Некорректная дата выдачи ПТС' }),
   sts_date: z.iso.date({ error: 'Некорректная дата выдачи СТС' }).nullable(),
   category: z.string({ error: 'Категория ТС должна быть строкой' }),
+
+  article_category: articleCategorySchema,
+  article_number: z.string({ error: 'Артикул должен быть строкой' }),
 });
 export type Vehicle = z.output<typeof rawVehicleSchema>;
 
@@ -40,6 +44,9 @@ export const apiVehicleSchema = entitySchema.extend({
 
   pts_date: rawVehicleSchema.shape.pts_date.nullable().transform(toDayjsDate),
   sts_date: rawVehicleSchema.shape.sts_date.transform(toDayjsDate),
+
+  article_category: rawVehicleSchema.shape.article_category.nullable(),
+  article_number: rawVehicleSchema.shape.article_number.nullable(),
 
   sts_front_url: z.url().nullable().optional(),
   sts_back_url: z.url().nullable().optional(),
@@ -91,6 +98,11 @@ export const formVehicleSchema = entitySchema
     category: rawVehicleSchema.shape.category
       .min(1, { error: 'Слишком короткая категория ТС' })
       .max(5, { error: 'Слишком длинная категория ТС' }),
+
+    article_category_id: rawVehicleSchema.shape.article_category.shape.id.nullable().optional(),
+    article_number: rawVehicleSchema.shape.article_number
+      .max(20, { error: 'Слишком длинный артикул ТС' })
+      .nullable(),
 
     pts_date: z
       .any()

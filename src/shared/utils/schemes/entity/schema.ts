@@ -17,7 +17,7 @@ export const entitySchema = z.object({
 export type UUIDEntity = z.infer<typeof entitySchema>;
 
 export const idEntitySchema = z.object({
-  id: z.number().positive(),
+  id: z.number('Необходим идентификатор ').positive(),
   created_at: date,
   updated_at: date,
 });

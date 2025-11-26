@@ -16,6 +16,15 @@ import Sider from 'antd/es/layout/Sider';
 import { usePathname, useRouter } from 'next/navigation';
 
 import Image from 'next/image';
+import type { JSX } from 'react';
+
+type MenuItem =
+  | {
+      href: string;
+      text: string;
+      icon: JSX.Element;
+    }
+  | undefined;
 
 export const Menu = () => {
   const pathname = usePathname();
@@ -23,7 +32,7 @@ export const Menu = () => {
   const clearAuthTokens = useAuthTokens((s) => s.clear);
   const permissions = useAuthTokens((s) => s.permissions);
 
-  const menu = [
+  const menu: MenuItem[] = [
     ...([
       'view_doc',
       'add_doc',
@@ -52,16 +61,6 @@ export const Menu = () => {
         ]
       : []),
     undefined,
-    ...(permissions.includes('view_individual')
-      ? [
-          {
-            href: '/tables/individuals',
-            text: 'Физ. лица',
-            icon: <IdcardOutlined />,
-          },
-        ]
-      : []),
-    undefined,
     ...(permissions.includes('view_vehicle')
       ? [
           {
@@ -71,6 +70,17 @@ export const Menu = () => {
           },
         ]
       : []),
+    undefined,
+    ...(permissions.includes('view_individual')
+      ? [
+          {
+            href: '/tables/individuals',
+            text: 'Физ. лица',
+            icon: <IdcardOutlined />,
+          },
+        ]
+      : []),
+
     ...(permissions.includes('view_internalcompany')
       ? [
           {
@@ -89,7 +99,7 @@ export const Menu = () => {
           },
         ]
       : []),
-
+    undefined,
     ...(permissions.includes('add_doc')
       ? [
           {
@@ -101,50 +111,66 @@ export const Menu = () => {
       : []),
   ];
 
+  const additional: MenuItem[] = [
+    {
+      href: '/tables/articles',
+      text: 'Категории артикулов',
+      icon: <DatabaseOutlined />,
+    },
+  ];
+
+  const drawMenu = (i: MenuItem, ind: number) =>
+    !i ? (
+      <Divider key={ind} className="m-1!" />
+    ) : (
+      <Button
+        key={i.href}
+        className="w-full"
+        size="large"
+        type={pathname === i.href ? 'primary' : 'default'}
+        onClick={() => router.push(i.href)}
+      >
+        <Flex className="w-full" justify="start">
+          <Title level={5} className={`align-start m-0! text-inherit!`}>
+            <Space>
+              {i.icon}
+              {i.text}
+            </Space>
+          </Title>
+        </Flex>
+      </Button>
+    );
+
   return (
     <Sider width={280} className="min-h-full! bg-[var(--color-bg2)]!">
-      <Space direction="vertical" className="p-2">
-        <Image
-          src="/logo/short_logo.webp"
-          alt="Первый километр"
-          className="cursor-pointer p-4"
-          onClick={() => router.push('/')}
-          width={260}
-          height={60}
-        />
-        {menu.map((i, ind) =>
-          !i ? (
-            <Divider key={ind} className="m-1!" />
-          ) : (
+      <Flex vertical justify="space-between" className="h-full">
+        <Space direction="vertical" className="p-2">
+          <Image
+            src="/logo/short_logo.webp"
+            alt="Первый километр"
+            className="cursor-pointer p-4"
+            onClick={() => router.push('/')}
+            width={260}
+            height={60}
+          />
+          {menu.map(drawMenu)}
+        </Space>
+
+        <Space direction="vertical" className="p-2">
+          {additional.map(drawMenu)}
+          <Flex className="w-full" justify="flex-end">
             <Button
-              key={i.href}
-              className="w-full"
-              size="large"
-              type={pathname === i.href ? 'primary' : 'default'}
-              onClick={() => router.push(i.href)}
+              danger
+              onClick={() => {
+                clearAuthTokens();
+                router.push('/login');
+              }}
             >
-              <Flex className="w-full" justify="start">
-                <Title level={5} className={`align-start m-0! text-inherit!`}>
-                  <Space>
-                    {i.icon}
-                    {i.text}
-                  </Space>
-                </Title>
-              </Flex>
+              Выйти <PlaySquareOutlined />
             </Button>
-          )
-        )}
-      </Space>
-      <Button
-        danger
-        className="absolute! right-4! bottom-4!"
-        onClick={() => {
-          clearAuthTokens();
-          router.push('/login');
-        }}
-      >
-        Выйти <PlaySquareOutlined />
-      </Button>
+          </Flex>
+        </Space>
+      </Flex>
     </Sider>
   );
 };

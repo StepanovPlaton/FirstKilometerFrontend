@@ -1,6 +1,6 @@
 'use client';
 
-import type { ApiIndividual, FormIndividual } from '@/entities/individual';
+import type { ApiIndividual, FormIndividual, Individual } from '@/entities/individual';
 import IndividualService, { formIndividualSchema } from '@/entities/individual';
 import {
   addCreatedAndUpdated,
@@ -40,9 +40,15 @@ export default function ClientTablesPage() {
   }, [individual, individualForm]);
 
   const submitIndividual = (values: FormIndividual) => {
-    const validatedForm = formIndividualSchema.safeParse({ ...values, uuid: individual?.uuid });
+    const validatedForm = formIndividualSchema
+      .omit({ uuid: true })
+      .safeParse({ ...values, uuid: individual?.uuid });
     if (validatedForm.success) {
-      return IndividualService.putAny(validatedForm.data)
+      return (
+        individual?.uuid
+          ? IndividualService.putAny({ uuid: individual.uuid, ...validatedForm.data })
+          : IndividualService.postAny(validatedForm.data)
+      )
         .then((individual) =>
           mutateTable((individuals) =>
             individuals?.map((u) => (u.uuid === individual.uuid ? individual : u))
@@ -182,10 +188,16 @@ export default function ClientTablesPage() {
         }}
       />
       {permissions.includes('add_individual') && (
-        <Button type="primary" onClick={() => setNewIndividual(true)}>
-          <PlusOutlined />
-          Добавить
-        </Button>
+        <Space>
+          <Button type="primary" onClick={() => setNewIndividual(true)}>
+            <PlusOutlined />
+            Добавить
+          </Button>
+          <Button onClick={() => setIndividual({} as Individual)}>
+            <PlusOutlined />
+            Добавить без документов
+          </Button>
+        </Space>
       )}
       <Modal
         open={!!individual}

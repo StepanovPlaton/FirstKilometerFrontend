@@ -33,13 +33,24 @@ export default function VehiclesTablesPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const [vehicleForm] = Form.useForm<FormVehicle>();
   useEffect(() => {
-    vehicleForm.setFieldsValue(vehicle as never as FormVehicle);
+    vehicleForm.setFieldsValue({
+      ...vehicle,
+      article_category_id: vehicle?.article_category?.id,
+    } as never as FormVehicle);
   }, [vehicle, vehicleForm]);
 
   const submitVehicle = (values: FormVehicle) => {
-    const validatedForm = formVehicleSchema.safeParse({ ...values, uuid: vehicle?.uuid });
+    const validatedForm = formVehicleSchema.omit({ uuid: true }).safeParse({
+      ...values,
+      article_category_id: values.article_category_id ?? null,
+      uuid: vehicle?.uuid,
+    });
     if (validatedForm.success) {
-      return VehicleService.putAny(validatedForm.data)
+      return (
+        vehicle?.uuid
+          ? VehicleService.putAny({ uuid: vehicle.uuid, ...validatedForm.data })
+          : VehicleService.postAny(validatedForm.data)
+      )
         .then((vehicle) =>
           mutateTable((vehicles) => vehicles?.map((v) => (v.uuid === vehicle.uuid ? vehicle : v)))
         )
@@ -91,7 +102,38 @@ export default function VehiclesTablesPage() {
   };
 
   const columns: ColumnsType<ApiVehicle> = [
-    // Артикул
+    {
+      key: 'article',
+      title: 'Артикль',
+      sorter: (a, b) =>
+        a.article_category
+          ? b.article_category
+            ? `${a.article_category?.category}${a.article_number}`.localeCompare(
+                `${b.article_category?.category}${b.article_number}`
+              )
+            : 1
+          : -1,
+      filters:
+        vehicles
+          ?.reduce(
+            (categories, vehicle) =>
+              vehicle.article_category?.category &&
+              !categories.includes(vehicle.article_category?.category)
+                ? [...categories, vehicle.article_category?.category]
+                : categories,
+            [] as string[]
+          )
+          .sort()
+          .map((category) => ({
+            text: category,
+            value: category,
+          })) ?? [],
+      onFilter: (value, row) => row.article_category?.category === value,
+      filterMode: 'tree',
+      filterSearch: true,
+      render: (_, vehicle) =>
+        `${vehicle.article_category?.category ?? '-'}${vehicle.article_number ?? ''}`,
+    },
     {
       key: 'make_model',
       title: 'Марка и модель ТС',
@@ -154,17 +196,6 @@ export default function VehiclesTablesPage() {
       : []),
   ];
 
-  const addEmptyVehicle = () => {
-    setLoadingVehicle(true);
-    VehicleService.postAny({})
-      .then((vehicle) => {
-        void mutateTable((vehicles) => [...(vehicles ?? []), vehicle]);
-        setVehicle(vehicle);
-      })
-      .catch(() => messageApi.error('Не удалось создать ТС. Повторите попытку позже'))
-      .finally(() => setLoadingVehicle(false));
-  };
-
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       <Table<ApiVehicle>
@@ -189,7 +220,7 @@ export default function VehiclesTablesPage() {
             <PlusOutlined />
             Добавить
           </Button>
-          <Button onClick={addEmptyVehicle}>
+          <Button onClick={() => setVehicle({} as ApiVehicle)}>
             <PlusOutlined />
             Добавить без документов
           </Button>
