@@ -123,6 +123,12 @@ export default function InternalCompaniesTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
+      {permissions.includes('add_internalcompany') && (
+        <Button type="primary" onClick={() => setInternalCompany({} as InternalCompany)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+      )}
       <Table<InternalCompany>
         className="w-full"
         rowKey="id"
@@ -139,12 +145,6 @@ export default function InternalCompaniesTablesPage() {
           x: 'max-content',
         }}
       />
-      {permissions.includes('add_internalcompany') && (
-        <Button type="primary" onClick={() => setInternalCompany({} as InternalCompany)}>
-          <PlusOutlined />
-          Добавить
-        </Button>
-      )}
       <Modal
         open={!!company}
         width={550}

@@ -198,6 +198,18 @@ export default function VehiclesTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
+      {permissions.includes('add_vehicle') && (
+        <Space>
+          <Button type="primary" onClick={() => setNewVehicle(true)}>
+            <PlusOutlined />
+            Добавить
+          </Button>
+          <Button onClick={() => setVehicle({} as ApiVehicle)}>
+            <PlusOutlined />
+            Добавить без документов
+          </Button>
+        </Space>
+      )}
       <Table<ApiVehicle>
         className="w-full"
         rowKey="uuid"
@@ -214,18 +226,6 @@ export default function VehiclesTablesPage() {
           x: 'max-content',
         }}
       />
-      {permissions.includes('add_vehicle') && (
-        <Space>
-          <Button type="primary" onClick={() => setNewVehicle(true)}>
-            <PlusOutlined />
-            Добавить
-          </Button>
-          <Button onClick={() => setVehicle({} as ApiVehicle)}>
-            <PlusOutlined />
-            Добавить без документов
-          </Button>
-        </Space>
-      )}
       <Modal
         open={!!vehicle}
         width={1200}

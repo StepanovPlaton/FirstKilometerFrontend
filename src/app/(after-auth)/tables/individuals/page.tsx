@@ -171,6 +171,18 @@ export default function ClientTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
+      {permissions.includes('add_person') && (
+        <Space>
+          <Button type="primary" onClick={() => setNewIndividual(true)}>
+            <PlusOutlined />
+            Добавить
+          </Button>
+          <Button onClick={() => setIndividual({} as Individual)}>
+            <PlusOutlined />
+            Добавить без документов
+          </Button>
+        </Space>
+      )}
       <Table<ApiIndividual>
         className="w-full"
         rowKey="uuid"
@@ -187,24 +199,12 @@ export default function ClientTablesPage() {
           x: 'max-content',
         }}
       />
-      {permissions.includes('add_individual') && (
-        <Space>
-          <Button type="primary" onClick={() => setNewIndividual(true)}>
-            <PlusOutlined />
-            Добавить
-          </Button>
-          <Button onClick={() => setIndividual({} as Individual)}>
-            <PlusOutlined />
-            Добавить без документов
-          </Button>
-        </Space>
-      )}
       <Modal
         open={!!individual}
         width={1200}
         okText={'Проверить и сохранить'}
         okButtonProps={{
-          disabled: !permissions.includes('change_individual'),
+          disabled: !permissions.includes('change_person'),
         }}
         onOk={() => {
           void individualForm

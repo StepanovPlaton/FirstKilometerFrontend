@@ -79,6 +79,12 @@ export default function ArticlesTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
+      {permissions.includes('add_articlecategory') && (
+        <Button onClick={() => setArticleCategory({} as ArticleCategory)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+      )}
       <Table<ArticleCategory>
         className="w-full"
         rowKey="id"
@@ -95,18 +101,12 @@ export default function ArticlesTablesPage() {
           x: 'max-content',
         }}
       />
-      {permissions.includes('add_individual') && (
-        <Button onClick={() => setArticleCategory({} as ArticleCategory)}>
-          <PlusOutlined />
-          Добавить
-        </Button>
-      )}
       <Modal
         open={!!articleCategory}
         width={500}
         okText={'Проверить и сохранить'}
         okButtonProps={{
-          disabled: !permissions.includes('change_individual'),
+          disabled: !permissions.includes('change_article_category'),
         }}
         onOk={() => {
           void articleCategoryForm

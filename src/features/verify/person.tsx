@@ -264,7 +264,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   <TextArea
                     rows={1}
                     className="field-sizing-content! w-full"
-                    onBlur={() => toUpperCase('issue_organization')}
+                    onBlur={() => toUpperCase('registration_region')}
                   />
                 </Form.Item>
               </Row>

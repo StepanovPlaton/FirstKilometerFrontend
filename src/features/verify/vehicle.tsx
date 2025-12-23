@@ -197,7 +197,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'color')}
                   className="w-full"
                 >
-                  <Input className="w-full" />
+                  <Input className="w-full" onInput={toUpperCase} />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">

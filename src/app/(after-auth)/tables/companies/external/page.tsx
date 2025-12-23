@@ -128,6 +128,12 @@ export default function ExternalCompaniesTablesPage() {
 
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
+      {permissions.includes('add_externalcompany') && (
+        <Button type="primary" onClick={() => setExternalCompany({} as ExternalCompany)}>
+          <PlusOutlined />
+          Добавить
+        </Button>
+      )}
       <Table<ExternalCompany>
         className="w-full"
         rowKey="id"
@@ -144,12 +150,6 @@ export default function ExternalCompaniesTablesPage() {
           x: 'max-content',
         }}
       />
-      {permissions.includes('add_externalcompany') && (
-        <Button type="primary" onClick={() => setExternalCompany({} as ExternalCompany)}>
-          <PlusOutlined />
-          Добавить
-        </Button>
-      )}
       <Modal
         open={!!company}
         width={550}
