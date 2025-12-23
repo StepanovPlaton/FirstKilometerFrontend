@@ -10,20 +10,38 @@ import type { WithoutIdentifier } from '../schemes/entity/schema';
 import type { PageOf } from '../schemes/page';
 import { schemaPageOf, schemaStrictPageOf } from '../schemes/page';
 import { ExtendableClass } from './extend';
-import type { EntityTools } from './tools';
+import type { EntityTools } from './tools/base';
 
 export type RequestOptions = Omit<HTTPRequestOptions, 'body'>;
 export type GetRequestOptions = HTTPGetRequestOptions;
 
 export abstract class EmptyService extends ExtendableClass<EntityTools> {}
 
-export abstract class GetService<E extends Entity> extends EmptyService {
+const removeIdFields = <T extends object>(entity: T): Omit<T, 'id' | 'uuid'> => {
+  if ('id' in entity) {
+    const { id: _, ...rest } = entity;
+    return rest as Omit<T, 'id' | 'uuid'>;
+  } else if ('uuid' in entity) {
+    const { uuid: _, ...rest } = entity;
+    return rest as Omit<T, 'id' | 'uuid'>;
+  } else {
+    return entity;
+  }
+};
+
+export abstract class SimpleService<E> extends EmptyService {
   schema: z.ZodType<E>;
+  constructor(schema: z.ZodType<E>) {
+    super();
+    this.schema = schema;
+  }
+}
+
+export abstract class GetService<E extends Entity> extends SimpleService<E> {
   urlPrefix: string;
 
   constructor(urlPrefix: string, schema: z.ZodType<E>) {
-    super();
-    this.schema = schema;
+    super(schema);
     this.urlPrefix = urlPrefix;
   }
 
@@ -78,26 +96,26 @@ export abstract class CRUDService<E extends Entity> extends GetService<E> {
 
   put = (entity: E, options?: RequestOptions): Promise<E> => {
     return HTTPService.put(`${this.urlPrefix}/${getIdentifier(entity)}/`, this.schema, {
-      body: entity,
+      body: removeIdFields(entity),
       ...options,
     });
   };
   putAny = (entity: object & WithIdentifier<E>, options?: RequestOptions): Promise<E> => {
     return HTTPService.put(`${this.urlPrefix}/${getIdentifier(entity)}/`, this.schema, {
-      body: entity,
+      body: removeIdFields(entity),
       ...options,
     });
   };
 
   patch = (entity: Partial<E> & WithIdentifier<E>, options?: RequestOptions): Promise<E> => {
     return HTTPService.patch(`${this.urlPrefix}/${getIdentifier(entity)}/`, this.schema, {
-      body: entity,
+      body: removeIdFields(entity),
       ...options,
     });
   };
   patchPartial = (entity: Partial<E> & WithIdentifier<E>, options?: RequestOptions): Promise<E> => {
     return HTTPService.patch(`${this.urlPrefix}/${getIdentifier(entity)}/`, this.schema, {
-      body: entity,
+      body: removeIdFields(entity),
       ...options,
     });
   };

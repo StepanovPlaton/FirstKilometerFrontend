@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --turbopack -p 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -25,12 +25,16 @@
     "antd": "^5.26.6",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "jwt-decode": "^4.0.0",
     "next": "15.4.4",
     "pdfjs-dist": "^3.4.120",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-zoom-pan-pinch": "^3.7.0",
     "swr": "^2.3.4",
-    "zod": "^4.0.10"
+    "zod": "^4.0.10",
+    "zustand": "^5.0.8",
+    "zustand-persist-cookie-storage": "^1.2.13"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

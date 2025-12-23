@@ -54,8 +54,8 @@ export const apiPersonSchema = entitySchema.extend({
 
   licence_number: rawPersonSchema.shape.licence_number.nullable(),
 
-  passport_url: z.url(),
-  reg_url: z.url(),
+  passport_url: z.url().optional().nullable(),
+  reg_url: z.url().optional().nullable(),
 });
 export type ApiPerson = z.output<typeof apiPersonSchema>;
 

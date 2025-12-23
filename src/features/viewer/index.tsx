@@ -1,4 +1,10 @@
-import { Image, Skeleton } from 'antd';
+'use client';
+
+import { FileImageOutlined, ReloadOutlined } from '@ant-design/icons';
+import { Button, Image, Skeleton } from 'antd';
+import clsx from 'clsx';
+import { useState } from 'react';
+import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 
 export const Viewer = (props: {
   active?: boolean;
@@ -10,6 +16,9 @@ export const Viewer = (props: {
   pdfClassName?: string;
   skeletonClassName?: string;
 }) => {
+  const [rotate, setRotate] = useState(0);
+  const [preview, setPreview] = useState(false);
+
   if (!props.active) {
     return <Skeleton.Node active className={props.skeletonClassName ?? ''} />;
   }
@@ -25,8 +34,42 @@ export const Viewer = (props: {
     );
   } else if (props.url) {
     return (
-      <Image src={props.url ?? ''} alt={props.alt ?? ''} className={props.imageClassName ?? ''} />
+      <div className={clsx('p-1', 'relative')}>
+        <div className={clsx(props.imageClassName)}>
+          <TransformWrapper>
+            {() => (
+              <>
+                <TransformComponent>
+                  <Image
+                    src={props.url ?? ''}
+                    alt={props.alt ?? ''}
+                    className={clsx(`transition-all`)}
+                    style={{
+                      transform: `rotate(${rotate}deg)`,
+                    }}
+                    preview={
+                      preview ? { visible: true, onVisibleChange: () => setPreview(false) } : false
+                    }
+                  />
+                </TransformComponent>
+                <Button
+                  onClick={() => setRotate((s) => s + 90)}
+                  icon={<ReloadOutlined />}
+                  className="cursor-pointe absolute! top-2 right-2"
+                />
+                <Button
+                  onClick={() => setPreview(true)}
+                  icon={<FileImageOutlined />}
+                  className="cursor-pointe absolute! top-9 right-2"
+                />
+              </>
+            )}
+          </TransformWrapper>
+        </div>
+      </div>
     );
+  } else if (props.active && !props.url) {
+    return <Skeleton.Node className={props.skeletonClassName ?? ''} />;
   }
   return <></>;
 };

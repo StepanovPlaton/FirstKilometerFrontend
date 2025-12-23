@@ -4,4 +4,4 @@ import { apiIndividualSchema } from './schema';
 
 export class IIndividualService extends CRUDCService<ApiIndividual> {}
 
-export const IndividualService = new IIndividualService('individuals', apiIndividualSchema);
+export const IndividualService = new IIndividualService('persons', apiIndividualSchema);

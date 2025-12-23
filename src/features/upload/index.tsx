@@ -17,6 +17,7 @@ const getBase64 = (file: RcFile): Promise<string> =>
 
 export const UploadDocument = (props: {
   onUpload: (file: RcFile) => unknown;
+  disabled?: boolean | undefined;
   text: string;
   file: RcFile | undefined;
 }) => {
@@ -53,6 +54,7 @@ export const UploadDocument = (props: {
         return false;
       }}
       accept=".jpg,.png,.jpeg,.pdf"
+      disabled={!!props.disabled}
     >
       <Button type="dashed" className="h-42! w-42">
         {previewImage ? (

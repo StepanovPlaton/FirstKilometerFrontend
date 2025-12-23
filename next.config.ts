@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
         source: '/api/:path*',
         destination:
           `${process.env.BACKEND_PROTOCOL}://` +
-          `${process.env.BACKEND_DOMAIN}:${process.env.BACKEND_PORT}/api/:path*`,
+          `${process.env.BACKEND_DOMAIN}:${process.env.BACKEND_PORT}/api/:path*/`,
       },
     ];
   },
