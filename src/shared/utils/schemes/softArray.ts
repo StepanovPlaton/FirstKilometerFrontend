@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const softArrayOf = <T extends z.ZodType>(schema: T) => {
-  type Type = z.TypeOf<typeof schema>;
+  type Type = z.output<typeof schema>;
   const isType = (a: unknown): a is Type => schema.safeParse(a).success;
 
   return z.array(z.any()).transform((a) => {

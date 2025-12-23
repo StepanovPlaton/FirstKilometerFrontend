@@ -61,4 +61,4 @@ export const companySchema = idEntitySchema.extend({
     .min(3, 'Слишком короткое должность директора')
     .max(100, 'Слишком длинное должность директора'),
 });
-export type Company = z.TypeOf<typeof companySchema>;
+export type Company = z.output<typeof companySchema>;
