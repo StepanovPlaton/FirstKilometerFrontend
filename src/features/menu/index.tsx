@@ -36,15 +36,12 @@ export const Menu = () => {
     ...([
       'view_doc',
       'add_doc',
-      'view_user',
-      'add_user',
-      'change_user',
       'view_vehicle',
       'add_vehicle',
       'change_vehicle',
-      'view_individual',
-      'add_individual',
-      'change_individual',
+      'view_person',
+      'add_person',
+      'change_person',
       'view_internalcompany',
       'add_internalcompany',
       'change_internalcompany',
@@ -71,7 +68,7 @@ export const Menu = () => {
         ]
       : []),
     undefined,
-    ...(permissions.includes('view_individual')
+    ...(permissions.includes('view_person')
       ? [
           {
             href: '/tables/individuals',
