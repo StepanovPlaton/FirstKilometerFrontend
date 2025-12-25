@@ -61,8 +61,6 @@ export const baseCompanySchema = idEntitySchema.extend({
     .min(3, 'Слишком короткое должность директора')
     .max(100, 'Слишком длинное должность директора'),
 });
-<<<<<<< HEAD:src/entities/company/schema.ts
-export type Company = z.output<typeof companySchema>;
-=======
+
 export type BaseCompany = z.output<typeof baseCompanySchema>;
->>>>>>> b91ddefece4e482f05ef6dac3659442887a866f6:src/shared/utils/schemes/company/schema.ts
+
