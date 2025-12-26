@@ -63,4 +63,3 @@ export const baseCompanySchema = idEntitySchema.extend({
 });
 
 export type BaseCompany = z.output<typeof baseCompanySchema>;
-
