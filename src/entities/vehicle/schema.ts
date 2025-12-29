@@ -94,7 +94,7 @@ export const formVehicleSchema = entitySchema
       .max(19, { error: 'Слишком длинный номер кузова ТС' }),
     engine: rawVehicleSchema.shape.engine
       .min(3, { error: 'Слишком короткий номер двигателя ТС' })
-      .max(20, { error: 'Слишком длинный номер двигателя ТС' }),
+      .max(50, { error: 'Слишком длинный номер двигателя ТС' }),
     category: rawVehicleSchema.shape.category
       .min(1, { error: 'Слишком короткая категория ТС' })
       .max(5, { error: 'Слишком длинная категория ТС' }),
