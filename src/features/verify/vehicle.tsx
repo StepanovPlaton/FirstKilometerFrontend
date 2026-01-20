@@ -21,7 +21,6 @@ import {
   Skeleton,
 } from 'antd';
 import clsx from 'clsx';
-import type { FormEventHandler } from 'react';
 import { useState } from 'react';
 
 const baseVehicleTypes = [
@@ -33,9 +32,6 @@ const baseVehicleTypes = [
   'Полуприцеп',
   'Специальный',
 ];
-
-const toUpperCase: FormEventHandler<HTMLInputElement> = (e) =>
-  ((e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.toUpperCase());
 
 export const VerifyVehicle = (props: {
   vehicle: ApiVehicle | undefined;
@@ -101,7 +97,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'pts_id')}
                   className="w-full"
                 >
-                  <Input className="w-full" />
+                  <Input style={{ textTransform: 'uppercase' }} className="w-full" />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">
@@ -111,7 +107,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'vin')}
                   className="w-full"
                 >
-                  <Input onInput={toUpperCase} className="w-full" />
+                  <Input style={{ textTransform: 'uppercase' }} className="w-full" />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">
@@ -121,7 +117,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'make_model')}
                   className="w-full"
                 >
-                  <Input className="w-full" onInput={toUpperCase} />
+                  <Input className="w-full" style={{ textTransform: 'uppercase' }} />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">
@@ -157,7 +153,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'engine')}
                   className="w-full"
                 >
-                  <Input className="w-full" onInput={toUpperCase} />
+                  <Input className="w-full" style={{ textTransform: 'uppercase' }} />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">
@@ -167,7 +163,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'chassis')}
                   className="w-full"
                 >
-                  <Input className="w-full" onInput={toUpperCase} />
+                  <Input className="w-full" style={{ textTransform: 'uppercase' }} />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">
@@ -197,7 +193,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'color')}
                   className="w-full"
                 >
-                  <Input className="w-full" onInput={toUpperCase} />
+                  <Input className="w-full" style={{ textTransform: 'uppercase' }} />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">
@@ -266,7 +262,7 @@ export const VerifyVehicle = (props: {
                   rules={getValidationRules(formVehicleSchema, 'reg_number')}
                   className="w-full"
                 >
-                  <Input className="w-full" onInput={toUpperCase} />
+                  <Input className="w-full" style={{ textTransform: 'uppercase' }} />
                 </Form.Item>
               </Row>
               <Row justify="start" className="w-full">

@@ -93,8 +93,8 @@ export const formVehicleSchema = entitySchema
       .min(3, { error: 'Слишком короткий номер кузова ТС' })
       .max(19, { error: 'Слишком длинный номер кузова ТС' }),
     engine: rawVehicleSchema.shape.engine
-      .min(3, { error: 'Слишком короткий номер двигателя ТС' })
-      .max(50, { error: 'Слишком длинный номер двигателя ТС' }),
+      .max(50, { error: 'Слишком длинный номер двигателя ТС' })
+      .nullable(),
     category: rawVehicleSchema.shape.category
       .min(1, { error: 'Слишком короткая категория ТС' })
       .max(5, { error: 'Слишком длинная категория ТС' }),
@@ -106,23 +106,13 @@ export const formVehicleSchema = entitySchema
 
     pts_date: z
       .any()
-      .refine((o) => dayjs.isDayjs(o))
-      .transform((d) => (d as never as Dayjs)?.format('YYYY-MM-DD')),
+      .nullable()
+      .refine((o) => (o ? dayjs.isDayjs(o) : true))
+      .transform((d) => (d ? (d as never as Dayjs).format('YYYY-MM-DD') : null)),
     sts_date: z
       .any()
       .nullable()
       .refine((o) => (o ? dayjs.isDayjs(o) : true))
       .transform((d) => (d ? (d as never as Dayjs).format('YYYY-MM-DD') : null)),
   })
-  .refine(
-    (vehicle) => {
-      return ((keys: (keyof typeof vehicle)[]) =>
-        keys.some((k) => !!vehicle[k]) ? keys.every((k) => !!vehicle[k]) : true)([
-        'sts_date',
-        'sts_id',
-        'reg_number',
-      ]);
-    },
-    { error: 'Данные СТС должны быть заполнены полностью, либо отсутствовать' }
-  );
 export type FormVehicle = z.output<typeof formVehicleSchema>;
