@@ -137,9 +137,10 @@ export const formPersonSchema = entitySchema.extend({
     }),
   
   phone: rawPersonSchema.shape.phone
-    .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
-      error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
-    })
-    .nullable(),
+  .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
+    error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
+  })
+  .or(z.literal(''))
+  .nullable(),
 });
 export type FormPerson = z.output<typeof formPersonSchema>;
