@@ -87,9 +87,12 @@ export default function UploadPage() {
   const [messageApi, contextHolder] = message.useMessage();
 
   const [form] = Form.useForm<GetDocumentForm>();
-  const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
-  const isReturnDoc = Form.useWatch((v) => v.type === 'return', form);
+  const docType = Form.useWatch('type', form);
+  const isTaxDoc = docType === 'sale';
+  const isComissionsDoc = docType === 'comissions';
+  const isReturnDoc = docType === 'return';
   const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services, form);
+  const showExtraFields = isTaxDoc || isComissionsDoc;
 
   useEffect(() => {
     if (!seller) {
@@ -166,11 +169,11 @@ export default function UploadPage() {
   }, [getInternalCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
 
   useEffect(() => {
-    if (isTaxDoc) {
+    if (showExtraFields) {
       setSeller('internal_company');
       setBuyer(undefined);
     }
-  }, [isTaxDoc]);
+  }, [showExtraFields]);
 
   useEffect(() => {
     if (form.getFieldValue('seller_id')) {
@@ -218,7 +221,7 @@ export default function UploadPage() {
                     {
                       label: 'Филиал',
                       value: 'internal_company',
-                      disabled: isTaxDoc,
+                      disabled: showExtraFields,
                     },
                     {
                       label: 'Юридическое лицо',
@@ -298,7 +301,7 @@ export default function UploadPage() {
                   }
                 />
               </Form.Item>
-              {!isTaxDoc && (
+              {!showExtraFields && (
                 <Form.Item<GetDocumentForm> label="Продавец" rules={requiredRule}>
                   <Select
                     className="w-100!"
@@ -406,14 +409,14 @@ export default function UploadPage() {
                   </Form.Item>
                 </Col>
               </Row>
-              {isTaxDoc && (
+              {showExtraFields && (
                 <>
                   <Row className="w-100!" gutter={4}>
                     <Col span={8}>
                       <Form.Item<GetDocumentForm>
                         label="Комиссия"
                         name={'tax'}
-                        rules={isTaxDoc ? requiredRule : []}
+                        rules={showExtraFields ? requiredRule : []}
                       >
                         <InputNumber
                           className="w-full!"
@@ -435,7 +438,7 @@ export default function UploadPage() {
                       <Form.Item<GetDocumentForm>
                         label="Опции"
                         name={'options'}
-                        rules={isTaxDoc ? requiredRule : []}
+                        rules={showExtraFields ? requiredRule : []}
                       >
                         <Select
                           mode="multiple"

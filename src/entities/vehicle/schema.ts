@@ -25,6 +25,9 @@ export const rawVehicleSchema = entitySchema.extend({
 
   article_category: articleCategorySchema,
   article_number: z.string({ error: 'Артикул должен быть строкой' }),
+
+  mileage: z.number({ error: "Пробег должен быть числом" }),
+  equipment: z.string({ error: "Комплектация должна быть строкой" })
 });
 export type Vehicle = z.output<typeof rawVehicleSchema>;
 
@@ -47,6 +50,9 @@ export const apiVehicleSchema = entitySchema.extend({
 
   article_category: rawVehicleSchema.shape.article_category.nullable(),
   article_number: rawVehicleSchema.shape.article_number.nullable(),
+
+  mileage: rawVehicleSchema.shape.mileage.nullable(),
+  equipment: rawVehicleSchema.shape.equipment.nullable(),
 
   sts_front_url: z.url().nullable().optional(),
   sts_back_url: z.url().nullable().optional(),
@@ -104,6 +110,13 @@ export const formVehicleSchema = entitySchema
       .max(20, { error: 'Слишком длинный артикул ТС' })
       .nullable(),
 
+    mileage: rawVehicleSchema.shape.mileage
+      .int({ error: 'Пробег должен быть целым числом' }) 
+      .or(z.nan())
+      .nullable(),
+    equipment: rawVehicleSchema.shape.equipment
+      .max(50, { error: "Слишком длинное название комплектации" })
+      .nullable(),
     pts_date: z
       .any()
       .nullable()

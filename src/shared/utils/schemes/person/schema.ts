@@ -28,6 +28,7 @@ export const rawPersonSchema = entitySchema.extend({
   registration_address: z.string({ error: 'Название улицы должно быть строкой' }),
 
   licence_number: z.string({ error: 'Номер паспорта должен быть строкой' }),
+  phone: z.string({ error: 'Номер телефона должен быть строкой' }),
 });
 export type Person = z.output<typeof rawPersonSchema>;
 
@@ -53,6 +54,8 @@ export const apiPersonSchema = entitySchema.extend({
   registration_address: rawPersonSchema.shape.registration_address.nullable(),
 
   licence_number: rawPersonSchema.shape.licence_number.nullable(),
+
+  phone: rawPersonSchema.shape.phone.nullable(),
 
   passport_url: z.url().optional().nullable(),
   reg_url: z.url().optional().nullable(),
@@ -132,5 +135,11 @@ export const formPersonSchema = entitySchema.extend({
     .regex(/^[0-9]{2}\s[0-9]{2}\s[0-9]{6}$/, {
       error: 'Серия и номер паспорта должны иметь формат "## ## ######"',
     }),
+  
+  phone: rawPersonSchema.shape.phone
+    .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
+      error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
+    })
+    .nullable(),
 });
 export type FormPerson = z.output<typeof formPersonSchema>;

@@ -206,6 +206,26 @@ export const VerifyVehicle = (props: {
                   <DatePicker format={['DD MMMM YYYY г.', 'DD.MM.YYYY']} className="w-full!" />
                 </Form.Item>
               </Row>
+              <Row justify="start" className="w-full">
+                <Form.Item<FormVehicle>
+                  label="Пробег (КМ)"
+                  name={'mileage'}
+                  rules={getValidationRules(formVehicleSchema, 'mileage')}
+                  className="w-full"
+                >
+                  <InputNumber className="w-full!" />
+                </Form.Item>
+              </Row>
+              <Row justify="start" className="w-full">
+                <Form.Item<FormVehicle>
+                  label="Комплектация"
+                  name={'equipment'}
+                  rules={getValidationRules(formVehicleSchema, 'equipment')}
+                  className="w-full"
+                >
+                  <Input className="w-full" />
+                </Form.Item>
+              </Row>
             </>
           ) : (
             <Skeleton active className="mt-10" />

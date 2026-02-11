@@ -220,6 +220,16 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   </Form.Item>
                 </Col>
               </Row>
+              <Row justify="start" wrap className="w-full">
+                <Form.Item<FormPerson>
+                  label="Номер телефона"
+                  name={'phone'}
+                  rules={getValidationRules(formPersonSchema, 'phone')}
+                  className="w-full"
+                >
+                  <Input />
+                </Form.Item>
+              </Row>
             </>
           ) : (
             <Skeleton active className="mt-10" />
