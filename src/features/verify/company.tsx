@@ -3,6 +3,7 @@ import { baseCompanySchema, type BaseCompany } from '@/shared/utils/schemes/comp
 import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
 import { Form, Input, Skeleton } from 'antd';
+import type { ChangeEvent } from 'react';
 
 export const VerifyCompany = ({
   ...props
@@ -10,7 +11,68 @@ export const VerifyCompany = ({
   company: BaseCompany | undefined;
   form: FormInstance<BaseCompany>;
   type: 'internal' | 'external';
+  
 }) => {
+  const formatPhoneNumber = (value: string): string => {
+    const digits = value.replace(/\D/g, '');
+
+    const normalized = digits.startsWith('8') 
+      ? '7' + digits.slice(1) 
+      : digits;
+
+    let result = '';
+
+    if (normalized.length === 0) {
+      return '';
+    }
+
+    // +7
+    result = '+7';
+    
+    if (normalized.length > 1) {
+      // +7 (XXX
+      result += ' (' + normalized.slice(1, 4);
+    }
+    
+    if (normalized.length >= 4) {
+      // +7 (XXX)
+      result += ')';
+    }
+    
+    if (normalized.length > 4) {
+      // +7 (XXX) XXX
+      result += ' ' + normalized.slice(4, 7);
+    }
+    
+    if (normalized.length > 7) {
+      // +7 (XXX) XXX-XX
+      result += '-' + normalized.slice(7, 9);
+    }
+    
+    if (normalized.length > 9) {
+      // +7 (XXX) XXX-XX-XX
+      result += '-' + normalized.slice(9, 11);
+    }
+
+    return result;
+  };
+
+  const handlePhoneChange = (
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    const { value } = e.target;
+    const formatted = formatPhoneNumber(value);
+
+    props.form.setFieldsValue({ phone: formatted });
+
+    requestAnimationFrame(() => {
+      if (e.target) {
+        const cursorPos = formatted.length;
+        e.target.setSelectionRange(cursorPos, cursorPos);
+      }
+    });
+  };
+
   return (
     <Form<BaseCompany> layout="vertical" form={props.form}>
       <Title level={2}>{props.type === 'internal' ? 'Филиал' : 'Юридическое лицо'}</Title>
@@ -71,7 +133,11 @@ export const VerifyCompany = ({
             name={'phone'}
             rules={getValidationRules(baseCompanySchema, 'phone')}
           >
-            <Input />
+            <Input
+              onChange={handlePhoneChange}
+              placeholder="+7 (___) ___-__-__"
+              maxLength={18}
+            />
           </Form.Item>
           <Form.Item<BaseCompany>
             label="Адрес электронной почты"

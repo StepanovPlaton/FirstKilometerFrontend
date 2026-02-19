@@ -40,6 +40,8 @@ type CreateDocumentForm = {
   options?: string;
   additional_services?: string;
   additional_services_cost?: number;
+  additional_equipment?: string;
+  additional_equipment_cost?: number;
 };
 
 export default function InitPage() {
@@ -49,9 +51,15 @@ export default function InitPage() {
   const [seller, setSeller] = useState<'individual' | 'internal_company' | 'external_company'>(
     'internal_company'
   );
-  const isTaxDoc = Form.useWatch((v) => v.type === 'sale', form);
-  const isReturnDoc = Form.useWatch((v) => v.type === 'return', form);
-  const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services, form);
+  const docType = Form.useWatch('type', form);
+  const isTaxDoc = docType === 'sale';
+  const isComissionsDoc = docType === 'comissions';
+  const isReturnDoc = docType === 'return';
+
+  const showExtraFields = isTaxDoc || isComissionsDoc;
+
+  const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services?.length, form);
+  const hasAdditionalEquipment = Form.useWatch((v) => !!v.additional_equipment?.length, form);
 
   const {
     data: documentTypes,
@@ -87,10 +95,19 @@ export default function InitPage() {
     if ('date' in data && data.date) {
       url += `&date=${data.date.format('YYYY-MM-DD')}`;
     }
-    if (isTaxDoc) {
-      url += `&tax=${data.tax}&options=${data.options}`;
-      if ('additional_services' in data && data.additional_services) {
+    if (showExtraFields) {
+      if (data.tax) {
+        url += `&tax=${data.tax}`;
+      }
+      if (data.options) {
+        url += `&options=${data.options}`;
+      }
+      if (data.additional_services) {
         url += `&additional_services=${data.additional_services}&additional_services_cost=${data.additional_services_cost}`;
+      }
+
+      if (isComissionsDoc && data.additional_equipment) {
+        url += `&additional_equipment=${data.additional_equipment}&additional_equipment_cost=${data.additional_equipment_cost}`;
       }
     }
     router.push(url);
@@ -109,10 +126,10 @@ export default function InitPage() {
   }, [getInternalCompaniesError, getDocumentTypesError, getIndividualsError, messageApi]);
 
   useEffect(() => {
-    if (isTaxDoc) {
+    if (showExtraFields) {
       setSeller('internal_company');
     }
-  }, [isTaxDoc]);
+  }, [showExtraFields]);
 
   return (
     <Flex vertical align="center" justify="space-evenly" className="h-full w-full" gap={24}>
@@ -260,14 +277,14 @@ export default function InitPage() {
                     </Form.Item>
                   </Col>
                 </Row>
-                {isTaxDoc && (
+                {showExtraFields && (
                   <>
                     <Row className="w-100!" gutter={4}>
                       <Col span={8}>
                         <Form.Item<CreateDocumentForm>
                           label="Комиссия"
                           name={'tax'}
-                          rules={isTaxDoc ? requiredRule : []}
+                          rules={showExtraFields ? requiredRule : []}
                         >
                           <InputNumber
                             className="w-full!"
@@ -289,7 +306,7 @@ export default function InitPage() {
                         <Form.Item<CreateDocumentForm>
                           label="Опции"
                           name={'options'}
-                          rules={isTaxDoc ? requiredRule : []}
+                          rules={showExtraFields ? requiredRule : []}
                         >
                           <Select
                             mode="multiple"
@@ -314,17 +331,8 @@ export default function InitPage() {
                     </Row>
                     <Row className="w-100!" gutter={4}>
                       <Col span={16}>
-                        <Form.Item<CreateDocumentForm>
-                          label="Дополнительные услуги"
-                          name={'additional_services'}
-                        >
-                          <Select
-                            mode="tags"
-                            allowClear
-                            className="w-full!"
-                            placeholder="Выберите дополнительные услуги"
-                            options={[].map((i) => ({ value: i, label: i }))}
-                          />
+                        <Form.Item<CreateDocumentForm> label="Дополнительные услуги" name={'additional_services'}>
+                          <Select mode="tags" placeholder="Введите услуги" options={[]} />
                         </Form.Item>
                       </Col>
                       <Col span={8}>
@@ -333,23 +341,28 @@ export default function InitPage() {
                           name={'additional_services_cost'}
                           rules={hasAdditionalServices ? requiredRule : []}
                         >
-                          <InputNumber
-                            className="w-full!"
-                            addonAfter="₽"
-                            min={0}
-                            placeholder="Введите стоимость"
-                            formatter={(v) =>
-                              `${v}`
-                                .split('')
-                                .reverse()
-                                .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
-                                .reverse()
-                                .join('')
-                            }
-                          />
+                          <InputNumber className="w-full!" addonAfter="₽" min={0} />
                         </Form.Item>
                       </Col>
                     </Row>
+                    {isComissionsDoc && (
+                      <Row className="w-100!" gutter={4}>
+                        <Col span={16}>
+                          <Form.Item<CreateDocumentForm> label="Дополнительное дооснащение" name={'additional_equipment'}>
+                            <Select mode="tags" placeholder="Введите оснащение" options={[]} />
+                          </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                          <Form.Item<CreateDocumentForm>
+                            label="Стоимость"
+                            name={'additional_equipment_cost'}
+                            rules={hasAdditionalEquipment ? requiredRule : []}
+                          >
+                            <InputNumber className="w-full!" addonAfter="₽" min={0} />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    )}
                   </>
                 )}
               </Flex>

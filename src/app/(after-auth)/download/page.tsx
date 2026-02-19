@@ -44,6 +44,8 @@ type GetDocumentForm = {
   options?: string;
   additional_services?: string;
   additional_services_cost?: number;
+  additional_equipment?: string;
+  additional_equipment_cost?: number;
 };
 
 export default function UploadPage() {
@@ -92,6 +94,7 @@ export default function UploadPage() {
   const isComissionsDoc = docType === 'comissions';
   const isReturnDoc = docType === 'return';
   const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services, form);
+  const hasAdditionalEquipment = Form.useWatch((v) => !!v.additional_equipment, form);
   const showExtraFields = isTaxDoc || isComissionsDoc;
 
   useEffect(() => {
@@ -113,6 +116,8 @@ export default function UploadPage() {
       { key: 'options', list: null, format: (v: string) => v.split(',') },
       { key: 'additional_services', list: null, format: (v: string) => v.split(',') },
       { key: 'additional_services_cost', list: null },
+      { key: 'additional_equipment', list: null, format: (v: string) => v.split(',') },
+      { key: 'additional_equipment_cost', list: null },
       {
         key: 'date',
         list: null,
@@ -499,6 +504,46 @@ export default function UploadPage() {
                       </Form.Item>
                     </Col>
                   </Row>
+                  {isComissionsDoc && (
+                    <Row className="w-100!" gutter={4}>
+                      <Col span={16}>
+                        <Form.Item<GetDocumentForm>
+                          label="Дополнительное дооснащение"
+                          name={'additional_equipment'}
+                        >
+                          <Select
+                            mode="tags"
+                            allowClear
+                            className="w-full!"
+                            placeholder="Введите дооснащение"
+                            options={[]}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item<GetDocumentForm>
+                          label="Стоимость"
+                          name={'additional_equipment_cost'}
+                          rules={hasAdditionalEquipment ? requiredRule : []}
+                        >
+                          <InputNumber
+                            className="w-full!"
+                            addonAfter="₽"
+                            min={0}
+                            placeholder="Цена"
+                            formatter={(v) =>
+                              `${v}`
+                                .split('')
+                                .reverse()
+                                .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                .reverse()
+                                .join('')
+                            }
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  )}
                 </>
               )}
             </Spin>
