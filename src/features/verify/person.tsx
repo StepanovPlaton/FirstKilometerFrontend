@@ -440,7 +440,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   <Input
                     className="w-full"
                     style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'middle_name')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'registration_address')}
                   />
                 </Form.Item>
               </Row>
