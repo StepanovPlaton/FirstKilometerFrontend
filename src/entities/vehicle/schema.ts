@@ -72,8 +72,10 @@ export const formVehicleSchema = entitySchema
       .or(z.literal(''))
       .nullable(),
     reg_number: rawVehicleSchema.shape.reg_number
-      .min(3, { error: 'Слишком короткий регистрационный номер' })
-      .max(12, { error: 'Слишком длинный регистрационный номер' })
+      .regex(
+        /^[АВЕКМНОРСТУХАВЕКМНОРСТУХ]\d{3}[АВЕКМНОРСТУХАВЕКМНОРСТУХ]{2}\d{2,3}$/,
+        { error: 'Неверный формат регистрационного номера (пример: А123ВС99 или А123ВС199)' }
+      )
       .or(z.literal(''))
       .nullable(),
     vin: rawVehicleSchema.shape.vin
