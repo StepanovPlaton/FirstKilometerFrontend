@@ -1,10 +1,16 @@
 'use client';
 
 import type { ExternalCompany } from '@/entities/external-company';
-import ExternalCompanyService, { externalCompanySchema } from '@/entities/external-company';
+import ExternalCompanyService from '@/entities/external-company';
+import {
+  companyToFormValues,
+  formatPaymentAccountsForTable,
+  persistCompanyWithPaymentAccounts,
+} from '@/features/companies/persistCompanyWithPaymentAccounts';
 import { addCreatedAndUpdated, addTextSortAndFilters } from '@/features/tables/sort-filters';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
+import { companyFormValuesSchema, type CompanyFormValues } from '@/shared/utils/schemes/company';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Table } from 'antd';
@@ -20,45 +26,51 @@ export default function ExternalCompaniesTablesPage() {
 
   const { data: companies, loading, mutate: mutateTable } = useEntities(ExternalCompanyService);
 
-  const [company, setExternalCompany] = useState<ExternalCompany>();
+  const [company, setExternalCompany] = useState<ExternalCompany | Record<string, never>>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [companyForm] = Form.useForm<ExternalCompany>();
+  const [companyForm] = Form.useForm<CompanyFormValues>();
+
   useEffect(() => {
-    companyForm.setFieldsValue(company as never as ExternalCompany);
+    if (company === undefined) {
+      return;
+    }
+    const co = company as ExternalCompany;
+    companyForm.setFieldsValue(companyToFormValues(co, 'external'));
   }, [company, companyForm]);
 
-  const submitExternalCompany = (values: ExternalCompany) => {
-    const validatedForm = externalCompanySchema.omit({ id: true }).safeParse({ ...values });
-    if (validatedForm.success && validatedForm.data) {
-      const newCompanyData = { ...validatedForm.data, id: company?.id };
-      return (
-        company?.id
-          ? ExternalCompanyService.putAny(newCompanyData as ExternalCompany)
-          : ExternalCompanyService.post(newCompanyData)
-      )
-        .then((receivedExternalCompany) => {
-          if (company?.id) {
-            return mutateTable((companies) =>
-              companies?.map((c) => (c.id === company.id ? company : c))
-            );
-          } else {
-            return mutateTable((companies) => [...(companies ?? []), receivedExternalCompany]);
-          }
-        })
-        .catch((e) => {
-          messageApi.error(
-            'Не удалось сохранить данные юридического лица. Повторите попытку позже'
-          );
-          throw e;
-        });
-    } else {
+  const submitExternalCompany = (values: CompanyFormValues) => {
+    const validatedForm = companyFormValuesSchema.safeParse(values);
+    if (!validatedForm.success) {
       messageApi.error('Данные юридического лица заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
       }
-      return Promise.reject(new Error(errorMessage));
+      return Promise.reject(new Error(errorMessage ?? 'Ошибка валидации'));
     }
+
+    const co = company;
+    const companyId = co && 'id' in co && typeof co.id === 'number' ? co.id : undefined;
+
+    return persistCompanyWithPaymentAccounts({
+      mode: 'external',
+      ...(companyId !== undefined ? { companyId } : {}),
+      values: validatedForm.data,
+    })
+      .then((receivedExternalCompany) => {
+        if (companyId) {
+          return mutateTable((list) =>
+            list?.map((c) => (c.id === companyId ? receivedExternalCompany : c))
+          );
+        }
+        return mutateTable((list) => [...(list ?? []), receivedExternalCompany]);
+      })
+      .catch((e) => {
+        messageApi.error(
+          'Не удалось сохранить данные юридического лица. Повторите попытку позже'
+        );
+        throw e;
+      });
   };
 
   const columns: ColumnsType<ExternalCompany> = [
@@ -67,6 +79,12 @@ export default function ExternalCompaniesTablesPage() {
       title: 'Название',
       dataIndex: 'short_name',
       ...addTextSortAndFilters<ExternalCompany, 'short_name'>('short_name', companies),
+    },
+    {
+      key: 'payment_accounts',
+      title: 'Счета',
+      dataIndex: 'payment_accounts',
+      render: (_: unknown, record: ExternalCompany) => formatPaymentAccountsForTable(record),
     },
     {
       key: 'director',
@@ -152,7 +170,7 @@ export default function ExternalCompaniesTablesPage() {
       />
       <Modal
         open={!!company}
-        width={550}
+        width={720}
         okText={'Проверить и сохранить'}
         okButtonProps={{
           disabled: !permissions.includes('change_externalcompany'),

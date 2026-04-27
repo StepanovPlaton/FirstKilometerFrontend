@@ -57,14 +57,12 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
       ? '7' + digits.slice(1) 
       : digits;
 
-    let result = '';
-
     if (normalized.length === 0) {
       return '';
     }
 
     // +7
-    result = '+7';
+    let result = '+7';
     
     if (normalized.length > 1) {
       // +7 (XXX

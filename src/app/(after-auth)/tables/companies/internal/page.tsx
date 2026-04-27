@@ -1,10 +1,16 @@
 'use client';
 
 import type { InternalCompany } from '@/entities/internal-company';
-import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
+import InternalCompanyService from '@/entities/internal-company';
+import {
+  companyToFormValues,
+  formatPaymentAccountsForTable,
+  persistCompanyWithPaymentAccounts,
+} from '@/features/companies/persistCompanyWithPaymentAccounts';
 import { addCreatedAndUpdated, addTextSortAndFilters } from '@/features/tables/sort-filters';
 import { VerifyCompany } from '@/features/verify/company';
 import { useEntities } from '@/shared/utils/hooks/data';
+import { companyFormValuesSchema, type CompanyFormValues } from '@/shared/utils/schemes/company';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Flex, Form, message, Modal, Popconfirm, Table } from 'antd';
@@ -19,43 +25,49 @@ export default function InternalCompaniesTablesPage() {
   const permissions = useAuthTokens((s) => s.permissions);
 
   const { data: companies, loading, mutate: mutateTable } = useEntities(InternalCompanyService);
-  const [company, setInternalCompany] = useState<InternalCompany>();
+  const [company, setInternalCompany] = useState<InternalCompany | Record<string, never>>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [companyForm] = Form.useForm<InternalCompany>();
+  const [companyForm] = Form.useForm<CompanyFormValues>();
+
   useEffect(() => {
-    companyForm.setFieldsValue(company as never as InternalCompany);
+    if (company === undefined) {
+      return;
+    }
+    const co = company as InternalCompany;
+    companyForm.setFieldsValue(companyToFormValues(co, 'internal'));
   }, [company, companyForm]);
 
-  const submitInternalCompany = (values: InternalCompany) => {
-    const validatedForm = internalCompanySchema.omit({ id: true }).safeParse({ ...values });
-    if (validatedForm.success && validatedForm.data) {
-      const newCompanyData = { ...validatedForm.data, id: company?.id };
-      return (
-        company?.id
-          ? InternalCompanyService.putAny(newCompanyData as InternalCompany)
-          : InternalCompanyService.post(validatedForm.data)
-      )
-        .then((receivedInternalCompany) => {
-          if (company?.id) {
-            return mutateTable((companies) =>
-              companies?.map((c) => (c.id === company.id ? company : c))
-            );
-          } else {
-            return mutateTable((companies) => [...(companies ?? []), receivedInternalCompany]);
-          }
-        })
-        .catch((e) => {
-          messageApi.error('Не удалось сохранить данные филиала. Повторите попытку позже');
-          throw e;
-        });
-    } else {
+  const submitInternalCompany = (values: CompanyFormValues) => {
+    const validatedForm = companyFormValuesSchema.safeParse(values);
+    if (!validatedForm.success) {
       messageApi.error('Данные филиала заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
       }
-      return Promise.reject(new Error(errorMessage));
+      return Promise.reject(new Error(errorMessage ?? 'Ошибка валидации'));
     }
+
+    const co = company;
+    const companyId = co && 'id' in co && typeof co.id === 'number' ? co.id : undefined;
+
+    return persistCompanyWithPaymentAccounts({
+      mode: 'internal',
+      ...(companyId !== undefined ? { companyId } : {}),
+      values: validatedForm.data,
+    })
+      .then((receivedInternalCompany) => {
+        if (companyId) {
+          return mutateTable((list) =>
+            list?.map((c) => (c.id === companyId ? receivedInternalCompany : c))
+          );
+        }
+        return mutateTable((list) => [...(list ?? []), receivedInternalCompany]);
+      })
+      .catch((e) => {
+        messageApi.error('Не удалось сохранить данные филиала. Повторите попытку позже');
+        throw e;
+      });
   };
 
   const columns: ColumnsType<InternalCompany> = [
@@ -64,6 +76,12 @@ export default function InternalCompaniesTablesPage() {
       title: 'Название',
       dataIndex: 'short_name',
       ...addTextSortAndFilters<InternalCompany, 'short_name'>('short_name', companies),
+    },
+    {
+      key: 'payment_accounts',
+      title: 'Счета',
+      dataIndex: 'payment_accounts',
+      render: (_: unknown, record: InternalCompany) => formatPaymentAccountsForTable(record),
     },
     {
       key: 'director',
@@ -147,7 +165,7 @@ export default function InternalCompaniesTablesPage() {
       />
       <Modal
         open={!!company}
-        width={550}
+        width={720}
         okText={'Проверить и сохранить'}
         okButtonProps={{
           disabled: !permissions.includes('change_internalcompany'),

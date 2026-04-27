@@ -5,6 +5,7 @@ import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import {
   BankOutlined,
   CarOutlined,
+  CreditCardOutlined,
   DatabaseOutlined,
   FileTextOutlined,
   IdcardOutlined,
@@ -93,6 +94,16 @@ export const Menu = () => {
             href: '/tables/companies/external',
             text: 'Юр. лица',
             icon: <DatabaseOutlined />,
+          },
+        ]
+      : []),
+    ...(permissions.includes('view_internalcompany') ||
+    permissions.includes('view_externalcompany')
+      ? [
+          {
+            href: '/tables/companies/payment-accounts',
+            text: 'Расчётные счета',
+            icon: <CreditCardOutlined />,
           },
         ]
       : []),
