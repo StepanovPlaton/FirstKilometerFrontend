@@ -36,7 +36,7 @@ export default function ClientTablesPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const [individualForm] = Form.useForm<FormIndividual>();
   useEffect(() => {
-    individualForm.setFieldsValue(individual as never as FormIndividual);
+    individualForm.setFieldsValue(individual as never);
   }, [individual, individualForm]);
 
   const submitIndividual = (values: FormIndividual) => {

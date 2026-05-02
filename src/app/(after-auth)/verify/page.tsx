@@ -58,7 +58,7 @@ export default function VerifyPage() {
   const [vehicleForm] = Form.useForm<FormVehicle>();
 
   useEffect(() => {
-    userForm.setFieldsValue(user as never as FormIndividual);
+    userForm.setFieldsValue(user as never);
   }, [user, userForm]);
   useEffect(() => {
     if (internalCompany) {
@@ -71,7 +71,7 @@ export default function VerifyPage() {
     }
   }, [externalCompany, externalCompanyForm]);
   useEffect(() => {
-    vehicleForm.setFieldsValue(vehicle as never as FormVehicle);
+    vehicleForm.setFieldsValue(vehicle as FormVehicle);
   }, [vehicle, vehicleForm]);
 
   const submitUser = (values: FormIndividual) => {

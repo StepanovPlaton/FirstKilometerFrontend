@@ -24,7 +24,7 @@ export default function ExternalCompaniesTablesPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const [companyForm] = Form.useForm<ExternalCompany>();
   useEffect(() => {
-    companyForm.setFieldsValue(company as never as ExternalCompany);
+    companyForm.setFieldsValue(company as ExternalCompany);
   }, [company, companyForm]);
 
   const submitExternalCompany = (values: ExternalCompany) => {

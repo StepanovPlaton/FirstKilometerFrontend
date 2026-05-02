@@ -23,7 +23,7 @@ export default function InternalCompaniesTablesPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const [companyForm] = Form.useForm<InternalCompany>();
   useEffect(() => {
-    companyForm.setFieldsValue(company as never as InternalCompany);
+    companyForm.setFieldsValue(company as InternalCompany);
   }, [company, companyForm]);
 
   const submitInternalCompany = (values: InternalCompany) => {

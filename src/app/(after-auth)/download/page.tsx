@@ -93,16 +93,18 @@ export default function UploadPage() {
   const isTaxDoc = docType === 'sale';
   const isComissionsDoc = docType === 'comissions';
   const isReturnDoc = docType === 'return';
+  const isReturnComissionsDoc = docType === 'comissions_return';
   const hasAdditionalServices = Form.useWatch((v) => !!v.additional_services, form);
   const hasAdditionalEquipment = Form.useWatch((v) => !!v.additional_equipment, form);
-  const showExtraFields = isTaxDoc || isComissionsDoc;
+  const showExtraFields = isTaxDoc || isComissionsDoc || isReturnComissionsDoc;
+  const hideMoneyFields = isReturnComissionsDoc;
 
   useEffect(() => {
     if (!seller) {
-      setSeller(searchParams.get('seller') as never as typeof seller);
+      setSeller(searchParams.get('seller') as never);
     }
     if (!buyer) {
-      setBuyer(searchParams.get('buyer') as never as typeof buyer);
+      setBuyer(searchParams.get('buyer') as never);
     }
     [
       { key: 'buyer', list: null },
@@ -384,7 +386,7 @@ export default function UploadPage() {
                 </Form.Item>
               )}
               <Row className="w-100!" gutter={4}>
-                {!isReturnDoc && (
+                {!isReturnDoc && !isReturnComissionsDoc && (
                   <Col span={12}>
                     <Form.Item<GetDocumentForm> label="Цена" name={'price'}>
                       <InputNumber
@@ -417,28 +419,30 @@ export default function UploadPage() {
               {showExtraFields && (
                 <>
                   <Row className="w-100!" gutter={4}>
-                    <Col span={8}>
-                      <Form.Item<GetDocumentForm>
-                        label="Комиссия"
-                        name={'tax'}
-                        rules={showExtraFields ? requiredRule : []}
-                      >
-                        <InputNumber
-                          className="w-full!"
-                          addonAfter="₽"
-                          min={0}
-                          placeholder="Введите комиссию"
-                          formatter={(v) =>
-                            `${v}`
-                              .split('')
-                              .reverse()
-                              .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
-                              .reverse()
-                              .join('')
-                          }
-                        />
-                      </Form.Item>
-                    </Col>
+                    {!hideMoneyFields && (
+                      <Col span={8}>
+                        <Form.Item<GetDocumentForm>
+                          label="Комиссия"
+                          name={'tax'}
+                          rules={showExtraFields ? requiredRule : []}
+                        >
+                          <InputNumber
+                            className="w-full!"
+                            addonAfter="₽"
+                            min={0}
+                            placeholder="Введите комиссию"
+                            formatter={(v) =>
+                              `${v}`
+                                .split('')
+                                .reverse()
+                                .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                .reverse()
+                                .join('')
+                            }
+                          />
+                        </Form.Item>
+                      </Col>
+                    )}
                     <Col span={16}>
                       <Form.Item<GetDocumentForm>
                         label="Опции"
@@ -481,30 +485,32 @@ export default function UploadPage() {
                         />
                       </Form.Item>
                     </Col>
-                    <Col span={8}>
-                      <Form.Item<GetDocumentForm>
-                        label="Стоимость"
-                        name={'additional_services_cost'}
-                        rules={hasAdditionalServices ? requiredRule : []}
-                      >
-                        <InputNumber
-                          className="w-full!"
-                          addonAfter="₽"
-                          min={0}
-                          placeholder="Введите стоимость"
-                          formatter={(v) =>
-                            `${v}`
-                              .split('')
-                              .reverse()
-                              .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
-                              .reverse()
-                              .join('')
-                          }
-                        />
-                      </Form.Item>
-                    </Col>
+                    {!hideMoneyFields && (
+                      <Col span={8}>
+                        <Form.Item<GetDocumentForm>
+                          label="Стоимость"
+                          name={'additional_services_cost'}
+                          rules={hasAdditionalServices ? requiredRule : []}
+                        >
+                          <InputNumber
+                            className="w-full!"
+                            addonAfter="₽"
+                            min={0}
+                            placeholder="Введите стоимость"
+                            formatter={(v) =>
+                              `${v}`
+                                .split('')
+                                .reverse()
+                                .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                .reverse()
+                                .join('')
+                            }
+                          />
+                        </Form.Item>
+                      </Col>
+                    )}
                   </Row>
-                  {isComissionsDoc && (
+                  {(isComissionsDoc || isReturnComissionsDoc) && (
                     <Row className="w-100!" gutter={4}>
                       <Col span={16}>
                         <Form.Item<GetDocumentForm>
@@ -520,28 +526,30 @@ export default function UploadPage() {
                           />
                         </Form.Item>
                       </Col>
-                      <Col span={8}>
-                        <Form.Item<GetDocumentForm>
-                          label="Стоимость"
-                          name={'additional_equipment_cost'}
-                          rules={hasAdditionalEquipment ? requiredRule : []}
-                        >
-                          <InputNumber
-                            className="w-full!"
-                            addonAfter="₽"
-                            min={0}
-                            placeholder="Цена"
-                            formatter={(v) =>
-                              `${v}`
-                                .split('')
-                                .reverse()
-                                .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
-                                .reverse()
-                                .join('')
-                            }
-                          />
-                        </Form.Item>
-                      </Col>
+                      {!hideMoneyFields && (
+                        <Col span={8}>
+                          <Form.Item<GetDocumentForm>
+                            label="Стоимость"
+                            name={'additional_equipment_cost'}
+                            rules={hasAdditionalEquipment ? requiredRule : []}
+                          >
+                            <InputNumber
+                              className="w-full!"
+                              addonAfter="₽"
+                              min={0}
+                              placeholder="Цена"
+                              formatter={(v) =>
+                                `${v}`
+                                  .split('')
+                                  .reverse()
+                                  .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                  .reverse()
+                                  .join('')
+                              }
+                            />
+                          </Form.Item>
+                        </Col>
+                      )}
                     </Row>
                   )}
                 </>

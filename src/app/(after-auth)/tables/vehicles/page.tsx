@@ -36,7 +36,7 @@ export default function VehiclesTablesPage() {
     vehicleForm.setFieldsValue({
       ...vehicle,
       article_category_id: vehicle?.article_category?.id,
-    } as never as FormVehicle);
+    } as never);
   }, [vehicle, vehicleForm]);
 
   const submitVehicle = (values: FormVehicle) => {

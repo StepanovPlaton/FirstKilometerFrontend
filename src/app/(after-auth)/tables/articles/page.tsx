@@ -29,7 +29,7 @@ export default function ArticlesTablesPage() {
   const [articleCategoryForm] = Form.useForm<ArticleCategory>();
 
   useEffect(() => {
-    articleCategoryForm.setFieldsValue(articleCategory as never as ArticleCategory);
+    articleCategoryForm.setFieldsValue(articleCategory as ArticleCategory);
   }, [articleCategory, articleCategoryForm]);
 
   const submitArticleCategory = (values: ArticleCategory) => {
