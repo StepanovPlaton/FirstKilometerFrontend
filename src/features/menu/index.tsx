@@ -97,8 +97,7 @@ export const Menu = () => {
           },
         ]
       : []),
-    ...(permissions.includes('view_internalcompany') ||
-    permissions.includes('view_externalcompany')
+    ...(permissions.includes('view_internalcompany') || permissions.includes('view_externalcompany')
       ? [
           {
             href: '/tables/companies/payment-accounts',

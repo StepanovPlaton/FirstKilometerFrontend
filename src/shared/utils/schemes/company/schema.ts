@@ -6,11 +6,9 @@ import z from 'zod';
 const emptyToNull = (v: unknown) => (v === '' || v === undefined ? null : v);
 const asUnknownArray = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
 
-const phoneValueSchema = z
-  .string()
-  .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
-    error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
-  });
+const phoneValueSchema = z.string().regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
+  error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
+});
 
 const emailValueSchema = z.string().trim().email({ error: 'Некорректный адрес электронной почты' });
 
@@ -36,7 +34,10 @@ const companyFieldsSchema = z.object({
     .max(5000, { error: 'Слишком длинный юридический адрес' }),
   postal_address: z.preprocess(emptyToNull, z.union([z.null(), z.string().max(5000)])),
   phone: z.preprocess(emptyToNull, z.union([z.null(), phoneValueSchema])),
-  email: z.preprocess((v) => (v === '' || v === undefined ? null : v), z.union([z.null(), emailValueSchema])),
+  email: z.preprocess(
+    (v) => (v === '' || v === undefined ? null : v),
+    z.union([z.null(), emailValueSchema])
+  ),
   director_name: z.preprocess(emptyToNull, z.union([z.null(), z.string().min(1).max(255)])),
   director_position: z
     .string('Должность руководителя должна быть строкой')
@@ -53,21 +54,21 @@ export const companyApiSchema = idEntitySchema.merge(companyFieldsSchema).extend
 export type CompanyApi = z.output<typeof companyApiSchema>;
 
 /** Значения формы: привязка счетов по id (редактирование счетов — отдельный справочник). */
-export const companyFormValuesSchema = companyFieldsSchema
-  .omit({ company_type: true })
-  .extend({
-    id: z.number().positive().optional(),
-    created_at: z.any().optional(),
-    updated_at: z.any().optional(),
-    company_type: z.enum(['internal', 'external']).optional(),
-    payment_account_ids: z.preprocess(
-      (v) =>
-        Array.isArray(v)
-          ? v.map((x) => (typeof x === 'number' ? x : Number(x))).filter((n) => Number.isInteger(n) && n > 0)
-          : [],
-      z.array(z.number().int().positive()).default([])
-    ),
-  });
+export const companyFormValuesSchema = companyFieldsSchema.omit({ company_type: true }).extend({
+  id: z.number().positive().optional(),
+  created_at: z.any().optional(),
+  updated_at: z.any().optional(),
+  company_type: z.enum(['internal', 'external']).optional(),
+  payment_account_ids: z.preprocess(
+    (v) =>
+      Array.isArray(v)
+        ? v
+            .map((x) => (typeof x === 'number' ? x : Number(x)))
+            .filter((n) => Number.isInteger(n) && n > 0)
+        : [],
+    z.array(z.number().int().positive()).default([])
+  ),
+});
 
 export type CompanyFormValues = z.output<typeof companyFormValuesSchema>;
 
@@ -101,13 +102,16 @@ export const normalizeCompanyFieldsForApi = (
   companyType: 'internal' | 'external'
 ): CompanyCorePayload => ({
   name: values.name,
-  short_name: values.short_name === '' || values.short_name === undefined ? null : values.short_name,
+  short_name:
+    values.short_name === '' || values.short_name === undefined ? null : values.short_name,
   inn: values.inn,
   kpp: values.kpp === '' || values.kpp === undefined ? null : values.kpp,
   ogrn: values.ogrn,
   legal_address: values.legal_address,
   postal_address:
-    values.postal_address === '' || values.postal_address === undefined ? null : values.postal_address,
+    values.postal_address === '' || values.postal_address === undefined
+      ? null
+      : values.postal_address,
   phone: values.phone === '' || values.phone === undefined ? null : values.phone,
   email: values.email === '' || values.email === undefined ? null : values.email,
   director_name:

@@ -52,11 +52,9 @@ export default function PaymentAccountsTablesPage() {
   const permissions = useAuthTokens((s) => s.permissions);
 
   const canView =
-    permissions.includes('view_internalcompany') ||
-    permissions.includes('view_externalcompany');
+    permissions.includes('view_internalcompany') || permissions.includes('view_externalcompany');
   const canAdd =
-    permissions.includes('add_internalcompany') ||
-    permissions.includes('add_externalcompany');
+    permissions.includes('add_internalcompany') || permissions.includes('add_externalcompany');
   const canChange =
     permissions.includes('change_internalcompany') ||
     permissions.includes('change_externalcompany');
@@ -99,7 +97,8 @@ export default function PaymentAccountsTablesPage() {
     }
 
     const current = account;
-    const id = current && 'id' in current && typeof current.id === 'number' ? current.id : undefined;
+    const id =
+      current && 'id' in current && typeof current.id === 'number' ? current.id : undefined;
 
     return (
       id

@@ -8,7 +8,10 @@ import IndividualService, { formIndividualSchema } from '@/entities/individual';
 import InternalCompanyService from '@/entities/internal-company';
 import type { FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
-import { companyToFormValues, persistCompanyWithPaymentAccounts } from '@/features/companies/persistCompanyWithPaymentAccounts';
+import {
+  companyToFormValues,
+  persistCompanyWithPaymentAccounts,
+} from '@/features/companies/persistCompanyWithPaymentAccounts';
 import { VerifyCompany } from '@/features/verify/company';
 import { VerifyPerson } from '@/features/verify/person';
 import { VerifyVehicle } from '@/features/verify/vehicle';
@@ -130,9 +133,7 @@ export default function VerifyPage() {
     })
       .then((company) => mutateExternalCompany(company))
       .catch((e) => {
-        messageApi.error(
-          'Не удалось сохранить данные юридического лица. Повторите попытку позже'
-        );
+        messageApi.error('Не удалось сохранить данные юридического лица. Повторите попытку позже');
         throw e;
       });
   };

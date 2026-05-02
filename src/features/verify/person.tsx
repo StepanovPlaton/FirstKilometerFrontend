@@ -52,9 +52,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   const formatPhoneNumber = (value: string): string => {
     const digits = value.replace(/\D/g, '');
 
-    const normalized = digits.startsWith('8') 
-      ? '7' + digits.slice(1) 
-      : digits;
+    const normalized = digits.startsWith('8') ? '7' + digits.slice(1) : digits;
 
     if (normalized.length === 0) {
       return '';
@@ -62,7 +60,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
 
     // +7
     let result = '+7';
-    
+
     if (normalized.length > 1) {
       // +7 (XXX
       result += ' (' + normalized.slice(1, 4);

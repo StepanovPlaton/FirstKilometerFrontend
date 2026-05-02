@@ -66,9 +66,7 @@ export default function ExternalCompaniesTablesPage() {
         return mutateTable((list) => [...(list ?? []), receivedExternalCompany]);
       })
       .catch((e) => {
-        messageApi.error(
-          'Не удалось сохранить данные юридического лица. Повторите попытку позже'
-        );
+        messageApi.error('Не удалось сохранить данные юридического лица. Повторите попытку позже');
         throw e;
       });
   };
