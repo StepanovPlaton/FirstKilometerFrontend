@@ -2,18 +2,18 @@
 
 import { Button, Card, Flex, Form, message } from 'antd';
 
-import type { ExternalCompany } from '@/entities/external-company';
-import ExternalCompanyService, { externalCompanySchema } from '@/entities/external-company';
+import ExternalCompanyService from '@/entities/external-company';
 import type { FormIndividual } from '@/entities/individual';
 import IndividualService, { formIndividualSchema } from '@/entities/individual';
-import type { InternalCompany } from '@/entities/internal-company';
-import InternalCompanyService, { internalCompanySchema } from '@/entities/internal-company';
+import InternalCompanyService from '@/entities/internal-company';
 import type { FormVehicle } from '@/entities/vehicle';
 import VehicleService, { formVehicleSchema } from '@/entities/vehicle';
+import { companyToFormValues, persistCompanyWithPaymentAccounts } from '@/features/companies/persistCompanyWithPaymentAccounts';
 import { VerifyCompany } from '@/features/verify/company';
 import { VerifyPerson } from '@/features/verify/person';
 import { VerifyVehicle } from '@/features/verify/vehicle';
 import { useEntity } from '@/shared/utils/hooks/data';
+import { companyFormValuesSchema, type CompanyFormValues } from '@/shared/utils/schemes/company';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru'; // Подключаем русскую локаль dayjs
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -53,8 +53,8 @@ export default function VerifyPage() {
   const { data: vehicle, mutate: mutateVehicle } = useEntity(VehicleService, vehicleUUID);
 
   const [userForm] = Form.useForm<FormIndividual>();
-  const [internalCompanyForm] = Form.useForm<InternalCompany>();
-  const [externalCompanyForm] = Form.useForm<ExternalCompany>();
+  const [internalCompanyForm] = Form.useForm<CompanyFormValues>();
+  const [externalCompanyForm] = Form.useForm<CompanyFormValues>();
   const [vehicleForm] = Form.useForm<FormVehicle>();
 
   useEffect(() => {
@@ -62,12 +62,12 @@ export default function VerifyPage() {
   }, [user, userForm]);
   useEffect(() => {
     if (internalCompany) {
-      internalCompanyForm.setFieldsValue(internalCompany);
+      internalCompanyForm.setFieldsValue(companyToFormValues(internalCompany, 'internal'));
     }
   }, [internalCompany, internalCompanyForm]);
   useEffect(() => {
     if (externalCompany) {
-      externalCompanyForm.setFieldsValue(externalCompany);
+      externalCompanyForm.setFieldsValue(companyToFormValues(externalCompany, 'external'));
     }
   }, [externalCompany, externalCompanyForm]);
   useEffect(() => {
@@ -92,43 +92,49 @@ export default function VerifyPage() {
       return Promise.reject(new Error(errorMessage));
     }
   };
-  const submitInternalCompany = (values: InternalCompany) => {
-    const validatedForm = internalCompanySchema.safeParse({ ...values, id: Number(buyer_id) });
-    if (validatedForm.success) {
-      return InternalCompanyService.putAny(validatedForm.data)
-        .then((company) => mutateInternalCompany(company))
-        .catch((e) => {
-          messageApi.error('Не удалось сохранить данные филиала. Повторите попытку позже');
-          throw e;
-        });
-    } else {
+  const submitInternalCompany = (values: CompanyFormValues) => {
+    const validatedForm = companyFormValuesSchema.safeParse(values);
+    if (!validatedForm.success) {
       messageApi.error('Данные филиала заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
       }
-      return Promise.reject(new Error(errorMessage));
+      return Promise.reject(new Error(errorMessage ?? 'Ошибка валидации'));
     }
+    return persistCompanyWithPaymentAccounts({
+      mode: 'internal',
+      ...(buyer_id !== null && buyer_id !== '' ? { companyId: Number(buyer_id) } : {}),
+      values: validatedForm.data,
+    })
+      .then((company) => mutateInternalCompany(company))
+      .catch((e) => {
+        messageApi.error('Не удалось сохранить данные филиала. Повторите попытку позже');
+        throw e;
+      });
   };
-  const submitExternalCompany = (values: ExternalCompany) => {
-    const validatedForm = externalCompanySchema.safeParse({ ...values, id: Number(buyer_id) });
-    if (validatedForm.success) {
-      return ExternalCompanyService.putAny(validatedForm.data)
-        .then((company) => mutateExternalCompany(company))
-        .catch((e) => {
-          messageApi.error(
-            'Не удалось сохранить данные юридического лица. Повторите попытку позже'
-          );
-          throw e;
-        });
-    } else {
+  const submitExternalCompany = (values: CompanyFormValues) => {
+    const validatedForm = companyFormValuesSchema.safeParse(values);
+    if (!validatedForm.success) {
       messageApi.error('Данные юридического лица заполнены неправильно');
       const errorMessage = z.treeifyError(validatedForm.error).errors[0];
       if (errorMessage) {
         messageApi.error(errorMessage);
       }
-      return Promise.reject(new Error(errorMessage));
+      return Promise.reject(new Error(errorMessage ?? 'Ошибка валидации'));
     }
+    return persistCompanyWithPaymentAccounts({
+      mode: 'external',
+      ...(buyer_id !== null && buyer_id !== '' ? { companyId: Number(buyer_id) } : {}),
+      values: validatedForm.data,
+    })
+      .then((company) => mutateExternalCompany(company))
+      .catch((e) => {
+        messageApi.error(
+          'Не удалось сохранить данные юридического лица. Повторите попытку позже'
+        );
+        throw e;
+      });
   };
 
   const submitVehicle = (values: FormVehicle) => {
