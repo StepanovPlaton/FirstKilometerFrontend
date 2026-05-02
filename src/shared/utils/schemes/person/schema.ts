@@ -135,12 +135,12 @@ export const formPersonSchema = entitySchema.extend({
     .regex(/^[0-9]{2}\s[0-9]{2}\s[0-9]{6}$/, {
       error: 'Серия и номер паспорта должны иметь формат "## ## ######"',
     }),
-  
+
   phone: rawPersonSchema.shape.phone
-  .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
-    error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
-  })
-  .or(z.literal(''))
-  .nullable(),
+    .regex(/^\+7\s?\([0-9]{3}\)\s?[0-9]{3}-[0-9]{2}-[0-9]{2}$/, {
+      error: 'Номер телефона должен иметь формат "+7 (###) ###-##-##"',
+    })
+    .or(z.literal(''))
+    .nullable(),
 });
 export type FormPerson = z.output<typeof formPersonSchema>;

@@ -542,7 +542,9 @@ export default function UploadPage() {
                                 `${v}`
                                   .split('')
                                   .reverse()
-                                  .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                  .map((e, i, a) =>
+                                    i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e
+                                  )
                                   .reverse()
                                   .join('')
                               }

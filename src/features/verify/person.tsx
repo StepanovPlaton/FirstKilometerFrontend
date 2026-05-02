@@ -33,9 +33,8 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   service: T;
   onPersonChange?: (person: ApiPerson['uuid']) => unknown;
 }) => {
-
   const handleUpperCaseChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, 
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     fieldName: string
   ) => {
     const { selectionStart, selectionEnd, value } = e.target;
@@ -53,9 +52,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
   const formatPhoneNumber = (value: string): string => {
     const digits = value.replace(/\D/g, '');
 
-    const normalized = digits.startsWith('8') 
-      ? '7' + digits.slice(1) 
-      : digits;
+    const normalized = digits.startsWith('8') ? '7' + digits.slice(1) : digits;
 
     let result = '';
 
@@ -65,27 +62,27 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
 
     // +7
     result = '+7';
-    
+
     if (normalized.length > 1) {
       // +7 (XXX
       result += ' (' + normalized.slice(1, 4);
     }
-    
+
     if (normalized.length >= 4) {
       // +7 (XXX)
       result += ')';
     }
-    
+
     if (normalized.length > 4) {
       // +7 (XXX) XXX
       result += ' ' + normalized.slice(4, 7);
     }
-    
+
     if (normalized.length > 7) {
       // +7 (XXX) XXX-XX
       result += '-' + normalized.slice(7, 9);
     }
-    
+
     if (normalized.length > 9) {
       // +7 (XXX) XXX-XX-XX
       result += '-' + normalized.slice(9, 11);
@@ -94,9 +91,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
     return result;
   };
 
-  const handlePhoneChange = (
-    e: ChangeEvent<HTMLInputElement>
-  ) => {
+  const handlePhoneChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     const formatted = formatPhoneNumber(value);
 
@@ -198,8 +193,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'last_name')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'last_name')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -212,8 +209,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'first_name')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'first_name')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -226,8 +225,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'middle_name')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'middle_name')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -269,8 +270,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'birth_place')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'birth_place')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -285,7 +288,9 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                     rows={1}
                     className="field-sizing-content! w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleUpperCaseChange(e, 'issue_organization')}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                      handleUpperCaseChange(e, 'issue_organization')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -369,7 +374,9 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                     rows={1}
                     className="field-sizing-content! w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleUpperCaseChange(e, 'registration_region')}
+                    onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                      handleUpperCaseChange(e, 'registration_region')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -382,8 +389,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'registration_settlement')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'registration_settlement')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -396,8 +405,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'registration_district')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'registration_district')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -410,8 +421,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'registration_area')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'registration_area')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -424,8 +437,10 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'registration_street')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'registration_street')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -433,14 +448,15 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                 <Form.Item<FormPerson>
                   label="Дом, квартира, корпус"
                   name={'registration_address'}
-                  
                   rules={getValidationRules(formPersonSchema, 'registration_address')}
                   className="w-full"
                 >
                   <Input
                     className="w-full"
-                    style={{ textTransform: 'uppercase' }} 
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'registration_address')}
+                    style={{ textTransform: 'uppercase' }}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'registration_address')
+                    }
                   />
                 </Form.Item>
               </Row>

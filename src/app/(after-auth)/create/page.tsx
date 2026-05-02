@@ -331,7 +331,10 @@ export default function InitPage() {
                     </Row>
                     <Row className="w-100!" gutter={4}>
                       <Col span={16}>
-                        <Form.Item<CreateDocumentForm> label="Дополнительные услуги" name={'additional_services'}>
+                        <Form.Item<CreateDocumentForm>
+                          label="Дополнительные услуги"
+                          name={'additional_services'}
+                        >
                           <Select mode="tags" placeholder="Введите услуги" options={[]} />
                         </Form.Item>
                       </Col>
@@ -348,7 +351,10 @@ export default function InitPage() {
                     {isComissionsDoc && (
                       <Row className="w-100!" gutter={4}>
                         <Col span={16}>
-                          <Form.Item<CreateDocumentForm> label="Дополнительное дооснащение" name={'additional_equipment'}>
+                          <Form.Item<CreateDocumentForm>
+                            label="Дополнительное дооснащение"
+                            name={'additional_equipment'}
+                          >
                             <Select mode="tags" placeholder="Введите оснащение" options={[]} />
                           </Form.Item>
                         </Col>

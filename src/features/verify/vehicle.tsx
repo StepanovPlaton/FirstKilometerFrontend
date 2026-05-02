@@ -37,22 +37,21 @@ export const VerifyVehicle = (props: {
   vehicle: ApiVehicle | undefined;
   form: FormInstance<FormVehicle>;
 }) => {
-
   const handleUpperCaseChange = (
-      e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, 
-      fieldName: string
-    ) => {
-      const { selectionStart, selectionEnd, value } = e.target;
-      const upperValue = value.toUpperCase();
-  
-      props.form.setFieldsValue({ [fieldName]: upperValue });
-  
-      requestAnimationFrame(() => {
-        if (e.target && selectionStart !== null && selectionEnd !== null) {
-          e.target.setSelectionRange(selectionStart, selectionEnd);
-        }
-      });
-    };
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    fieldName: string
+  ) => {
+    const { selectionStart, selectionEnd, value } = e.target;
+    const upperValue = value.toUpperCase();
+
+    props.form.setFieldsValue({ [fieldName]: upperValue });
+
+    requestAnimationFrame(() => {
+      if (e.target && selectionStart !== null && selectionEnd !== null) {
+        e.target.setSelectionRange(selectionStart, selectionEnd);
+      }
+    });
+  };
 
   const [vehicleTypes, setVehicleTypes] = useState<string[]>(baseVehicleTypes);
 
@@ -115,9 +114,11 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'pts_id')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'pts_id')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -129,7 +130,7 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'vin')}
                   />
@@ -143,9 +144,11 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'make_model')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'make_model')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -183,9 +186,11 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'engine')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'engine')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -197,9 +202,11 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'chassis')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'chassis')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -231,9 +238,11 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'color')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'color')
+                    }
                   />
                 </Form.Item>
               </Row>
@@ -324,9 +333,11 @@ export const VerifyVehicle = (props: {
                   className="w-full"
                 >
                   <Input
-                    className="w-full" 
+                    className="w-full"
                     style={{ textTransform: 'uppercase' }}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleUpperCaseChange(e, 'reg_number')}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      handleUpperCaseChange(e, 'reg_number')
+                    }
                   />
                 </Form.Item>
               </Row>

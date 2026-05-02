@@ -26,8 +26,8 @@ export const rawVehicleSchema = entitySchema.extend({
   article_category: articleCategorySchema,
   article_number: z.string({ error: 'Артикул должен быть строкой' }),
 
-  mileage: z.number({ error: "Пробег должен быть числом" }),
-  equipment: z.string({ error: "Комплектация должна быть строкой" })
+  mileage: z.number({ error: 'Пробег должен быть числом' }),
+  equipment: z.string({ error: 'Комплектация должна быть строкой' }),
 });
 export type Vehicle = z.output<typeof rawVehicleSchema>;
 
@@ -60,74 +60,72 @@ export const apiVehicleSchema = entitySchema.extend({
 });
 export type ApiVehicle = z.output<typeof apiVehicleSchema>;
 
-export const formVehicleSchema = entitySchema
-  .extend({
-    //TODO: Добавить маску на номера
-    pts_id: rawVehicleSchema.shape.pts_id
-      .min(3, { error: 'Слишком короткий номер ПТС' })
-      .max(20, { error: 'Слишком длинный номер ПТС' }),
-    sts_id: rawVehicleSchema.shape.sts_id
-      .min(3, { error: 'Слишком короткий номер СТС' })
-      .max(20, { error: 'Слишком длинный номер СТС' })
-      .or(z.literal(''))
-      .nullable(),
-    reg_number: rawVehicleSchema.shape.reg_number
-      .regex(
-        /^[АВЕКМНОРСТУХАВЕКМНОРСТУХ]\d{3}[АВЕКМНОРСТУХАВЕКМНОРСТУХ]{2}\d{2,3}$/,
-        { error: 'Неверный формат регистрационного номера (пример: А123ВС99 или А123ВС199)' }
-      )
-      .or(z.literal(''))
-      .nullable(),
-    vin: rawVehicleSchema.shape.vin
-      .min(3, { error: 'Слишком короткий VIN-номер' })
-      .max(19, { error: 'Слишком длинный VIN-номер' }),
-    make_model: rawVehicleSchema.shape.make_model
-      .min(3, { error: 'Слишком короткая марка и модель' })
-      .max(100, { error: 'Слишком длинная марка и модель' }),
-    type: rawVehicleSchema.shape.type
-      .min(3, { error: 'Слишком короткий тип ТС' })
-      .max(50, { error: 'Слишком длинный тип ТС' }),
-    year: rawVehicleSchema.shape.year
-      .positive({ error: 'Год не может быть отрицательный' })
-      .min(1900, { error: 'Слишком маленький год выпуска ТС' })
-      .max(2100, { error: 'Слишком большой год выпуска ТС' }),
-    color: rawVehicleSchema.shape.color
-      .min(3, { error: 'Слишком короткий цвет ТС' })
-      .max(50, { error: 'Слишком длинный цвет ТС' }),
-    chassis: rawVehicleSchema.shape.chassis
-      .min(3, { error: 'Слишком короткий номер шасси ТС' })
-      .max(50, { error: 'Слишком длинный номер шасси ТС' }),
-    body: rawVehicleSchema.shape.body
-      .min(3, { error: 'Слишком короткий номер кузова ТС' })
-      .max(19, { error: 'Слишком длинный номер кузова ТС' }),
-    engine: rawVehicleSchema.shape.engine
-      .max(50, { error: 'Слишком длинный номер двигателя ТС' })
-      .nullable(),
-    category: rawVehicleSchema.shape.category
-      .min(1, { error: 'Слишком короткая категория ТС' })
-      .max(5, { error: 'Слишком длинная категория ТС' }),
+export const formVehicleSchema = entitySchema.extend({
+  //TODO: Добавить маску на номера
+  pts_id: rawVehicleSchema.shape.pts_id
+    .min(3, { error: 'Слишком короткий номер ПТС' })
+    .max(20, { error: 'Слишком длинный номер ПТС' }),
+  sts_id: rawVehicleSchema.shape.sts_id
+    .min(3, { error: 'Слишком короткий номер СТС' })
+    .max(20, { error: 'Слишком длинный номер СТС' })
+    .or(z.literal(''))
+    .nullable(),
+  reg_number: rawVehicleSchema.shape.reg_number
+    .regex(/^[АВЕКМНОРСТУХАВЕКМНОРСТУХ]\d{3}[АВЕКМНОРСТУХАВЕКМНОРСТУХ]{2}\d{2,3}$/, {
+      error: 'Неверный формат регистрационного номера (пример: А123ВС99 или А123ВС199)',
+    })
+    .or(z.literal(''))
+    .nullable(),
+  vin: rawVehicleSchema.shape.vin
+    .min(3, { error: 'Слишком короткий VIN-номер' })
+    .max(19, { error: 'Слишком длинный VIN-номер' }),
+  make_model: rawVehicleSchema.shape.make_model
+    .min(3, { error: 'Слишком короткая марка и модель' })
+    .max(100, { error: 'Слишком длинная марка и модель' }),
+  type: rawVehicleSchema.shape.type
+    .min(3, { error: 'Слишком короткий тип ТС' })
+    .max(50, { error: 'Слишком длинный тип ТС' }),
+  year: rawVehicleSchema.shape.year
+    .positive({ error: 'Год не может быть отрицательный' })
+    .min(1900, { error: 'Слишком маленький год выпуска ТС' })
+    .max(2100, { error: 'Слишком большой год выпуска ТС' }),
+  color: rawVehicleSchema.shape.color
+    .min(3, { error: 'Слишком короткий цвет ТС' })
+    .max(50, { error: 'Слишком длинный цвет ТС' }),
+  chassis: rawVehicleSchema.shape.chassis
+    .min(3, { error: 'Слишком короткий номер шасси ТС' })
+    .max(50, { error: 'Слишком длинный номер шасси ТС' }),
+  body: rawVehicleSchema.shape.body
+    .min(3, { error: 'Слишком короткий номер кузова ТС' })
+    .max(19, { error: 'Слишком длинный номер кузова ТС' }),
+  engine: rawVehicleSchema.shape.engine
+    .max(50, { error: 'Слишком длинный номер двигателя ТС' })
+    .nullable(),
+  category: rawVehicleSchema.shape.category
+    .min(1, { error: 'Слишком короткая категория ТС' })
+    .max(5, { error: 'Слишком длинная категория ТС' }),
 
-    article_category_id: rawVehicleSchema.shape.article_category.shape.id.nullable().optional(),
-    article_number: rawVehicleSchema.shape.article_number
-      .max(20, { error: 'Слишком длинный артикул ТС' })
-      .nullable(),
+  article_category_id: rawVehicleSchema.shape.article_category.shape.id.nullable().optional(),
+  article_number: rawVehicleSchema.shape.article_number
+    .max(20, { error: 'Слишком длинный артикул ТС' })
+    .nullable(),
 
-    mileage: rawVehicleSchema.shape.mileage
-      .int({ error: 'Пробег должен быть целым числом' }) 
-      .or(z.nan())
-      .nullable(),
-    equipment: rawVehicleSchema.shape.equipment
-      .max(50, { error: "Слишком длинное название комплектации" })
-      .nullable(),
-    pts_date: z
-      .any()
-      .nullable()
-      .refine((o) => (o ? dayjs.isDayjs(o) : true))
-      .transform((d) => (d ? (d as never as Dayjs).format('YYYY-MM-DD') : null)),
-    sts_date: z
-      .any()
-      .nullable()
-      .refine((o) => (o ? dayjs.isDayjs(o) : true))
-      .transform((d) => (d ? (d as never as Dayjs).format('YYYY-MM-DD') : null)),
-  })
+  mileage: rawVehicleSchema.shape.mileage
+    .int({ error: 'Пробег должен быть целым числом' })
+    .or(z.nan())
+    .nullable(),
+  equipment: rawVehicleSchema.shape.equipment
+    .max(50, { error: 'Слишком длинное название комплектации' })
+    .nullable(),
+  pts_date: z
+    .any()
+    .nullable()
+    .refine((o) => (o ? dayjs.isDayjs(o) : true))
+    .transform((d) => (d ? (d as never as Dayjs).format('YYYY-MM-DD') : null)),
+  sts_date: z
+    .any()
+    .nullable()
+    .refine((o) => (o ? dayjs.isDayjs(o) : true))
+    .transform((d) => (d ? (d as never as Dayjs).format('YYYY-MM-DD') : null)),
+});
 export type FormVehicle = z.output<typeof formVehicleSchema>;
