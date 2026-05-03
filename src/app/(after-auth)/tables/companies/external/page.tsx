@@ -145,7 +145,7 @@ export default function ExternalCompaniesTablesPage() {
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       {permissions.includes('add_externalcompany') && (
-        <Button type="primary" onClick={() => setExternalCompany({} as ExternalCompany)}>
+        <Button type="primary" onClick={() => setExternalCompany({})}>
           <PlusOutlined />
           Добавить
         </Button>

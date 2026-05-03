@@ -36,7 +36,7 @@ export async function persistCompanyWithPaymentAccounts(
     return companyService.putAny({
       id: companyId,
       ...writeBody,
-    } as never);
+    });
   }
   return companyService.post(writeBody as never);
 }

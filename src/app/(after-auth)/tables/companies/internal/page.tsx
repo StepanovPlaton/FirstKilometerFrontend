@@ -142,7 +142,7 @@ export default function InternalCompaniesTablesPage() {
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       {permissions.includes('add_internalcompany') && (
-        <Button type="primary" onClick={() => setInternalCompany({} as InternalCompany)}>
+        <Button type="primary" onClick={() => setInternalCompany({})}>
           <PlusOutlined />
           Добавить
         </Button>

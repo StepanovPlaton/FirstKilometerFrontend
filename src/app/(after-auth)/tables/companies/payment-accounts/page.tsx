@@ -190,7 +190,7 @@ export default function PaymentAccountsTablesPage() {
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       {canAdd && (
-        <Button type="primary" onClick={() => setAccount({} as PaymentAccount)}>
+        <Button type="primary" onClick={() => setAccount({})}>
           <PlusOutlined />
           Добавить
         </Button>
