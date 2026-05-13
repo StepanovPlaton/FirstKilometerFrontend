@@ -52,7 +52,7 @@ export default function OperationsPage() {
         name: payload.name,
         price: payload.price,
         measure: payload.measure,
-      } as Procedure)
+      })
         .then((received) =>
           mutateTable((list) => list?.map((p) => (p.id === id ? received : p)))
         )
@@ -141,7 +141,7 @@ export default function OperationsPage() {
   return (
     <Flex vertical align="end" className="w-full" gap={8}>
       {permissions.includes('add_procedure') && (
-        <Button type="primary" onClick={() => setProcedure({} as Procedure)}>
+        <Button type="primary" onClick={() => setProcedure({})}>
           <PlusOutlined />
           Добавить
         </Button>

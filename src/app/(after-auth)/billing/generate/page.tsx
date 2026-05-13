@@ -333,7 +333,10 @@ export default function GenerateBillingPage() {
                       </Form.Item>
                       <Form.Item
                         noStyle
-                        shouldUpdate={(prev, cur) => prev.buyer_type !== cur.buyer_type}
+                        shouldUpdate={(prev, cur) =>
+                          (prev as { buyer_type?: string }).buyer_type !==
+                          (cur as { buyer_type?: string }).buyer_type
+                        }
                         className="w-full"
                       >
                         {({ getFieldValue }) =>
