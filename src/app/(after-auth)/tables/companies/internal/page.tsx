@@ -164,6 +164,7 @@ export default function InternalCompaniesTablesPage() {
         }}
       />
       <Modal
+        centered
         open={!!company}
         width={720}
         okText={'Проверить и сохранить'}

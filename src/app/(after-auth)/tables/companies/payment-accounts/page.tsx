@@ -213,6 +213,7 @@ export default function PaymentAccountsTablesPage() {
         }}
       />
       <Modal
+        centered
         open={!!account}
         width={520}
         okText="Проверить и сохранить"

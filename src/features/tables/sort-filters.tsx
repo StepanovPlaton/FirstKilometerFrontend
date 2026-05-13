@@ -3,8 +3,19 @@ import { DatePicker } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { Key } from 'antd/lib/table/interface';
 import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
+import 'dayjs/locale/ru';
 
 const { RangePicker } = DatePicker;
+
+const formatDateRu = (d: Dayjs | null | undefined, withYear: boolean) => {
+  if (!d) {
+    return '—';
+  }
+  return withYear
+    ? `${dayjs(d).locale('ru').format('D MMMM YYYY')} г.`
+    : dayjs(d).locale('ru').format('D MMMM');
+};
 
 export const addTextSortAndFilters = <T extends { [k in K]: string | null }, K extends keyof T>(
   key: keyof T,
@@ -121,14 +132,14 @@ export const addCreatedAndUpdated = <
       key: 'updated',
       title: 'Обновлён',
       dataIndex: 'updated_at',
-      render: (updated_at: Dayjs) => updated_at?.format('DD MMMM') ?? '???',
+      render: (updated_at: Dayjs | null) => formatDateRu(updated_at, false),
       ...addDateSortAndFilters<T, 'updated_at'>('updated_at'),
     },
     {
       key: 'created',
-      title: ' Создан',
+      title: 'Создан',
       dataIndex: 'created_at',
-      render: (created_at: Dayjs) => created_at?.format('DD MMMM YYYY г.') ?? '???',
+      render: (created_at: Dayjs | null) => formatDateRu(created_at, true),
       ...addDateSortAndFilters<T, 'created_at'>('created_at'),
     },
   ] as ColumnsType<T>;

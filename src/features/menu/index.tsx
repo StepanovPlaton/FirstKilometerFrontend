@@ -3,6 +3,7 @@
 import { Title } from '@/shared/ui/title';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import {
+  AccountBookOutlined,
   BankOutlined,
   CarOutlined,
   CreditCardOutlined,
@@ -11,6 +12,7 @@ import {
   IdcardOutlined,
   PlaySquareOutlined,
   PlusOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 import { Button, Divider, Flex, Space } from 'antd';
 import Sider from 'antd/es/layout/Sider';
@@ -78,6 +80,15 @@ export const Menu = () => {
           },
         ]
       : []),
+    ...(permissions.includes('view_procedure')
+      ? [
+          {
+            href: '/tables/operations',
+            text: 'Операции',
+            icon: <ToolOutlined />,
+          },
+        ]
+      : []),
 
     ...(permissions.includes('view_internalcompany')
       ? [
@@ -114,6 +125,15 @@ export const Menu = () => {
             href: '/download',
             text: 'Сгенерировать договор',
             icon: <FileTextOutlined />,
+          },
+        ]
+      : []),
+    ...(permissions.includes('view_billing') || permissions.includes('add_billing')
+      ? [
+          {
+            href: '/billing/generate',
+            text: 'Сгенерировать счёт',
+            icon: <AccountBookOutlined />,
           },
         ]
       : []),
