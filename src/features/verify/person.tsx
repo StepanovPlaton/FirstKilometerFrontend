@@ -168,6 +168,7 @@ export const VerifyPerson = <T extends CRUDCService<ApiPerson>>({
                   />
                 </Form.Item>
                 <Modal
+                  centered
                   open={confirmDelete}
                   onCancel={() => setConfirmDelete(false)}
                   title={<Title level={2}>Замена пользователя</Title>}
