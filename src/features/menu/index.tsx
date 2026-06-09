@@ -84,7 +84,7 @@ export const Menu = () => {
       ? [
           {
             href: '/tables/operations',
-            text: 'Операции',
+            text: 'Товары/Услуги',
             icon: <ToolOutlined />,
           },
         ]

@@ -109,8 +109,8 @@ export default function OperationsPage() {
             width: 72,
             render: (id: number) => (
               <Popconfirm
-                title="Удаление операции"
-                description="Удалить эту услугу/работу?"
+                title="Удаление товара/услуги"
+                description="Удалить эту услугу/товар?"
                 okText="Удалить"
                 cancelText="Отмена"
                 okButtonProps={{ danger: true }}
@@ -197,8 +197,8 @@ export default function OperationsPage() {
         }}
         title={
           procedure && 'id' in procedure && typeof procedure.id === 'number'
-            ? 'Редактирование операции'
-            : 'Новая операция'
+            ? 'Редактирование товара/услуги'
+            : 'Новый товар/услуга'
         }
       >
         <Form form={form} layout="vertical">

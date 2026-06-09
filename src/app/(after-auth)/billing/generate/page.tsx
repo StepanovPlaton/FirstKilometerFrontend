@@ -368,6 +368,14 @@ export default function GenerateBillingPage() {
                           step={0.01}
                           precision={2}
                           addonAfter="₽"
+                          formatter={(v) =>
+                            `${v}`
+                              .split('')
+                              .reverse()
+                              .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                              .reverse()
+                              .join('')
+                          }
                         />
                       </Form.Item>
                     </>
@@ -419,6 +427,14 @@ export default function GenerateBillingPage() {
                                     addonAfter="₽"
                                     placeholder="Цена"
                                     value={item.price}
+                                    formatter={(v) =>
+                                      `${v}`
+                                        .split('')
+                                        .reverse()
+                                        .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                        .reverse()
+                                        .join('')
+                                    }
                                     onChange={(v) =>
                                       updateProcedureItem(item.key, { price: v ?? 0 })
                                     }
@@ -498,6 +514,14 @@ export default function GenerateBillingPage() {
                                     addonAfter="₽"
                                     placeholder="Цена"
                                     value={item.price}
+                                    formatter={(v) =>
+                                      `${v}`
+                                        .split('')
+                                        .reverse()
+                                        .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                        .reverse()
+                                        .join('')
+                                    }
                                     onChange={(v) =>
                                       updateProcedureItem(item.key, { price: v ?? 0 })
                                     }
