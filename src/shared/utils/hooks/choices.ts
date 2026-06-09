@@ -10,8 +10,16 @@ export function useChoices<E extends Entity>(
   requestOptions?: GetRequestOptions,
   storeOptions?: SWRConfiguration<Choice[], HTTPError> & { active?: boolean }
 ) {
+  const queryStr = requestOptions?.query
+    ? '?' + new URLSearchParams(
+        Object.fromEntries(
+          Object.entries(requestOptions.query).map(([k, v]) => [k, String(v)])
+        )
+      ).toString()
+    : '';
+
   const { data, error, isLoading, mutate } = useSWR<Choice[], HTTPError>(
-    (storeOptions?.active ?? true) ? `${service.urlPrefix}/choices` : null,
+    (storeOptions?.active ?? true) ? `${service.urlPrefix}/choices${queryStr}` : null,
     () => service.getChoices(requestOptions),
     storeOptions
   );

@@ -14,6 +14,7 @@ import {
   Button,
   Card,
   DatePicker,
+  Divider,
   Flex,
   Form,
   InputNumber,
@@ -24,6 +25,7 @@ import {
   Spin,
   message,
 } from 'antd';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
@@ -49,10 +51,17 @@ type FormValues = {
   vat_percentage: number;
   vehicle_uuid?: string;
   total_amount?: number;
-  procedure_ids?: number[];
   buyer_type: 'person' | 'company';
   buyer_person_uuid?: string;
   buyer_company_id?: number;
+};
+
+type ProcedureItem = {
+  key: number;
+  kind: 'product' | 'service';
+  procedure_id: number | undefined;
+  price: number;
+  quantity: number;
 };
 
 export default function GenerateBillingPage() {
@@ -63,11 +72,50 @@ export default function GenerateBillingPage() {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm<FormValues>();
 
+  const [procedureItems, setProcedureItems] = useState<ProcedureItem[]>([]);
+  const [nextKey, setNextKey] = useState(1);
+
+  const addProductItem = () => {
+    setProcedureItems((prev) => [
+      ...prev,
+      { key: nextKey, kind: 'product', procedure_id: undefined, price: 0, quantity: 1 },
+    ]);
+    setNextKey((k) => k + 1);
+  };
+
+  const addServiceItem = () => {
+    setProcedureItems((prev) => [
+      ...prev,
+      { key: nextKey, kind: 'service', procedure_id: undefined, price: 0, quantity: 1 },
+    ]);
+    setNextKey((k) => k + 1);
+  };
+
+  const removeProcedureItem = (key: number) => {
+    setProcedureItems((prev) => prev.filter((item) => item.key !== key));
+  };
+
+  const updateProcedureItem = (key: number, patch: Partial<ProcedureItem>) => {
+    setProcedureItems((prev) =>
+      prev.map((item) => (item.key === key ? { ...item, ...patch } : item))
+    );
+  };
+
+  const procedureTotal = useMemo(
+    () => procedureItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0),
+    [procedureItems]
+  );
+
   const { data: internalCompanies, loading: loadingInternal } = useEntities(InternalCompanyService);
   const { data: externalCompanies, loading: loadingExternal } = useEntities(ExternalCompanyService);
   const { data: vehicles, loading: loadingVehicles } = useEntities(VehicleService);
-  const { data: procedures, loading: loadingProcedures } = useEntities(ProcedureService);
   const { data: personChoices, loading: loadingPersonChoices } = useChoices(IndividualService);
+  const { data: productChoices, loading: loadingProductChoices } = useChoices(ProcedureService, {
+    query: { kind: 'product' },
+  });
+  const { data: serviceChoices, loading: loadingServiceChoices } = useChoices(ProcedureService, {
+    query: { kind: 'service' },
+  });
 
   const canView = permissions.includes('view_billing') || permissions.includes('add_billing');
   const canSubmit = permissions.includes('add_billing');
@@ -95,13 +143,22 @@ export default function GenerateBillingPage() {
     [vehicles]
   );
 
-  const procedureOptions = useMemo(
+  const productOptions = useMemo(
     () =>
-      procedures?.map((p) => ({
-        value: p.id,
-        label: `${p.name} (${p.price} ₽)`,
+      productChoices?.map((c) => ({
+        value: c.value,
+        label: c.label,
       })) ?? [],
-    [procedures]
+    [productChoices]
+  );
+
+  const serviceOptions = useMemo(
+    () =>
+      serviceChoices?.map((c) => ({
+        value: c.value,
+        label: c.label,
+      })) ?? [],
+    [serviceChoices]
   );
 
   const personOptions = useMemo(
@@ -139,9 +196,9 @@ export default function GenerateBillingPage() {
         due_date,
       };
     } else {
-      const ids = values.procedure_ids ?? [];
-      if (ids.length === 0) {
-        messageApi.error('Выберите хотя бы одну услугу');
+      const items = procedureItems.filter((item) => item.procedure_id !== undefined);
+      if (items.length === 0) {
+        messageApi.error('Добавьте хотя бы одну услугу');
         return;
       }
       if (values.buyer_type === 'person') {
@@ -150,7 +207,11 @@ export default function GenerateBillingPage() {
           return;
         }
         body = {
-          procedure_ids: ids,
+          procedure_items: items.map((i) => ({
+            procedure_id: i.procedure_id,
+            price: i.price,
+            quantity: i.quantity,
+          })),
           company_id: values.company_id,
           buyer_type: 'person',
           buyer_id: values.buyer_person_uuid,
@@ -163,7 +224,11 @@ export default function GenerateBillingPage() {
           return;
         }
         body = {
-          procedure_ids: ids,
+          procedure_items: items.map((i) => ({
+            procedure_id: i.procedure_id,
+            price: i.price,
+            quantity: i.quantity,
+          })),
           company_id: values.company_id,
           buyer_type: 'company',
           buyer_id: values.buyer_company_id,
@@ -308,21 +373,176 @@ export default function GenerateBillingPage() {
                     </>
                   ) : (
                     <>
-                      <Form.Item
-                        name="procedure_ids"
-                        label="Услуги / работы"
-                        rules={[{ required: true, message: 'Выберите услуги' }]}
-                        className="mb-0! w-full"
-                      >
-                        <Select
-                          className="w-100!"
-                          mode="multiple"
-                          allowClear
-                          loading={loadingProcedures}
-                          placeholder="Операции"
-                          options={procedureOptions}
-                        />
-                      </Form.Item>
+                      <Flex vertical gap={16} className="w-full">
+                        {/* === Товары === */}
+                        <Flex vertical gap={8} className="w-full">
+                          <Flex justify="space-between" align="center" className="w-full">
+                            <span className="font-medium">Товары</span>
+                            <Button
+                              type="dashed"
+                              size="small"
+                              icon={<PlusOutlined />}
+                              onClick={addProductItem}
+                            >
+                              Добавить товар
+                            </Button>
+                          </Flex>
+
+                          {procedureItems
+                            .filter((item) => item.kind === 'product')
+                            .map((item) => {
+                              const usedIds = procedureItems
+                                .filter((i) => i.key !== item.key)
+                                .map((i) => i.procedure_id)
+                                .filter((v): v is number => v !== undefined);
+                              return (
+                                <Flex key={item.key} gap={8} align="center" className="w-full">
+                                  <Select
+                                    className="flex-1!"
+                                    showSearch
+                                    optionFilterProp="label"
+                                    placeholder="Выберите товар"
+                                    loading={loadingProductChoices}
+                                    value={item.procedure_id}
+                                    onChange={(v) =>
+                                      updateProcedureItem(item.key, { procedure_id: v })
+                                    }
+                                    options={productOptions.filter(
+                                      (o) => !usedIds.includes(o.value as number)
+                                    )}
+                                  />
+                                  <InputNumber
+                                    className="w-32!"
+                                    min={0}
+                                    step={0.01}
+                                    precision={2}
+                                    addonAfter="₽"
+                                    placeholder="Цена"
+                                    value={item.price}
+                                    onChange={(v) =>
+                                      updateProcedureItem(item.key, { price: v ?? 0 })
+                                    }
+                                  />
+                                  <InputNumber
+                                    className="w-24!"
+                                    min={1}
+                                    precision={0}
+                                    placeholder="Кол-во"
+                                    value={item.quantity}
+                                    onChange={(v) =>
+                                      updateProcedureItem(item.key, { quantity: v ?? 1 })
+                                    }
+                                  />
+                                  <Button
+                                    danger
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => removeProcedureItem(item.key)}
+                                  />
+                                </Flex>
+                              );
+                            })}
+
+                          {procedureItems.filter((item) => item.kind === 'product').length ===
+                            0 && (
+                            <Flex justify="center" className="w-full">
+                              <span className="text-gray-400 text-sm">Нет добавленных товаров</span>
+                            </Flex>
+                          )}
+                        </Flex>
+
+                        <Divider className="my-0!" />
+
+                        {/* === Услуги === */}
+                        <Flex vertical gap={8} className="w-full">
+                          <Flex justify="space-between" align="center" className="w-full">
+                            <span className="font-medium">Услуги</span>
+                            <Button
+                              type="dashed"
+                              size="small"
+                              icon={<PlusOutlined />}
+                              onClick={addServiceItem}
+                            >
+                              Добавить услугу
+                            </Button>
+                          </Flex>
+
+                          {procedureItems
+                            .filter((item) => item.kind === 'service')
+                            .map((item) => {
+                              const usedIds = procedureItems
+                                .filter((i) => i.key !== item.key)
+                                .map((i) => i.procedure_id)
+                                .filter((v): v is number => v !== undefined);
+                              return (
+                                <Flex key={item.key} gap={8} align="center" className="w-full">
+                                  <Select
+                                    className="flex-1!"
+                                    showSearch
+                                    optionFilterProp="label"
+                                    placeholder="Выберите услугу"
+                                    loading={loadingServiceChoices}
+                                    value={item.procedure_id}
+                                    onChange={(v) =>
+                                      updateProcedureItem(item.key, { procedure_id: v })
+                                    }
+                                    options={serviceOptions.filter(
+                                      (o) => !usedIds.includes(o.value as number)
+                                    )}
+                                  />
+                                  <InputNumber
+                                    className="w-32!"
+                                    min={0}
+                                    step={0.01}
+                                    precision={2}
+                                    addonAfter="₽"
+                                    placeholder="Цена"
+                                    value={item.price}
+                                    onChange={(v) =>
+                                      updateProcedureItem(item.key, { price: v ?? 0 })
+                                    }
+                                  />
+                                  <InputNumber
+                                    className="w-24!"
+                                    min={1}
+                                    precision={0}
+                                    placeholder="Кол-во"
+                                    value={item.quantity}
+                                    onChange={(v) =>
+                                      updateProcedureItem(item.key, { quantity: v ?? 1 })
+                                    }
+                                  />
+                                  <Button
+                                    danger
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => removeProcedureItem(item.key)}
+                                  />
+                                </Flex>
+                              );
+                            })}
+
+                          {procedureItems.filter((item) => item.kind === 'service').length ===
+                            0 && (
+                            <Flex justify="center" className="w-full">
+                              <span className="text-gray-400 text-sm">Нет добавленных услуг</span>
+                            </Flex>
+                          )}
+                        </Flex>
+                      </Flex>
+
+                      {procedureItems.length > 0 && (
+                        <Flex justify="end" className="w-full">
+                          <span>
+                            <strong>Итого: </strong>
+                            {procedureTotal.toLocaleString('ru-RU', {
+                              style: 'currency',
+                              currency: 'RUB',
+                            })}
+                          </span>
+                        </Flex>
+                      )}
+
                       <Form.Item name="buyer_type" label="Тип покупателя" className="mb-0! w-full">
                         <Radio.Group className="w-full">
                           <Flex gap="small" wrap="wrap">

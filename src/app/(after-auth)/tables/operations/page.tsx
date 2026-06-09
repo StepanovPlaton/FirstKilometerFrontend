@@ -6,7 +6,7 @@ import { addCreatedAndUpdated, addTextSortAndFilters } from '@/features/tables/s
 import { useEntities } from '@/shared/utils/hooks/data';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Flex, Form, Input, InputNumber, Modal, Popconfirm, Table, message } from 'antd';
+import { Button, Flex, Form, Input, Modal, Popconfirm, Select, Table, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 
@@ -17,7 +17,12 @@ export default function OperationsPage() {
   const { data: procedures, loading, mutate: mutateTable } = useEntities(ProcedureService);
   const [procedure, setProcedure] = useState<ProcedureRow>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [form] = Form.useForm<{ name: string; price: number; measure: string }>();
+  const [form] = Form.useForm<{ name: string; measure: string; kind: 'product' | 'service' }>();
+
+  const kindLabel: Record<string, string> = {
+    product: 'Товар',
+    service: 'Услуга',
+  };
 
   useEffect(() => {
     if (procedure === undefined) {
@@ -27,19 +32,19 @@ export default function OperationsPage() {
       const p = procedure as Procedure;
       form.setFieldsValue({
         name: p.name,
-        price: p.price,
         measure: p.measure || 'шт',
+        kind: p.kind || 'service',
       });
     } else {
       form.resetFields();
-      form.setFieldsValue({ name: '', measure: 'шт', price: 0 });
+      form.setFieldsValue({ name: '', measure: 'шт', kind: 'service' });
     }
   }, [procedure, form]);
 
-  const submitProcedure = (values: { name: string; price: number; measure: string }) => {
+  const submitProcedure = (values: { name: string; measure: string; kind: 'product' | 'service' }) => {
     const payload = {
       name: values.name.trim(),
-      price: values.price,
+      kind: values.kind || 'service',
       measure: (values.measure || 'шт').trim().slice(0, 4) || 'шт',
     };
 
@@ -50,7 +55,7 @@ export default function OperationsPage() {
       return ProcedureService.patch({
         id,
         name: payload.name,
-        price: payload.price,
+        kind: payload.kind,
         measure: payload.measure,
       })
         .then((received) =>
@@ -62,7 +67,7 @@ export default function OperationsPage() {
         });
     }
 
-    return ProcedureService.postAny({ name: payload.name, price: payload.price, measure: payload.measure })
+    return ProcedureService.postAny({ name: payload.name, kind: payload.kind, measure: payload.measure })
       .then((received) => mutateTable((list) => [...(list ?? []), received]))
       .catch(() => {
         messageApi.error('Не удалось создать операцию. Повторите попытку позже');
@@ -78,10 +83,16 @@ export default function OperationsPage() {
       ...addTextSortAndFilters<Procedure, 'name'>('name', procedures),
     },
     {
-      key: 'price',
-      title: 'Стоимость',
-      dataIndex: 'price',
-      render: (v: number) => (typeof v === 'number' ? v.toLocaleString('ru-RU') : v),
+      key: 'kind',
+      title: 'Тип',
+      dataIndex: 'kind',
+      width: 100,
+      render: (kind: string) => kindLabel[kind] ?? kind,
+      filters: [
+        { text: 'Товар', value: 'product' },
+        { text: 'Услуга', value: 'service' },
+      ],
+      onFilter: (value, record) => record.kind === value,
     },
     {
       key: 'measure',
@@ -199,11 +210,16 @@ export default function OperationsPage() {
             <Input maxLength={255} />
           </Form.Item>
           <Form.Item
-            name="price"
-            label="Стоимость"
-            rules={[{ required: true, message: 'Укажите стоимость' }]}
+            name="kind"
+            label="Тип"
+            rules={[{ required: true, message: 'Укажите тип' }]}
           >
-            <InputNumber className="w-full" min={0} step={0.01} precision={2} />
+            <Select
+              options={[
+                { value: 'service', label: 'Услуга' },
+                { value: 'product', label: 'Товар' },
+              ]}
+            />
           </Form.Item>
           <Form.Item
             name="measure"

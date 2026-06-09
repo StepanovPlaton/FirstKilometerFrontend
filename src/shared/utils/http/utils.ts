@@ -23,7 +23,10 @@ export abstract class HTTPUtils {
     if (!requestUrl.endsWith('/')) {
       requestUrl += '/';
     }
-    requestUrl += new URLSearchParams(this.toStringsRecord(query)).toString();
+    const queryString = new URLSearchParams(this.toStringsRecord(query)).toString();
+    if (queryString) {
+      requestUrl += (requestUrl.includes('?') ? '&' : '?') + queryString;
+    }
 
     return requestUrl;
   }
