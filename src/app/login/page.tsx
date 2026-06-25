@@ -43,12 +43,12 @@ export default function InitPage() {
       <img src="/logo/logo.webp" className="w-full" />
       <Card className="w-80 px-4!">
         <Spin spinning={loading}>
-          <Form<TokenObtainData> layout="vertical" form={form} onFinish={submit}>
+          <Form<TokenObtainData> layout="vertical" form={form} onFinish={submit} autoComplete="off">
             <Form.Item<TokenObtainData> label="Логин" name={'username'} rules={requiredRule}>
-              <Input />
+              <Input autoComplete="off" />
             </Form.Item>
             <Form.Item<TokenObtainData> label="Пароль" name={'password'} rules={requiredRule}>
-              <Input />
+              <Input.Password autoComplete="new-password" />
             </Form.Item>
             <Flex className="w-full" justify="space-around">
               <Button type="primary" htmlType="submit" onClick={() => form.submit()}>

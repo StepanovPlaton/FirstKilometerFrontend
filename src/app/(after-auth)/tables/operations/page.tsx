@@ -41,7 +41,11 @@ export default function OperationsPage() {
     }
   }, [procedure, form]);
 
-  const submitProcedure = (values: { name: string; measure: string; kind: 'product' | 'service' }) => {
+  const submitProcedure = (values: {
+    name: string;
+    measure: string;
+    kind: 'product' | 'service';
+  }) => {
     const payload = {
       name: values.name.trim(),
       kind: values.kind || 'service',
@@ -58,16 +62,18 @@ export default function OperationsPage() {
         kind: payload.kind,
         measure: payload.measure,
       })
-        .then((received) =>
-          mutateTable((list) => list?.map((p) => (p.id === id ? received : p)))
-        )
+        .then((received) => mutateTable((list) => list?.map((p) => (p.id === id ? received : p))))
         .catch(() => {
           messageApi.error('Не удалось сохранить операцию. Повторите попытку позже');
           throw new Error('save failed');
         });
     }
 
-    return ProcedureService.postAny({ name: payload.name, kind: payload.kind, measure: payload.measure })
+    return ProcedureService.postAny({
+      name: payload.name,
+      kind: payload.kind,
+      measure: payload.measure,
+    })
       .then((received) => mutateTable((list) => [...(list ?? []), received]))
       .catch(() => {
         messageApi.error('Не удалось создать операцию. Повторите попытку позже');
@@ -120,9 +126,7 @@ export default function OperationsPage() {
                     .then(() => {
                       void mutateTable((list) => list?.filter((p) => p.id !== id));
                     })
-                    .catch(() =>
-                      messageApi.error('Не удалось удалить операцию. Попробуйте позже')
-                    );
+                    .catch(() => messageApi.error('Не удалось удалить операцию. Попробуйте позже'));
                 }}
                 onCancel={(e) => e?.stopPropagation()}
               >
@@ -209,11 +213,7 @@ export default function OperationsPage() {
           >
             <Input maxLength={255} />
           </Form.Item>
-          <Form.Item
-            name="kind"
-            label="Тип"
-            rules={[{ required: true, message: 'Укажите тип' }]}
-          >
+          <Form.Item name="kind" label="Тип" rules={[{ required: true, message: 'Укажите тип' }]}>
             <Select
               options={[
                 { value: 'service', label: 'Услуга' },

@@ -7,7 +7,7 @@ import {
 } from '@/shared/utils/schemes/company';
 import { getValidationRules } from '@/shared/utils/schemes/validator';
 import type { FormInstance } from 'antd';
-import { Divider, Form, Input, Select, Skeleton } from 'antd';
+import { Form, Input, Select, Skeleton } from 'antd';
 import type { ChangeEvent } from 'react';
 import useSWR from 'swr';
 
@@ -154,7 +154,6 @@ export const VerifyCompany = ({
             <Input allowClear />
           </Form.Item>
 
-          <Divider orientation="left">Платёжные счета</Divider>
           <Form.Item<CompanyFormValues>
             label="Привязанные счета"
             name="payment_account_ids"

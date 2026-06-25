@@ -8,9 +8,12 @@ import VehicleService from '@/entities/vehicle';
 import { postGenerateBilling } from '@/features/billing/generateInvoice';
 import { Title } from '@/shared/ui/title';
 import { useChoices } from '@/shared/utils/hooks/choices';
+import { useCompanyPaymentAccounts } from '@/shared/utils/hooks/company-payment-accounts';
 import { useEntities } from '@/shared/utils/hooks/data';
 import { useAuthTokens } from '@/shared/utils/schemes/tokens';
+import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import {
+  Alert,
   Button,
   Card,
   DatePicker,
@@ -25,12 +28,12 @@ import {
   Spin,
   message,
 } from 'antd';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ru';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 dayjs.locale('ru');
 
@@ -47,6 +50,7 @@ type GenerateMode = 'vehicle' | 'procedures';
 
 type FormValues = {
   company_id: number;
+  payment_account_id?: number;
   due_date: Dayjs;
   vat_percentage: number;
   vehicle_uuid?: string;
@@ -108,7 +112,9 @@ export default function GenerateBillingPage() {
 
   const { data: internalCompanies, loading: loadingInternal } = useEntities(InternalCompanyService);
   const { data: externalCompanies, loading: loadingExternal } = useEntities(ExternalCompanyService);
-  const { data: vehicles, loading: loadingVehicles } = useEntities(VehicleService);
+  const { data: vehicleChoices, loading: loadingVehicles } = useChoices(VehicleService, undefined, {
+    active: mode === 'vehicle',
+  });
   const { data: personChoices, loading: loadingPersonChoices } = useChoices(IndividualService);
   const { data: productChoices, loading: loadingProductChoices } = useChoices(ProcedureService, {
     query: { kind: 'product' },
@@ -116,6 +122,31 @@ export default function GenerateBillingPage() {
   const { data: serviceChoices, loading: loadingServiceChoices } = useChoices(ProcedureService, {
     query: { kind: 'service' },
   });
+
+  const companyId = Form.useWatch('company_id', form);
+  const { data: paymentAccounts, loading: loadingPaymentAccounts } =
+    useCompanyPaymentAccounts(companyId);
+
+  useEffect(() => {
+    if (!loadingPaymentAccounts && paymentAccounts?.length === 1) {
+      const singleAccount = paymentAccounts[0];
+      if (singleAccount) {
+        form.setFieldValue('payment_account_id', singleAccount.id);
+      }
+    }
+  }, [paymentAccounts, loadingPaymentAccounts, form]);
+
+  const paymentAccountOptions = useMemo(
+    () =>
+      paymentAccounts?.map((a) => ({
+        value: a.id,
+        label: a.bank_account,
+      })) ?? [],
+    [paymentAccounts]
+  );
+
+  const showNoPaymentAccountsAlert =
+    companyId != null && !loadingPaymentAccounts && paymentAccounts?.length === 0;
 
   const canView = permissions.includes('view_billing') || permissions.includes('add_billing');
   const canSubmit = permissions.includes('add_billing');
@@ -133,15 +164,6 @@ export default function GenerateBillingPage() {
       })) ?? [];
     return [...internal, ...external].sort((a, b) => a.label.localeCompare(b.label, 'ru'));
   }, [internalCompanies, externalCompanies]);
-
-  const vehicleOptions = useMemo(
-    () =>
-      vehicles?.map((v) => ({
-        value: v.uuid,
-        label: [v.reg_number, v.make_model].filter(Boolean).join(' · ') || String(v.uuid),
-      })) ?? [],
-    [vehicles]
-  );
 
   const productOptions = useMemo(
     () =>
@@ -174,6 +196,14 @@ export default function GenerateBillingPage() {
     if (!canSubmit) {
       return;
     }
+    if (!values.payment_account_id) {
+      messageApi.error('Выберите расчётный счёт');
+      return;
+    }
+    if (paymentAccounts?.length === 0) {
+      messageApi.error('У выбранного филиала нет привязанных расчётных счетов');
+      return;
+    }
     const due_date = values.due_date.format('YYYY-MM-DD');
     const vat = values.vat_percentage ?? 0;
 
@@ -191,6 +221,7 @@ export default function GenerateBillingPage() {
       body = {
         vehicle_uuid: values.vehicle_uuid,
         company_id: values.company_id,
+        payment_account_id: values.payment_account_id,
         total_amount: values.total_amount,
         vat_percentage: vat,
         due_date,
@@ -213,6 +244,7 @@ export default function GenerateBillingPage() {
             quantity: i.quantity,
           })),
           company_id: values.company_id,
+          payment_account_id: values.payment_account_id,
           buyer_type: 'person',
           buyer_id: values.buyer_person_uuid,
           vat_percentage: vat,
@@ -230,6 +262,7 @@ export default function GenerateBillingPage() {
             quantity: i.quantity,
           })),
           company_id: values.company_id,
+          payment_account_id: values.payment_account_id,
           buyer_type: 'company',
           buyer_id: values.buyer_company_id,
           vat_percentage: vat,
@@ -318,8 +351,46 @@ export default function GenerateBillingPage() {
                           label: c.short_name || c.name,
                         })) ?? []
                       }
+                      onChange={() => {
+                        form.setFieldValue('payment_account_id', undefined);
+                      }}
                     />
                   </Form.Item>
+
+                  <Form.Item
+                    name="payment_account_id"
+                    label="Расчётный счёт"
+                    rules={[{ required: true, message: 'Выберите расчётный счёт' }]}
+                    className="mb-0! w-full"
+                  >
+                    <Select
+                      className="w-100!"
+                      showSearch
+                      optionFilterProp="label"
+                      loading={loadingPaymentAccounts}
+                      disabled={
+                        companyId == null || loadingPaymentAccounts || showNoPaymentAccountsAlert
+                      }
+                      placeholder={companyId == null ? 'Сначала выберите филиал' : 'Расчётный счёт'}
+                      options={paymentAccountOptions}
+                    />
+                  </Form.Item>
+
+                  {showNoPaymentAccountsAlert && (
+                    <Alert
+                      type="warning"
+                      showIcon
+                      message="У выбранного филиала нет привязанных расчётных счетов."
+                      description={
+                        <span>
+                          Добавьте счёт в{' '}
+                          <Link href="/tables/companies/payment-accounts">справочнике</Link> или
+                          привяжите его к филиалу в{' '}
+                          <Link href="/tables/companies/internal">таблице филиалов</Link>.
+                        </span>
+                      }
+                    />
+                  )}
 
                   <Form.Item
                     name="due_date"
@@ -353,7 +424,7 @@ export default function GenerateBillingPage() {
                           optionFilterProp="label"
                           loading={loadingVehicles}
                           placeholder="ТС"
-                          options={vehicleOptions}
+                          options={vehicleChoices ?? []}
                         />
                       </Form.Item>
                       <Form.Item
@@ -406,7 +477,7 @@ export default function GenerateBillingPage() {
                               return (
                                 <Flex key={item.key} gap={8} align="center" className="w-full">
                                   <Select
-                                    className="flex-1!"
+                                    className="max-w-44 min-w-44 flex-1!"
                                     showSearch
                                     optionFilterProp="label"
                                     placeholder="Выберите товар"
@@ -420,7 +491,7 @@ export default function GenerateBillingPage() {
                                     )}
                                   />
                                   <InputNumber
-                                    className="w-32!"
+                                    className="w-28!"
                                     min={0}
                                     step={0.01}
                                     precision={2}
@@ -431,7 +502,9 @@ export default function GenerateBillingPage() {
                                       `${v}`
                                         .split('')
                                         .reverse()
-                                        .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                        .map((e, i, a) =>
+                                          i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e
+                                        )
                                         .reverse()
                                         .join('')
                                     }
@@ -440,7 +513,7 @@ export default function GenerateBillingPage() {
                                     }
                                   />
                                   <InputNumber
-                                    className="w-24!"
+                                    className="w-16!"
                                     min={1}
                                     precision={0}
                                     placeholder="Кол-во"
@@ -462,7 +535,7 @@ export default function GenerateBillingPage() {
                           {procedureItems.filter((item) => item.kind === 'product').length ===
                             0 && (
                             <Flex justify="center" className="w-full">
-                              <span className="text-gray-400 text-sm">Нет добавленных товаров</span>
+                              <span className="text-sm text-gray-400">Нет добавленных товаров</span>
                             </Flex>
                           )}
                         </Flex>
@@ -493,7 +566,7 @@ export default function GenerateBillingPage() {
                               return (
                                 <Flex key={item.key} gap={8} align="center" className="w-full">
                                   <Select
-                                    className="flex-1!"
+                                    className="max-w-44 min-w-44 flex-1!"
                                     showSearch
                                     optionFilterProp="label"
                                     placeholder="Выберите услугу"
@@ -507,7 +580,7 @@ export default function GenerateBillingPage() {
                                     )}
                                   />
                                   <InputNumber
-                                    className="w-32!"
+                                    className="w-28!"
                                     min={0}
                                     step={0.01}
                                     precision={2}
@@ -518,7 +591,9 @@ export default function GenerateBillingPage() {
                                       `${v}`
                                         .split('')
                                         .reverse()
-                                        .map((e, i, a) => (i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e))
+                                        .map((e, i, a) =>
+                                          i % 3 === 2 && i !== a.length - 1 ? ' ' + e : e
+                                        )
                                         .reverse()
                                         .join('')
                                     }
@@ -527,7 +602,7 @@ export default function GenerateBillingPage() {
                                     }
                                   />
                                   <InputNumber
-                                    className="w-24!"
+                                    className="w-16!"
                                     min={1}
                                     precision={0}
                                     placeholder="Кол-во"
@@ -549,7 +624,7 @@ export default function GenerateBillingPage() {
                           {procedureItems.filter((item) => item.kind === 'service').length ===
                             0 && (
                             <Flex justify="center" className="w-full">
-                              <span className="text-gray-400 text-sm">Нет добавленных услуг</span>
+                              <span className="text-sm text-gray-400">Нет добавленных услуг</span>
                             </Flex>
                           )}
                         </Flex>
