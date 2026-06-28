@@ -146,7 +146,7 @@ export default function GenerateBillingPage() {
   );
 
   const showNoPaymentAccountsAlert =
-    companyId != null && !loadingPaymentAccounts && paymentAccounts?.length === 0;
+    companyId !== null && !loadingPaymentAccounts && paymentAccounts?.length === 0;
 
   const canView = permissions.includes('view_billing') || permissions.includes('add_billing');
   const canSubmit = permissions.includes('add_billing');
@@ -369,9 +369,9 @@ export default function GenerateBillingPage() {
                       optionFilterProp="label"
                       loading={loadingPaymentAccounts}
                       disabled={
-                        companyId == null || loadingPaymentAccounts || showNoPaymentAccountsAlert
+                        companyId === null || loadingPaymentAccounts || showNoPaymentAccountsAlert
                       }
-                      placeholder={companyId == null ? 'Сначала выберите филиал' : 'Расчётный счёт'}
+                      placeholder={companyId === null ? 'Сначала выберите филиал' : 'Расчётный счёт'}
                       options={paymentAccountOptions}
                     />
                   </Form.Item>

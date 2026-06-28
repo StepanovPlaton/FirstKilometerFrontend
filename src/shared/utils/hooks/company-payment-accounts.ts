@@ -10,9 +10,16 @@ export function useCompanyPaymentAccounts(
   companyId: number | null | undefined,
   storeOptions?: SWRConfiguration<PaymentAccount[], HTTPError>
 ) {
+  const isValidCompanyId = companyId !== null && companyId !== undefined;
+
   const { data, error, isLoading, mutate } = useSWR<PaymentAccount[], HTTPError>(
-    companyId != null ? `companies/${companyId}/accounts` : null,
-    () => PaymentAccountService.getByCompanyId(companyId!),
+    isValidCompanyId ? `companies/${companyId}/accounts` : null,
+    () => {
+      if (!isValidCompanyId) {
+        throw new Error('companyId is required to fetch payment accounts');
+      }
+      return PaymentAccountService.getByCompanyId(companyId);
+    },
     storeOptions
   );
 
